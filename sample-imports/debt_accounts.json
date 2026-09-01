@@ -1,0 +1,24 @@
+[
+  {
+    "account_ref": "ACC-55120",
+    "employer_ref": "VIG",
+    "payroll_ref": "EMP-004821",
+    "creditor_name": "African Bank",
+    "credit_type": "BANK_LOAN",
+    "balance_rand": 18830,
+    "in_arrears": true,
+    "state": "ACTIVE_INTERVENTION",
+    "challenge_status": "",
+    "journey_ref": "JNY-991202"
+  },
+  {
+    "account_ref": "ACC-55121",
+    "employer_ref": "VIG",
+    "payroll_ref": "EMP-004823",
+    "creditor_name": "Truworths",
+    "credit_type": "RETAIL_STORE",
+    "balance_rand": 4210.5,
+    "in_arrears": false,
+    "state": "NONE"
+  }
+]

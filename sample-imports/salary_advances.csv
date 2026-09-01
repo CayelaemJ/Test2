@@ -1,0 +1,2 @@
+salary_advance_id,employer_ref,client_id,payroll_ref,amount,salary_advance_status,bank_account_verification_status,blacklisted,advanced_at,source_updated_at,is_deleted
+287646,VIG,132368,EMP-004821,1500.00,FINALISED,PASSED,false,2026-03-12,2026-04-01T08:00:00Z,false

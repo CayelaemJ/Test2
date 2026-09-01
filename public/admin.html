@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/portal-nav-v054.css?v=0.5.4">
+<link rel="stylesheet" href="/static/ui-enhance-v1.css?v=1">
+<title>empower-fin Dashboard Portal — Administration</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+  :root{
+    --blue:#b15be8;--blue-d:#8e42bd;--navy:#32217c;--ice:#f3efff;--ice-2:#f4f9fd;
+    --line:#e8e1f7;--line-soft:#f7f4ff;--ink:#0f2438;--grey:#5b6b7a;--grey-l:#8497a7;
+    --green:#1fa463;--green-soft:#e7f7ef;--amber:#e8910c;--amber-soft:#fdf3e2;
+    --red:#e0492f;--red-soft:#fdecea;--white:#fff;
+    --shadow:0 1px 2px rgba(13,42,71,.04),0 8px 24px rgba(13,42,71,.06);
+    --radius:16px;--radius-sm:11px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);
+    background:radial-gradient(1100px 560px at 88% -10%,rgba(0,120,199,.07),transparent 60%),#f3f7fb;min-height:100vh;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px 72px;}
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(243,247,251,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+  .topbar-inner{max-width:1080px;margin:0 auto;padding:0 28px;height:64px;display:flex;align-items:center;gap:14px;}
+  .logo-text{font-weight:800;font-size:16px;letter-spacing:-.3px;color:var(--navy);}
+  .logo-text .opt{color:var(--blue);}
+  .pill{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);background:var(--ice);border:1px solid var(--line);padding:5px 11px;border-radius:8px;}
+  .head{padding:34px 0 20px;}
+  .head .eyebrow{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--blue);margin-bottom:9px;}
+  .head h1{font-family:'Fraunces',serif;font-weight:600;font-size:34px;letter-spacing:-.6px;color:var(--navy);}
+  .head p{margin-top:10px;font-size:14.5px;color:var(--grey);max-width:64ch;line-height:1.55;}
+  .grid{display:grid;grid-template-columns:300px 1fr;gap:22px;align-items:start;}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .card-hd{padding:18px 20px 12px;border-bottom:1px solid var(--line-soft);}
+  .card-hd h2{font-size:14px;font-weight:800;color:var(--navy);letter-spacing:.01em;}
+  .card-hd .note{font-size:12px;color:var(--grey-l);margin-top:4px;}
+  .card-bd{padding:16px 20px 20px;}
+  /* report list */
+  .rep{display:flex;flex-direction:column;gap:2px;padding:11px 13px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid transparent;transition:.14s;}
+  .rep:hover{background:var(--ice-2);}
+  .rep.on{background:var(--ice);border-color:var(--line);}
+  .rep .step{font-size:10.5px;font-weight:800;color:var(--grey-l);letter-spacing:.05em;}
+  .rep .t{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .btn{font-family:inherit;font-weight:700;font-size:13px;border-radius:11px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--white);color:var(--navy);transition:.14s;display:inline-flex;align-items:center;gap:8px;}
+  .btn:hover{border-color:var(--blue);color:var(--blue);}
+  .btn-primary{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .btn-primary:hover{background:var(--blue-d);color:#fff;}
+  .btn-green{background:var(--green);color:#fff;border-color:var(--green);}
+  .btn-ghost{background:none;box-shadow:none;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .muted{color:var(--grey);font-size:13px;line-height:1.55;}
+  .drop{margin-top:14px;border:2px dashed var(--line);border-radius:var(--radius);padding:30px;text-align:center;transition:.16s;cursor:pointer;background:var(--ice-2);}
+  .drop.over{border-color:var(--blue);background:var(--ice);}
+  .drop .big{font-size:14px;font-weight:700;color:var(--navy);}
+  .drop .sm{font-size:12.5px;color:var(--grey-l);margin-top:5px;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line-soft);}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--grey-l);font-weight:800;}
+  .tag{font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px;display:inline-block;}
+  .tag.req{background:var(--amber-soft);color:var(--amber);}
+  .tag.opt{background:var(--ice);color:var(--grey);}
+  .banner{border-radius:var(--radius-sm);padding:13px 15px;font-size:13px;font-weight:600;margin-top:14px;display:flex;gap:9px;align-items:flex-start;}
+  .banner.ok{background:var(--green-soft);color:#137a47;}
+  .banner.err{background:var(--red-soft);color:#b5391f;}
+  .err-list{margin-top:12px;max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:var(--radius-sm);}
+  .err-list td:first-child{font-weight:800;color:var(--red);white-space:nowrap;}
+  .hist td .st{font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;}
+  .st.COMMITTED{background:var(--green-soft);color:#137a47;}
+  .st.VALIDATED{background:var(--ice);color:var(--blue-d);}
+  .st.FAILED{background:var(--red-soft);color:#b5391f;}
+  .st.REVERTED{background:#f1f1f4;color:#777;}
+  .section-gap{margin-top:22px;}
+  .field-desc{color:var(--grey-l);}
+  code{background:var(--ice);padding:1px 6px;border-radius:5px;font-size:12px;}
+  .hidden{display:none;}
+
+  .source-mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:820px;margin-bottom:16px;}
+  .source-mode-card{display:flex;align-items:flex-start;gap:12px;text-align:left;border:1px solid var(--line);background:#fff;border-radius:13px;padding:15px 16px;cursor:pointer;font-family:inherit;color:var(--ink);transition:.16s;}
+  .source-mode-card:hover{border-color:#cdb8f3;background:#fcfbff;}
+  .source-mode-card.on{border-color:var(--blue);background:var(--ice);box-shadow:0 0 0 2px rgba(177,91,232,.08);}
+  .source-mode-icon{width:34px;height:34px;border-radius:10px;background:#f3efff;color:var(--blue-d);display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-weight:800;}
+  .source-mode-card strong{display:block;font-size:13.5px;color:var(--navy);}
+  .source-mode-card small{display:block;margin-top:3px;color:var(--grey-l);font-size:11.5px;line-height:1.4;font-weight:600;}
+  .integration-panel-title{font-size:13px;font-weight:800;color:var(--navy);margin:2px 0 2px;grid-column:span 2;}
+  @media(max-width:720px){.source-mode-grid{grid-template-columns:1fr}.integration-two-col{grid-template-columns:1fr!important}.integration-two-col label[style*="grid-column:span 2"],.integration-panel-title{grid-column:span 1!important}}
+
+  /* ── welcome splash (shown briefly right after sign-in) ── */
+  #welcome-splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 700px at 50% -10%, rgba(177,91,232,.18), transparent 60%), linear-gradient(160deg,#f3f7fb 0%,#eef2ff 100%);transition:opacity .45s ease, visibility .45s ease;}
+  #welcome-splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
+  .welcome-splash-inner{text-align:center;}
+  .welcome-splash-logo{height:40px;width:auto;margin-bottom:22px;opacity:.94;}
+  .welcome-splash-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--blue);margin:0 auto 20px;animation:welcome-spin .8s linear infinite;}
+  @keyframes welcome-spin{to{transform:rotate(360deg);}}
+  .welcome-splash-greeting{font-family:'Fraunces',serif;font-weight:600;font-size:26px;color:var(--navy);}
+  .welcome-splash-sub{margin-top:6px;font-size:13.5px;color:var(--grey);font-weight:600;}
+</style>
+</head>
+<body data-portal-build="0.5.3">
+<div id="welcome-splash">
+  <div class="welcome-splash-inner">
+    <img id="welcome-splash-logo" class="welcome-splash-logo" src="/static/logo-large.png" alt="">
+    <div class="welcome-splash-spinner"></div>
+    <div class="welcome-splash-greeting" id="welcome-splash-greeting">Welcome</div>
+    <div class="welcome-splash-sub">Loading Administration…</div>
+  </div>
+</div>
+<script>setTimeout(function(){var e=document.getElementById('welcome-splash');if(e)e.classList.add('hide');},4500);</script>
+<div class="topbar"><div class="topbar-inner">
+  <img src="/static/logo.png" alt="empower-fin Dashboard Portal" style="height:30px;width:auto;">
+  <span class="pill">Administration</span>
+  <div id="portal-nav" style="margin-left:auto;"></div>
+  <div id="portal-account"></div>
+</div></div>
+
+<div class="wrap">
+  <div class="head">
+    <div class="eyebrow">Feed the system</div>
+    <h1>Import reports</h1>
+    <p>Upload raw exports from the journey systems. Each report is validated against a fixed format, staged for review, then committed — which recomputes the Financial Wellness Score and refreshes every employer dashboard. Load reports top-to-bottom; later reports reference earlier ones.</p>
+  </div>
+
+  <div class="grid">
+    <!-- left: report picker -->
+    <div class="card">
+      <div class="card-hd"><h2>Reports</h2><div class="note">In load order</div></div>
+      <div class="card-bd" id="rep-list"></div>
+    </div>
+
+    <!-- right: working area -->
+    <div>
+      <div class="card">
+        <div class="card-hd"><h2 id="rep-title">Select a report</h2><div class="note" id="rep-note">Choose a report on the left to begin.</div></div>
+        <div class="card-bd" id="work">
+          <p class="muted">Pick a report to see its format, download a template, and upload a file.</p>
+        </div>
+      </div>
+
+      <!-- import history -->
+      <div class="card section-gap">
+        <div class="card-hd"><h2>Import history</h2><div class="note">Most recent first · Revert is shown only when a batch can be safely rolled back</div></div>
+        <div class="card-bd" style="padding:6px 8px 12px;">
+          <table class="hist"><thead><tr><th>Report</th><th>File</th><th>Rows</th><th>Status</th><th>When</th><th></th></tr></thead>
+          <tbody id="hist-body"><tr><td colspan="6" class="muted" style="padding:14px;">No imports yet.</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- live integration (API or direct SQL) -->
+      <div class="card section-gap">
+        <div class="card-hd"><h2>Live Data Integration</h2><div class="note">Pull the same 10 core feeds from either an API or approved read-only SQL views · file import remains available as fallback</div></div>
+        <div class="card-bd">
+          <div id="integ-status" class="banner ok" style="display:none;margin-bottom:14px;"></div>
+
+          <input id="integ-mode" type="hidden" value="API">
+          <div class="source-mode-grid" role="tablist" aria-label="Integration source">
+            <button class="source-mode-card on" id="source-tab-api" type="button" role="tab" aria-selected="true" onclick="setIntegMode('API')">
+              <span class="source-mode-icon">API</span>
+              <span><strong>API integration</strong><small>Pull the 10 contracted feeds from HTTPS endpoints using bearer-token authentication.</small></span>
+            </button>
+            <button class="source-mode-card" id="source-tab-sql" type="button" role="tab" aria-selected="false" onclick="setIntegMode('SQL')">
+              <span class="source-mode-icon">DB</span>
+              <span><strong>Database integration</strong><small>Connect directly to approved read-only PostgreSQL, SQL Server, MySQL or MariaDB views.</small></span>
+            </button>
+          </div>
+          <div style="max-width:820px;margin-bottom:14px;">
+            <label style="display:block;font-size:12.5px;font-weight:700;color:#5b6b7a;max-width:390px;">Auto-sync every (hours)
+              <input id="integ-hours" type="number" min="1" value="24" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+          </div>
+
+          <div id="integ-api-panel" class="integration-two-col" style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:820px;">
+            <div class="integration-panel-title">API connection</div>
+            <label style="grid-column:span 2;font-size:12.5px;font-weight:700;color:#5b6b7a;">Provider API base URL
+              <input id="integ-url" placeholder="https://your-provider.example.com" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="grid-column:span 2;font-size:12.5px;font-weight:700;color:#5b6b7a;">Bearer token (kept private)
+              <input id="integ-token" type="password" placeholder="leave blank to keep existing" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+          </div>
+
+          <div id="integ-sql-panel" class="integration-two-col" style="margin-top:14px;display:none;grid-template-columns:1fr 1fr;gap:14px;max-width:820px;">
+            <div class="integration-panel-title">Database connection (Direct SQL)</div>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">SQL platform
+              <select id="integ-sql-dialect" onchange="setSqlPortDefault()" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;background:#fff;">
+                <option value="POSTGRESQL">PostgreSQL</option>
+                <option value="MSSQL">Microsoft SQL Server</option>
+                <option value="MYSQL">MySQL / MariaDB</option>
+              </select>
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Port
+              <input id="integ-sql-port" type="number" min="1" max="65535" placeholder="5432" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Host
+              <input id="integ-sql-host" placeholder="db.example.internal" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Database / catalog
+              <input id="integ-sql-database" placeholder="empowerfin_source" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Schema (optional)
+              <input id="integ-sql-schema" placeholder="public or dbo" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Canonical view prefix
+              <input id="integ-sql-prefix" value="v_" placeholder="v_" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Read-only username
+              <input id="integ-sql-user" autocomplete="off" placeholder="empowerfin_reader" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Password (kept private)
+              <input id="integ-sql-password" type="password" autocomplete="new-password" placeholder="leave blank to keep existing" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Query timeout (ms)
+              <input id="integ-sql-timeout" type="number" min="1000" value="60000" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Max changed rows / feed / sync
+              <input id="integ-sql-maxrows" type="number" min="1" value="250000" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#32217c;cursor:pointer;">
+              <input id="integ-sql-ssl" type="checkbox" checked style="width:17px;height:17px;"> Require encrypted SQL connection
+            </label>
+            <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#32217c;cursor:pointer;">
+              <input id="integ-sql-trust" type="checkbox" style="width:17px;height:17px;"> Trust server certificate (only when approved)
+            </label>
+            <div style="grid-column:span 2;font-size:12px;color:#8497a7;line-height:1.5;">SQL mode expects 10 read-only canonical views named <b>v_employers</b>, <b>v_workforce_snapshots</b>, … <b>v_salary_advances</b> (or the configured prefix). The connection test checks every view and its contracted columns.</div>
+          </div>
+
+          <label style="margin-top:16px;display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#32217c;cursor:pointer;">
+            <input id="integ-enabled" type="checkbox" style="width:17px;height:17px;"> Enable automatic scheduled sync
+          </label>
+
+          <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn" onclick="saveInteg()">Save settings</button>
+            <button class="btn btn-ghost" onclick="testInteg()">Test source</button>
+            <button class="btn" style="background:#b15be8;color:#fff;border-color:#b15be8;" onclick="syncNow()">Sync now</button>
+          </div>
+          <div id="integ-result" style="margin-top:12px;"></div>
+          <div style="margin-top:18px;">
+            <div style="font-size:12.5px;font-weight:700;color:#5b6b7a;margin-bottom:8px;">Recent syncs</div>
+            <table class="hist"><tbody id="integ-logs"><tr><td class="muted" style="padding:10px;">No syncs yet.</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- system email and scheduled reporting -->
+      <div class="card section-gap" id="email-settings-card">
+        <div class="card-hd"><h2>System Email &amp; Scheduled Reports</h2><div class="note">SMTP delivery used by scheduled employer reports</div></div>
+        <div class="card-bd">
+          <div id="mail-status" class="banner ok" style="display:none;margin-bottom:14px;"></div>
+          <div class="integration-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:820px;">
+            <div class="integration-panel-title">SMTP connection</div>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">SMTP host
+              <input id="mail-host" placeholder="smtp.office365.com" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Port
+              <input id="mail-port" type="number" min="1" max="65535" value="587" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">SMTP username
+              <input id="mail-user" autocomplete="off" placeholder="reports@company.com" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">SMTP password
+              <input id="mail-password" type="password" autocomplete="new-password" placeholder="leave blank to keep existing" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">From name
+              <input id="mail-from-name" value="empower-fin Dashboard Portal" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">From email
+              <input id="mail-from-email" type="email" placeholder="reports@company.com" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Reply-to (optional)
+              <input id="mail-reply-to" type="email" placeholder="support@company.com" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Default report timezone
+              <input id="mail-timezone" value="Africa/Johannesburg" placeholder="Africa/Johannesburg" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="grid-column:span 2;font-size:12.5px;font-weight:700;color:#5b6b7a;">Portal public URL (optional)
+              <input id="mail-portal-url" placeholder="https://dashboard.example.com" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#32217c;cursor:pointer;"><input id="mail-secure" type="checkbox" style="width:17px;height:17px;"> TLS from connection start (normally port 465)</label>
+            <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#32217c;cursor:pointer;"><input id="mail-require-tls" type="checkbox" checked style="width:17px;height:17px;"> Require TLS / STARTTLS</label>
+            <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#32217c;cursor:pointer;"><input id="mail-reject-unauth" type="checkbox" checked style="width:17px;height:17px;"> Validate SMTP certificate</label>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:end;max-width:820px;">
+            <button class="btn" onclick="saveEmailSettings()">Save email settings</button>
+            <label style="font-size:12px;font-weight:700;color:#5b6b7a;">Test recipient
+              <input id="mail-test-recipient" type="email" placeholder="you@company.com" style="display:block;width:240px;margin-top:4px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <button class="btn btn-ghost" onclick="testEmailSettings()">Send test email</button>
+          </div>
+          <div id="mail-result" style="margin-top:12px;"></div>
+
+          <div style="margin-top:24px;font-size:12.5px;font-weight:800;color:#32217c;">Scheduled reports</div>
+          <div style="overflow:auto;margin-top:8px;"><table class="hist"><thead><tr><th>Report</th><th>User</th><th>Frequency</th><th>Next send</th><th>Status</th></tr></thead><tbody id="mail-schedules"><tr><td colspan="5" class="muted" style="padding:10px;">No schedules yet.</td></tr></tbody></table></div>
+          <div style="margin-top:20px;font-size:12.5px;font-weight:800;color:#32217c;">Recent email deliveries</div>
+          <div style="overflow:auto;margin-top:8px;"><table class="hist"><thead><tr><th>When</th><th>Report</th><th>Status</th><th>Recipients</th></tr></thead><tbody id="mail-deliveries"><tr><td colspan="4" class="muted" style="padding:10px;">No deliveries yet.</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- client reach & engagement -->
+      <div class="card section-gap">
+        <div class="card-hd"><h2>Client Reach &amp; Engagement</h2><div class="note">How many people are signing in and using the portal · last <span id="eng-window">30</span> days</div></div>
+        <div class="card-bd">
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <select id="eng-days" onchange="loadEngagement()" style="font:inherit;padding:8px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;" id="eng-stats">
+            <div class="muted">Loading…</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start;" class="eng-grid">
+            <div>
+              <div style="font-size:12.5px;font-weight:800;color:#32217c;margin-bottom:8px;">Logins per day</div>
+              <div id="eng-trend" style="display:flex;align-items:flex-end;gap:2px;height:90px;border-bottom:1px solid #e8e1f7;padding-bottom:2px;"></div>
+            </div>
+            <div>
+              <div style="font-size:12.5px;font-weight:800;color:#32217c;margin-bottom:8px;">Most-viewed pages</div>
+              <div id="eng-pages"></div>
+            </div>
+          </div>
+          <div style="margin-top:22px;font-size:12.5px;font-weight:800;color:#32217c;">Most engaged users</div>
+          <div style="overflow:auto;margin-top:8px;"><table class="hist"><thead><tr><th>User</th><th>Logins</th><th>Pageviews</th><th>Avg. scroll depth</th></tr></thead><tbody id="eng-users"><tr><td colspan="4" class="muted" style="padding:10px;">Loading…</td></tr></tbody></table></div>
+        </div>
+      </div>
+      <style>@media(max-width:820px){.eng-grid{grid-template-columns:1fr!important;}}</style>
+
+      <!-- channel partners (white-label) -->
+      <div class="card section-gap">
+        <div class="card-hd"><h2>Channel Partners</h2><div class="note">White-label branding · each partner's users see their colours, logo &amp; name</div></div>
+        <div class="card-bd">
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+            <input id="pt-new-name" placeholder="New partner name (e.g. Acme Financial)" style="flex:1;min-width:220px;font:inherit;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            <button class="btn" onclick="createPartner()">Add partner</button>
+          </div>
+          <div style="margin-bottom:16px;">
+            <div class="note" style="margin:0 0 8px;font-size:12px;color:#8497a7;">Or start from a test client preset (dummy placeholder logo &amp; approximate brand colours, for demo/testing only):</div>
+            <div id="pt-presets" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+          </div>
+          <div id="pt-list"></div>
+        </div>
+      </div>
+
+      <!-- dashboard section permissions -->
+      <div class="card section-gap">
+        <div class="card-hd"><h2>Dashboard Sections</h2><div class="note">Hide sections that aren't ready yet, and control which roles (or specific people) can see each one</div></div>
+        <div class="card-bd">
+          <div id="sec-list"></div>
+        </div>
+      </div>
+
+      <!-- danger zone: full reset -->
+      <div class="card section-gap" style="border-color:#f3c9c0;">
+        <div class="card-hd" style="border-bottom-color:#fbe4df;"><h2 style="color:#b5391f;">Danger zone</h2><div class="note">Clear all imported data for a clean go-live start</div></div>
+        <div class="card-bd">
+          <p class="muted" style="margin-bottom:14px;">This permanently removes <b>all imported portal data</b> — employers and their related workforce, journey, debt, policy, rating, referral, salary-advance, score and import records. <b>User logins are kept.</b> There is no undo. Use this only when moving from testing to a clean data set.</p>
+          <button class="btn" id="reset-btn" style="border-color:#e0492f;color:#b5391f;" onclick="openReset()">Reset all imported data…</button>
+          <div id="reset-area" style="display:none;margin-top:16px;padding:16px;border:1px solid #f3c9c0;border-radius:11px;background:#fdf5f3;">
+            <div style="font-weight:700;color:#b5391f;font-size:13.5px;margin-bottom:8px;">Are you sure? This cannot be undone.</div>
+            <div class="muted" style="margin-bottom:10px;">Type <b>RESET</b> below to confirm.</div>
+            <input id="reset-confirm" placeholder="type RESET" style="font-family:inherit;font-size:13.5px;padding:9px 12px;border:1px solid #e0492f;border-radius:9px;width:160px;">
+            <button class="btn" style="background:#e0492f;color:#fff;border-color:#e0492f;margin-left:8px;" onclick="doReset()">Permanently reset</button>
+            <button class="btn btn-ghost" style="margin-left:4px;" onclick="$('#reset-area').style.display='none'">Cancel</button>
+            <div class="banner" id="reset-msg" style="display:none;margin-top:12px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/engagement-v1.js?v=1" defer></script>
+<script src="/static/portal-nav-v054.js?v=0.5.4"></script>
+<script>
+/* ── Admin console. Talks to the import API. Set API base if served elsewhere. ── */
+const API = ""; // same origin
+let MANIFEST = null, CURRENT = null, LAST_BATCH = null;
+
+const $ = s => document.querySelector(s);
+const fmtDate = d => d ? new Date(d).toLocaleString('en-ZA',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+
+// brief "Hi <name>" splash right after sign-in — once per browser tab session
+function handleWelcomeSplash(me){
+  const el=document.getElementById('welcome-splash');
+  if(!el) return;
+  let already=false;
+  try{ already = sessionStorage.getItem('ef_splash_shown')==='1'; }catch(_){}
+  if(already){ el.classList.add('hide'); return; }
+  const greet=document.getElementById('welcome-splash-greeting');
+  const first=(me.name||'').trim().split(/\s+/)[0]||'there';
+  if(greet) greet.textContent='Hi '+first+' \uD83D\uDC4B';
+  const logo=document.getElementById('welcome-splash-logo');
+  if(logo && me.theme && me.theme.logoDataUrl) logo.src=me.theme.logoDataUrl;
+  try{ sessionStorage.setItem('ef_splash_shown','1'); }catch(_){}
+  setTimeout(()=>el.classList.add('hide'), 700);
+}
+
+function addNav(me){
+  if(window.EmpowerPortalNav){
+    window.EmpowerPortalNav.render({me,navSelector:'#portal-nav',accountSelector:'#portal-account',active:'admin'});
+  }
+}
+// ── live data integration (API or direct SQL) ──
+function setIntegMode(mode){
+  mode=String(mode||'API').toUpperCase()==='SQL'?'SQL':'API';
+  $('#integ-mode').value=mode;
+  $('#integ-api-panel').style.display = mode === 'API' ? 'grid' : 'none';
+  $('#integ-sql-panel').style.display = mode === 'SQL' ? 'grid' : 'none';
+  const api=$('#source-tab-api'), sql=$('#source-tab-sql');
+  if(api){ api.classList.toggle('on',mode==='API'); api.setAttribute('aria-selected',String(mode==='API')); }
+  if(sql){ sql.classList.toggle('on',mode==='SQL'); sql.setAttribute('aria-selected',String(mode==='SQL')); }
+}
+function toggleIntegMode(){ setIntegMode($('#integ-mode')?.value || 'API'); }
+function setSqlPortDefault(force=false){
+  const dialect = $('#integ-sql-dialect').value;
+  const field = $('#integ-sql-port');
+  if(!force && field.value) return;
+  field.value = dialect === 'MSSQL' ? '1433' : dialect === 'MYSQL' ? '3306' : '5432';
+}
+async function loadInteg(){
+  try{
+    const c = await fetch(`${API}/api/admin/integration`).then(r=>r.json());
+    setIntegMode((c.effectiveSourceMode || c.sourceMode || 'API').toUpperCase());
+    $('#integ-url').value = c.baseUrl || '';
+    $('#integ-hours').value = c.scheduleHours || 24;
+    $('#integ-enabled').checked = !!c.enabled;
+    if(c.hasToken) $('#integ-token').placeholder = c.apiTokenFromEnvironment ? '•••••• (provided by SOURCE_API_TOKEN)' : '•••••• (saved — leave blank to keep)';
+
+    $('#integ-sql-dialect').value = (c.sqlDialect || 'POSTGRESQL').toUpperCase();
+    $('#integ-sql-host').value = c.sqlHost || '';
+    $('#integ-sql-port').value = c.sqlPort || '';
+    if(!$('#integ-sql-port').value) setSqlPortDefault(true);
+    $('#integ-sql-database').value = c.sqlDatabase || '';
+    $('#integ-sql-schema').value = c.sqlSchema || '';
+    $('#integ-sql-user').value = c.sqlUsername || '';
+    $('#integ-sql-prefix').value = c.sqlViewPrefix || 'v_';
+    $('#integ-sql-timeout').value = c.sqlQueryTimeoutMs || 60000;
+    $('#integ-sql-maxrows').value = c.sqlMaxRowsPerReport || 250000;
+    $('#integ-sql-ssl').checked = c.sqlSsl !== false;
+    $('#integ-sql-trust').checked = !!c.sqlTrustServerCertificate;
+    if(c.hasSqlPassword) $('#integ-sql-password').placeholder = c.sqlPasswordFromEnvironment ? '•••••• (provided by SOURCE_SQL_PASSWORD)' : '•••••• (saved — leave blank to keep)';
+
+    const s = $('#integ-status');
+    const configuredText = c.configured ? 'configured' : 'incomplete';
+    if(c.lastSyncAt){
+      const when = new Date(c.lastSyncAt).toLocaleString('en-ZA');
+      s.style.display='block';
+      s.className = 'banner ' + (c.lastSyncStatus==='OK'?'ok':c.lastSyncStatus==='FAILED'?'err':'ok');
+      s.textContent = `${c.effectiveSourceMode || c.sourceMode || 'API'} source · ${configuredText} · Last sync: ${c.lastSyncStatus} · ${when} — ${c.lastSyncNote||''}`;
+    }else{
+      s.style.display='block';
+      s.className = 'banner ' + (c.configured?'ok':'');
+      s.textContent = `${c.effectiveSourceMode || c.sourceMode || 'API'} source · ${configuredText}. No sync has run yet.`;
+    }
+    loadIntegLogs();
+  }catch(e){}
+}
+function integrationDraft(){
+  const mode = ($('#integ-mode').value || 'API').toUpperCase();
+  const body = {
+    sourceMode: mode,
+    baseUrl: $('#integ-url').value.trim(),
+    scheduleHours: parseInt($('#integ-hours').value)||24,
+    enabled: $('#integ-enabled').checked,
+    sqlDialect: $('#integ-sql-dialect').value,
+    sqlHost: $('#integ-sql-host').value.trim(),
+    sqlPort: parseInt($('#integ-sql-port').value)||null,
+    sqlDatabase: $('#integ-sql-database').value.trim(),
+    sqlSchema: $('#integ-sql-schema').value.trim(),
+    sqlUsername: $('#integ-sql-user').value.trim(),
+    sqlViewPrefix: $('#integ-sql-prefix').value.trim() || 'v_',
+    sqlQueryTimeoutMs: parseInt($('#integ-sql-timeout').value)||60000,
+    sqlMaxRowsPerReport: parseInt($('#integ-sql-maxrows').value)||250000,
+    sqlSsl: $('#integ-sql-ssl').checked,
+    sqlTrustServerCertificate: $('#integ-sql-trust').checked,
+  };
+  const tok = $('#integ-token').value.trim(); if(tok) body.authToken = tok;
+  const sqlPassword = $('#integ-sql-password').value.trim(); if(sqlPassword) body.sqlPassword = sqlPassword;
+  return body;
+}
+async function saveInteg(){
+  const body=integrationDraft();
+  const mode=body.sourceMode;
+  $('#integ-result').innerHTML = '<div class="banner ok">Saving…</div>';
+  try{
+    const r = await fetch(`${API}/api/admin/integration`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error || 'save failed');
+    $('#integ-token').value=''; $('#integ-sql-password').value='';
+    $('#integ-result').innerHTML = `<div class="banner ok">✓ ${mode==='SQL'?'Database':'API'} integration settings saved.</div>`;
+    loadInteg();
+  }catch(e){ $('#integ-result').innerHTML = `<div class="banner err">✕ ${e.message}</div>`; }
+}
+async function testInteg(){
+  const body=integrationDraft();
+  const label=body.sourceMode==='SQL'?'database':'API';
+  $('#integ-result').innerHTML = `<div class="banner ok">Testing ${label} connection and contract…</div>`;
+  try{
+    const r = await fetch(`${API}/api/admin/integration/test`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d = await r.json();
+    $('#integ-result').innerHTML = d.ok ? `<div class="banner ok">✓ ${d.note}</div>` : `<div class="banner err">✕ ${d.error}</div>`;
+  }catch(e){ $('#integ-result').innerHTML = `<div class="banner err">✕ ${e.message}</div>`; }
+}
+async function syncNow(){
+  const mode = ($('#integ-mode').value || 'API').toUpperCase();
+  $('#integ-result').innerHTML = `<div class="banner ok">Syncing all reports from ${mode}… this may take a minute for large datasets.</div>`;
+  try{
+    const r = await fetch(`${API}/api/admin/integration/sync`,{method:'POST'});
+    const d = await r.json();
+    if(d.error){ $('#integ-result').innerHTML = `<div class="banner err">✕ ${d.error}</div>`; return; }
+    const rows = Object.entries(d.summary||{}).map(([k,v])=>{
+      const txt = v.error ? `<span style="color:#b5391f">${v.error}</span>` : v.errorCount ? `<span style="color:#b5391f">${v.errorCount} validation error(s)</span>` : `${v.committed ?? 0} loaded`;
+      return `<tr><td style="font-weight:700">${k}</td><td>${txt}</td></tr>`;
+    }).join('');
+    const cls = d.status==='OK'?'ok':d.status==='FAILED'?'err':'ok';
+    $('#integ-result').innerHTML = `<div class="banner ${cls}">${d.status}: ${d.note}</div><table class="hist" style="margin-top:8px"><tbody>${rows}</tbody></table>`;
+    loadInteg();
+  }catch(e){ $('#integ-result').innerHTML = `<div class="banner err">✕ ${e.message}</div>`; }
+}
+async function loadIntegLogs(){
+  try{
+    const logs = await fetch(`${API}/api/admin/integration/logs`).then(r=>r.json());
+    const tb = $('#integ-logs');
+    if(!logs.length){ tb.innerHTML = '<tr><td class="muted" style="padding:10px;">No syncs yet.</td></tr>'; return; }
+    tb.innerHTML = logs.map(l=>{
+      const when = new Date(l.startedAt).toLocaleString('en-ZA');
+      const badge = l.status==='OK'?'#1fa463':l.status==='FAILED'?'#e0492f':'#e8910c';
+      return `<tr><td>${when}</td><td>${l.trigger}</td><td><span style="color:${badge};font-weight:700">${l.status}</span></td><td class="muted">${l.note||''}</td></tr>`;
+    }).join('');
+  }catch(e){}
+}
+
+
+// ── system email / SMTP and scheduled reports ──
+function emailDraft(){
+  const body={
+    smtpHost: $('#mail-host').value.trim(),
+    smtpPort: parseInt($('#mail-port').value)||587,
+    smtpSecure: $('#mail-secure').checked,
+    smtpRequireTls: $('#mail-require-tls').checked,
+    smtpRejectUnauthorized: $('#mail-reject-unauth').checked,
+    smtpUsername: $('#mail-user').value.trim(),
+    fromName: $('#mail-from-name').value.trim(),
+    fromEmail: $('#mail-from-email').value.trim(),
+    replyTo: $('#mail-reply-to').value.trim(),
+    defaultTimezone: $('#mail-timezone').value.trim()||'Africa/Johannesburg',
+    portalBaseUrl: $('#mail-portal-url').value.trim(),
+  };
+  const password=$('#mail-password').value.trim(); if(password) body.smtpPassword=password;
+  return body;
+}
+async function loadEmailSettings(){
+  try{
+    const r=await fetch(`${API}/api/admin/email-settings`); const c=await r.json(); if(!r.ok) throw new Error(c.error||'Could not load email settings');
+    $('#mail-host').value=c.smtpHost||''; $('#mail-port').value=c.smtpPort||587; $('#mail-user').value=c.smtpUsername||'';
+    $('#mail-from-name').value=c.fromName||'empower-fin Dashboard Portal'; $('#mail-from-email').value=c.fromEmail||''; $('#mail-reply-to').value=c.replyTo||'';
+    $('#mail-timezone').value=c.defaultTimezone||'Africa/Johannesburg'; $('#mail-portal-url').value=c.portalBaseUrl||'';
+    $('#mail-secure').checked=!!c.smtpSecure; $('#mail-require-tls').checked=c.smtpRequireTls!==false; $('#mail-reject-unauth').checked=c.smtpRejectUnauthorized!==false;
+    if(c.hasPassword) $('#mail-password').placeholder=c.passwordFromEnvironment?'•••••• (provided by SMTP_PASSWORD)':'•••••• (saved — leave blank to keep)';
+    const st=$('#mail-status'); st.style.display='block'; st.className='banner '+(c.configured?'ok':'');
+    st.textContent=c.configured?'SMTP is configured for scheduled report delivery.':'SMTP setup is incomplete. Scheduled reports cannot send until the required fields are configured.';
+    if(c.lastTestAt) st.textContent+=` Last test: ${c.lastTestStatus||'—'} · ${fmtDate(c.lastTestAt)}${c.lastTestNote?' — '+c.lastTestNote:''}`;
+    loadScheduledReportsAdmin(); loadEmailDeliveries();
+  }catch(e){ $('#mail-result').innerHTML=`<div class="banner err">✕ ${e.message}</div>`; }
+}
+async function saveEmailSettings(){
+  $('#mail-result').innerHTML='<div class="banner ok">Saving email settings…</div>';
+  try{
+    const r=await fetch(`${API}/api/admin/email-settings`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(emailDraft())});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error||'Save failed');
+    $('#mail-password').value=''; $('#mail-result').innerHTML='<div class="banner ok">✓ Email settings saved.</div>'; loadEmailSettings();
+  }catch(e){ $('#mail-result').innerHTML=`<div class="banner err">✕ ${e.message}</div>`; }
+}
+async function testEmailSettings(){
+  const recipient=$('#mail-test-recipient').value.trim();
+  $('#mail-result').innerHTML='<div class="banner ok">Testing SMTP and sending a test email…</div>';
+  try{
+    const body={...emailDraft(),recipient};
+    const r=await fetch(`${API}/api/admin/email-settings/test`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Email test failed');
+    $('#mail-result').innerHTML=`<div class="banner ok">✓ Test email sent to ${d.recipient}.</div>`; loadEmailSettings();
+  }catch(e){ $('#mail-result').innerHTML=`<div class="banner err">✕ ${e.message}</div>`; }
+}
+function scheduleFreqLabel(s){
+  if(s.frequency==='ONCE') return 'Once';
+  if(s.frequency==='DAILY') return `Daily · ${s.sendTime}`;
+  if(s.frequency==='WEEKLY') return `Weekly · ${['','Mon','Tue','Wed','Thu','Fri','Sat','Sun'][s.dayOfWeek]||''} ${s.sendTime}`;
+  if(s.frequency==='MONTHLY') return `Monthly · day ${s.dayOfMonth} · ${s.sendTime}`;
+  return s.frequency;
+}
+async function loadScheduledReportsAdmin(){
+  const tb=$('#mail-schedules'); if(!tb) return;
+  try{
+    const r=await fetch(`${API}/api/admin/report-schedules`); const rows=await r.json(); if(!r.ok) throw new Error(rows.error||'Could not load schedules');
+    if(!rows.length){ tb.innerHTML='<tr><td colspan="5" class="muted" style="padding:10px;">No schedules yet.</td></tr>'; return; }
+    tb.innerHTML=rows.map(s=>`<tr><td><strong>${s.name}</strong><div class="muted">${s.employer?.name||''}</div></td><td>${s.user?.name||''}<div class="muted">${s.user?.email||''}</div></td><td>${scheduleFreqLabel(s)}</td><td>${s.active?fmtDate(s.nextRunAt):'Paused'}</td><td><span style="font-weight:800;color:${s.lastStatus==='FAILED'?'#b5391f':'#137a47'}">${s.active?'ACTIVE':'PAUSED'}</span>${s.lastStatus?`<div class="muted">last: ${s.lastStatus}</div>`:''}</td></tr>`).join('');
+  }catch(e){ tb.innerHTML=`<tr><td colspan="5" class="muted" style="padding:10px;color:#b5391f;">${e.message}</td></tr>`; }
+}
+async function loadEmailDeliveries(){
+  const tb=$('#mail-deliveries'); if(!tb) return;
+  try{
+    const r=await fetch(`${API}/api/admin/report-deliveries`); const rows=await r.json(); if(!r.ok) throw new Error(rows.error||'Could not load deliveries');
+    if(!rows.length){ tb.innerHTML='<tr><td colspan="4" class="muted" style="padding:10px;">No deliveries yet.</td></tr>'; return; }
+    tb.innerHTML=rows.map(x=>`<tr><td>${fmtDate(x.sentAt)}</td><td>${x.schedule?.name||x.subject||'Scheduled report'}<div class="muted">${x.schedule?.employer?.name||''}</div></td><td style="font-weight:800;color:${x.status==='SENT'?'#137a47':'#b5391f'}">${x.status}</td><td class="muted">${Array.isArray(x.recipients)?x.recipients.join(', '):''}${x.error?`<div style="color:#b5391f">${x.error}</div>`:''}</td></tr>`).join('');
+  }catch(e){ tb.innerHTML=`<tr><td colspan="4" class="muted" style="padding:10px;color:#b5391f;">${e.message}</td></tr>`; }
+}
+
+// ── client reach & engagement ──
+async function loadEngagement(){
+  const days=$('#eng-days')?.value || 30;
+  const statsEl=$('#eng-stats'), trendEl=$('#eng-trend'), pagesEl=$('#eng-pages'), usersEl=$('#eng-users'), winEl=$('#eng-window');
+  if(winEl) winEl.textContent=days;
+  try{
+    const s=await fetch(`${API}/api/admin/analytics/summary?days=${days}`).then(r=>r.json());
+    const stat=(label,value)=>`<div style="background:#f7fafd;border:1px solid #e8e1f7;border-radius:12px;padding:12px 14px;"><div style="font-size:22px;font-weight:800;color:#32217c;">${value}</div><div style="font-size:11.5px;font-weight:700;color:#8497a7;margin-top:2px;">${label}</div></div>`;
+    statsEl.innerHTML = [
+      stat('Active accounts', s.activeAccountCount),
+      stat('Signed in this window', s.uniqueSignedInUsers),
+      stat('Total logins', s.totalLogins),
+      stat('Pageviews', s.totalPageviews),
+      stat('Avg. scroll depth', s.avgScrollDepth+'%'),
+    ].join('');
+    const max=Math.max(1,...s.trend.map(t=>t.logins));
+    trendEl.innerHTML=s.trend.map(t=>`<div title="${t.date}: ${t.logins} login(s)" style="flex:1;min-width:2px;background:#b15be8;border-radius:3px 3px 0 0;height:${Math.max(3,Math.round((t.logins/max)*100))}%;"></div>`).join('');
+    pagesEl.innerHTML = s.topPages.length
+      ? s.topPages.map(p=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px solid #f7f4ff;"><span class="muted">${p.path}</span><b style="color:#32217c;">${p.views}</b></div>`).join('')
+      : '<div class="muted" style="font-size:12.5px;">No pageviews recorded yet.</div>';
+    usersEl.innerHTML = s.byUser.length
+      ? s.byUser.map(u=>`<tr><td><b>${u.name}</b><div class="muted">${u.email}</div></td><td>${u.logins}</td><td>${u.pageviews}</td><td>${u.avgScrollDepth!==null?u.avgScrollDepth+'%':'—'}</td></tr>`).join('')
+      : '<tr><td colspan="4" class="muted" style="padding:10px;">No engagement recorded yet in this window.</td></tr>';
+  }catch(e){
+    statsEl.innerHTML = `<div class="muted">Could not load engagement data.</div>`;
+  }
+}
+
+// ── channel partners (white-label) ──
+let PARTNERS=[], ALL_USERS=[], ALL_EMP=[];
+async function loadPartners(){
+  try{
+    PARTNERS = await fetch(`${API}/api/admin/partners`).then(r=>r.json());
+    ALL_USERS = await fetch(`${API}/api/users`).then(r=>r.json()).catch(()=>[]);
+    const _me = await fetch(`${API}/api/auth/me`).then(r=>r.json()).catch(()=>({employers:[]}));
+    ALL_EMP = _me.employers || [];
+    renderPartners();
+  }catch(e){}
+}
+async function createPartner(){
+  const name=$('#pt-new-name').value.trim(); if(!name) return;
+  await fetch(`${API}/api/admin/partners`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
+  $('#pt-new-name').value='';
+  loadPartners();
+}
+
+// ── dummy test-client presets ──
+// Generates a placeholder badge logo (initials on a colour swatch) rather than
+// any real brand artwork — safe to use for testing white-label branding
+// end-to-end (colours, name, logo swap) before a client supplies real assets.
+function dummyLogoDataUrl(initials,bg,fg){
+  fg=fg||'#ffffff';
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="160" height="160" rx="32" fill="${bg}"/><text x="80" y="98" font-family="Manrope,Arial,sans-serif" font-size="58" font-weight="800" fill="${fg}" text-anchor="middle">${initials}</text></svg>`;
+  return 'data:image/svg+xml;base64,'+btoa(svg);
+}
+const PARTNER_PRESETS=[
+  { name:'FNB (test)', initials:'FNB', primaryColor:'003C64', accentColor:'00A651', navyColor:'003C64', tagline:'First National Bank — test client' },
+  { name:'ABSA (test)', initials:'AB', primaryColor:'A6192E', accentColor:'DC1928', navyColor:'6E0E1B', tagline:'Absa — test client' },
+  { name:'Capitec (test)', initials:'CB', primaryColor:'004B87', accentColor:'E4002B', navyColor:'002B4D', tagline:'Capitec Bank — test client' },
+  { name:'Standard Bank (test)', initials:'SB', primaryColor:'0033A0', accentColor:'1F63D6', navyColor:'001F5C', tagline:'Standard Bank — test client' },
+  { name:'Nedbank (test)', initials:'NB', primaryColor:'00703C', accentColor:'00A651', navyColor:'003D22', tagline:'Nedbank — test client' },
+];
+function renderPresets(){
+  const wrap=$('#pt-presets'); if(!wrap) return;
+  wrap.innerHTML=PARTNER_PRESETS.map((p,i)=>`<button type="button" class="btn btn-ghost" style="border-color:#${p.accentColor};color:#${p.primaryColor};font-size:12px;" onclick="addPresetPartner(${i})">+ ${p.name}</button>`).join('');
+}
+async function addPresetPartner(i){
+  const preset=PARTNER_PRESETS[i]; if(!preset) return;
+  const created=await fetch(`${API}/api/admin/partners`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:preset.name})}).then(r=>r.json());
+  const logo=dummyLogoDataUrl(preset.initials,'#'+preset.accentColor);
+  await fetch(`${API}/api/admin/partners/${created.id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    primaryColor:preset.primaryColor, accentColor:preset.accentColor, navyColor:preset.navyColor,
+    tagline:preset.tagline, logoDataUrl:logo,
+  })});
+  loadPartners();
+}
+
+function renderPartners(){
+  const wrap=$('#pt-list');
+  if(!PARTNERS.length){ wrap.innerHTML='<p class="muted">No partners yet. Add one above.</p>'; return; }
+  wrap.innerHTML = PARTNERS.map(p=>{
+    const pc=p.primaryColor?('#'+p.primaryColor):'#32217C', ac=p.accentColor?('#'+p.accentColor):'#B15BE8', nv=p.navyColor?('#'+p.navyColor):'#32217C';
+    return `<div class="card" style="margin-bottom:12px;padding:16px;border:1px solid #e8e1f7;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div style="width:34px;height:34px;border-radius:8px;background:${pc};"></div>
+        <div style="font-weight:800;font-size:15px;color:#32217c;flex:1;">${p.name}</div>
+        <span class="muted" style="font-size:12px;">${p._count.users} users · ${p._count.employers} employers · /p/${p.slug}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr) 2fr;gap:10px;align-items:end;">
+        <label style="font-size:11.5px;font-weight:700;color:#5b6b7a;">Primary<input type="color" value="${pc}" onchange="editPartner('${p.id}','primaryColor',this.value)" style="display:block;width:100%;height:34px;border:1px solid #e8e1f7;border-radius:7px;margin-top:4px;"></label>
+        <label style="font-size:11.5px;font-weight:700;color:#5b6b7a;">Accent<input type="color" value="${ac}" onchange="editPartner('${p.id}','accentColor',this.value)" style="display:block;width:100%;height:34px;border:1px solid #e8e1f7;border-radius:7px;margin-top:4px;"></label>
+        <label style="font-size:11.5px;font-weight:700;color:#5b6b7a;">Navy<input type="color" value="${nv}" onchange="editPartner('${p.id}','navyColor',this.value)" style="display:block;width:100%;height:34px;border:1px solid #e8e1f7;border-radius:7px;margin-top:4px;"></label>
+        <label style="font-size:11.5px;font-weight:700;color:#5b6b7a;">Display name<input value="${p.displayName||''}" onchange="editPartner('${p.id}','displayName',this.value)" style="display:block;width:100%;padding:7px 10px;border:1px solid #e8e1f7;border-radius:7px;margin-top:4px;font:inherit;"></label>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;align-items:end;">
+        <label style="font-size:11.5px;font-weight:700;color:#5b6b7a;">Tagline (optional)<input value="${p.tagline||''}" onchange="editPartner('${p.id}','tagline',this.value)" style="display:block;width:100%;padding:7px 10px;border:1px solid #e8e1f7;border-radius:7px;margin-top:4px;font:inherit;"></label>
+        <label style="font-size:11.5px;font-weight:700;color:#5b6b7a;">Logo (PNG)<input type="file" accept="image/png,image/jpeg" onchange="uploadPartnerLogo('${p.id}',this)" style="display:block;margin-top:4px;font-size:12px;"></label>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-top:12px;align-items:center;">
+        <select id="pt-u-${p.id}" style="font:inherit;padding:7px 10px;border:1px solid #e8e1f7;border-radius:7px;"><option value="">Assign a user…</option>${ALL_USERS.map(u=>`<option value="${u.id}">${u.name||u.email}</option>`).join('')}</select>
+        <select id="pt-e-${p.id}" style="font:inherit;padding:7px 10px;border:1px solid #e8e1f7;border-radius:7px;"><option value="">Assign an employer…</option>${(ALL_EMP||[]).map(e=>`<option value="${e.id||e.employerId}">${e.name||e.employer}</option>`).join('')}</select>
+        <button class="btn btn-ghost" onclick="assignToPartner('${p.id}')">Assign</button>
+      </div>
+      <div style="margin-top:10px;text-align:right;"><button class="btn btn-ghost" style="color:#b5391f;font-size:12px;" onclick="deletePartner('${p.id}','${p.name.replace(/'/g,"")}')">Delete partner</button></div>
+    </div>`;
+  }).join('');
+}
+async function editPartner(id,field,value){
+  if(field.endsWith('Color')) value=value.replace(/^#/,'');
+  await fetch(`${API}/api/admin/partners/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({[field]:value})});
+  loadPartners();
+}
+function uploadPartnerLogo(id,input){
+  const f=input.files[0]; if(!f) return;
+  if(f.size>500000){ alert('Please use a logo under 500KB.'); return; }
+  const reader=new FileReader();
+  reader.onload=async()=>{ await fetch(`${API}/api/admin/partners/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({logoDataUrl:reader.result})}); alert('Logo saved.'); loadPartners(); };
+  reader.readAsDataURL(f);
+}
+async function assignToPartner(id){
+  const uid=$('#pt-u-'+id).value, eid=$('#pt-e-'+id).value;
+  if(uid) await fetch(`${API}/api/admin/partners/${id}/assign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:uid})});
+  if(eid) await fetch(`${API}/api/admin/partners/${id}/assign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({employerId:eid})});
+  loadPartners();
+}
+async function deletePartner(id,name){
+  if(!confirm(`Delete partner "${name}"? Its users and employers stay, but lose this branding.`)) return;
+  await fetch(`${API}/api/admin/partners/${id}`,{method:'DELETE'});
+  loadPartners();
+}
+
+// ── dashboard section permissions ──
+const ROLE_LABEL = { ADMIN:'Admin', EMPLOYER_VIEW:'Employer view', PORTFOLIO_VIEW:'Portfolio view' };
+let SECTIONS=[];
+async function loadSections(){
+  try{
+    SECTIONS = await fetch(`${API}/api/admin/sections`).then(r=>r.json());
+    if(!ALL_USERS.length) ALL_USERS = await fetch(`${API}/api/users`).then(r=>r.json()).catch(()=>[]);
+    renderSections();
+  }catch(e){}
+}
+function renderSections(){
+  const wrap=$('#sec-list'); if(!wrap) return;
+  if(!SECTIONS.length){ wrap.innerHTML='<p class="muted">No dashboard sections found.</p>'; return; }
+  wrap.innerHTML = SECTIONS.map(s=>{
+    const roleChecks = Object.keys(ROLE_LABEL).map(r=>
+      `<label style="font-size:12px;font-weight:700;color:#5b6b7a;display:inline-flex;align-items:center;gap:5px;margin-right:14px;">
+        <input type="checkbox" ${s.allowedRoles.includes(r)?'checked':''} onchange="toggleSectionRole('${s.key}','${r}',this.checked)"> ${ROLE_LABEL[r]}
+      </label>`).join('');
+    const overrides = s.overrides.length
+      ? s.overrides.map(o=>`<span class="tag opt" style="margin:2px 4px 2px 0;">${o.name||o.email} <a href="#" onclick="revokeSection('${s.key}','${o.userId}');return false;" style="color:#b5391f;text-decoration:none;margin-left:4px;">✕</a></span>`).join('')
+      : '<span class="muted">None</span>';
+    return `<div style="border:1px solid #e8e1f7;border-radius:11px;padding:14px 16px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <label style="display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;color:#32217c;flex:1;">
+          <input type="checkbox" ${s.enabled?'checked':''} onchange="toggleSectionEnabled('${s.key}',this.checked)"> ${s.label}
+        </label>
+        <span class="muted" style="font-size:11.5px;">${s.enabled?'Visible':'Hidden from everyone (except admins and explicit grants below)'}</span>
+      </div>
+      <div style="margin:8px 0;">${roleChecks}</div>
+      <div style="margin-top:10px;">
+        <div style="font-size:11px;font-weight:800;color:#8497a7;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Extra access for specific people</div>
+        <div style="margin-bottom:8px;">${overrides}</div>
+        <div style="display:flex;gap:8px;">
+          <select id="sec-u-${s.key}" style="font:inherit;padding:7px 10px;border:1px solid #e8e1f7;border-radius:7px;flex:1;"><option value="">Grant access to…</option>${ALL_USERS.map(u=>`<option value="${u.id}">${u.name||u.email}</option>`).join('')}</select>
+          <button class="btn btn-ghost" onclick="grantSection('${s.key}')">Grant</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function toggleSectionEnabled(key,enabled){
+  await fetch(`${API}/api/admin/sections/${key}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled})});
+  loadSections();
+}
+async function toggleSectionRole(key,role,checked){
+  const section = SECTIONS.find(s=>s.key===key); if(!section) return;
+  const roles = new Set(section.allowedRoles);
+  if(checked) roles.add(role); else roles.delete(role);
+  await fetch(`${API}/api/admin/sections/${key}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({allowedRoles:[...roles]})});
+  loadSections();
+}
+async function grantSection(key){
+  const userId=$('#sec-u-'+key).value; if(!userId) return;
+  await fetch(`${API}/api/admin/sections/${key}/grant`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId})});
+  loadSections();
+}
+async function revokeSection(key,userId){
+  await fetch(`${API}/api/admin/sections/${key}/revoke`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId})});
+  loadSections();
+}
+
+
+// ── danger zone: full reset ──
+function openReset(){
+  const area=$('#reset-area');
+  const input=$('#reset-confirm');
+  const msg=$('#reset-msg');
+  if(!area || !input || !msg) return;
+  area.style.display='block';
+  input.value='';
+  msg.style.display='none';
+  msg.textContent='';
+  input.focus();
+}
+async function doReset(){
+  const input=$('#reset-confirm');
+  const msg=$('#reset-msg');
+  if(!input || !msg) return;
+  if(input.value.trim()!=='RESET'){
+    msg.className='banner err';
+    msg.style.display='block';
+    msg.textContent='Please type RESET exactly to confirm.';
+    return;
+  }
+  if(!confirm('Permanently remove all imported portal data? User accounts are kept. This cannot be undone.')) return;
+  msg.className='banner ok';
+  msg.style.display='block';
+  msg.textContent='Clearing imported data…';
+  try{
+    const r=await fetch(`${API}/api/admin/reset-all`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({confirm:'RESET'})
+    });
+    let d={};
+    try{ d=await r.json(); }catch(_){ }
+    if(!r.ok) throw new Error(d.error || `Reset failed (HTTP ${r.status})`);
+    const total=Object.values(d.cleared||{}).reduce((sum,value)=>sum+(Number(value)||0),0);
+    msg.className='banner ok';
+    msg.textContent=`✓ Reset complete. Cleared ${total} imported records. User accounts were kept.`;
+    input.value='';
+    const resultArea=$('#result'); if(resultArea) resultArea.innerHTML='';
+    await loadHistory();
+  }catch(e){
+    msg.className='banner err';
+    msg.textContent=`✕ ${e.message}`;
+  }
+}
+
+
+async function boot(){
+  // require admin
+  let me=null;
+  try{ const r=await fetch('/api/auth/me'); if(!r.ok){ location.href='/login'; return; } me=await r.json(); }
+  catch(e){ location.href='/login'; return; }
+  if(!me.modules.admin){ location.href='/dashboard'; return; }
+  handleWelcomeSplash(me);
+  addNav(me);
+  try{
+    const r = await fetch(`${API}/api/admin/reports`);
+    MANIFEST = await r.json();
+    renderRepList();
+    loadHistory();
+    loadInteg();
+    loadEmailSettings();
+    loadPartners();
+    loadSections();
+    loadEngagement();
+    renderPresets();
+  }catch(e){
+    $('#rep-list').innerHTML = `<p class="muted">Could not reach the API. Start the server and reload.</p>`;
+  }
+}
+
+function renderRepList(){
+  const order = MANIFEST.loadOrder;
+  $('#rep-list').innerHTML = order.map((key,i)=>{
+    const rep = MANIFEST.reports.find(r=>r.key===key);
+    return `<div class="rep" data-key="${key}" onclick="selectReport('${key}')">
+      <span class="step">STEP ${i+1}</span><span class="t">${rep.title}</span></div>`;
+  }).join('');
+}
+
+function selectReport(key){
+  CURRENT = MANIFEST.reports.find(r=>r.key===key);
+  document.querySelectorAll('.rep').forEach(el=>el.classList.toggle('on',el.dataset.key===key));
+  $('#rep-title').textContent = CURRENT.title;
+  $('#rep-note').textContent = CURRENT.description;
+
+  const fields = CURRENT.fields.map(f=>`<tr>
+    <td><strong>${f.name}</strong>${f.unit?` <code>${f.unit}</code>`:''}</td>
+    <td>${f.type}</td>
+    <td>${f.required?'<span class="tag req">required</span>':'<span class="tag opt">optional</span>'}</td>
+    <td class="field-desc">${f.description}${f.allowed?`<br><code>${f.allowed.join(' · ')}</code>`:''}</td>
+  </tr>`).join('');
+
+  $('#work').innerHTML = `
+    <div class="row">
+      <button class="btn" onclick="dl('csv')">↓ CSV template</button>
+      <button class="btn" onclick="dl('xlsx')">↓ Excel template</button>
+      <span class="muted">Natural key: <code>${CURRENT.naturalKey.join(' + ')}</code></span>
+    </div>
+    <div class="drop" id="drop" onclick="$('#file').click()">
+      <div class="big">Drop a file here or click to browse</div>
+      <div class="sm">CSV, Excel (.xlsx) or JSON · up to 50 MB</div>
+      <input id="file" type="file" class="hidden" accept=".csv,.xlsx,.xls,.json" onchange="upload(this.files[0])">
+    </div>
+    <div id="result"></div>
+    <details class="section-gap"><summary class="muted" style="cursor:pointer;font-weight:700;">View format (${CURRENT.fields.length} columns)</summary>
+      <table style="margin-top:10px;"><thead><tr><th>Column</th><th>Type</th><th>Req</th><th>Description</th></tr></thead><tbody>${fields}</tbody></table>
+    </details>`;
+  wireDrop();
+}
+
+function dl(fmt){ window.location = `${API}/api/admin/reports/${CURRENT.key}/template?fmt=${fmt}`; }
+
+function wireDrop(){
+  const d = $('#drop');
+  ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over');}));
+  ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over');}));
+  d.addEventListener('drop',e=>{ if(e.dataTransfer.files[0]) upload(e.dataTransfer.files[0]); });
+}
+
+async function upload(file){
+  if(!file) return;
+  $('#result').innerHTML = `<div class="banner ok">Uploading & validating <strong>${file.name}</strong>…</div>`;
+  const fd = new FormData(); fd.append('file', file);
+  try{
+    const r = await fetch(`${API}/api/admin/reports/${CURRENT.key}/upload`, {method:'POST', body:fd});
+    let res;
+    try{ res = await r.json(); }
+    catch(_){ $('#result').innerHTML = `<div class="banner err">✕ The server returned an unexpected response (status ${r.status}). The file may be too large or the server errored while reading it. Try again, or tell support the report was "${CURRENT.key}".</div>`; return; }
+    if(!r.ok){ $('#result').innerHTML = `<div class="banner err">✕ Upload failed: ${res.error||('server error '+r.status)}</div>`; return; }
+    LAST_BATCH = res.batchId;
+    renderResult(res);
+    loadHistory();
+  }catch(e){
+    $('#result').innerHTML = `<div class="banner err">✕ Upload could not complete: ${e.message}. Check your connection and try again.</div>`;
+  }
+}
+
+function renderResult(res){
+  if(res.status === 'VALIDATED'){
+    $('#result').innerHTML = `
+      <div class="banner ok">✓ Validated <strong>${res.rowCount}</strong> rows with no errors. Review the preview, then commit to update the dashboards.</div>
+      ${previewTable(res.preview)}
+      <div class="row section-gap">
+        <button class="btn btn-green" onclick="commit('${res.batchId}')">Commit & recompute scores</button>
+        <button class="btn btn-ghost" onclick="$('#result').innerHTML=''">Cancel</button>
+      </div>`;
+  } else {
+    const rows = res.errors.map(e=>`<tr><td>row ${e.row}</td><td>${e.column}</td><td><code>${e.value??''}</code></td><td>${e.reason}</td></tr>`).join('');
+    const missing = res.missingColumns.length ? `<div class="muted" style="margin-top:8px;">Missing required columns: <code>${res.missingColumns.join(', ')}</code></div>`:'';
+    $('#result').innerHTML = `
+      <div class="banner err">✕ ${res.errorCount} problem(s) found across ${res.rowCount} rows. Nothing was loaded. Fix the file and re-upload.</div>
+      ${missing}
+      <div class="err-list"><table><thead><tr><th>Row</th><th>Column</th><th>Value</th><th>Problem</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+}
+
+function previewTable(rows){
+  if(!rows || !rows.length) return '';
+  const cols = Object.keys(rows[0]);
+  return `<div class="err-list" style="margin-top:12px;"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td>${r[c]??''}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+async function commit(batchId){
+  $('#result').innerHTML = `<div class="banner ok">Committing & recomputing scores… (large files can take up to a minute — please wait)</div>`;
+  try{
+    const r = await fetch(`${API}/api/admin/batches/${batchId}/commit`, {method:'POST'});
+    let res={};
+    try{ res = await r.json(); }catch(_){}
+    if(!r.ok){
+      $('#result').innerHTML = `<div class="banner err">✕ Commit failed: ${res.error||('server error '+r.status)}. Nothing was saved. ${res.error?'':'If this was a large file, try again — the first attempt may have timed out.'}</div>`;
+      return;
+    }
+    $('#result').innerHTML = `<div class="banner ok">✓ Committed. Recomputed ${res.touchedEmployers?.length||0} employer dashboard(s) for period <strong>${res.period||''}</strong>.</div>`;
+    loadHistory();
+  }catch(e){
+    $('#result').innerHTML = `<div class="banner err">✕ Commit could not complete: ${e.message}. The file may be large — wait a moment and check Import history; if it shows COMMITTED it actually succeeded.</div>`;
+  }
+}
+
+async function revert(batchId){
+  if(!confirm('Revert this import? Only rows that can be safely rolled back will be removed.')) return;
+  try{
+    const r = await fetch(`${API}/api/admin/batches/${batchId}/revert`, {method:'POST'});
+    let d={};
+    try{ d=await r.json(); }catch(_){ }
+    if(!r.ok) throw new Error(d.error || `Revert failed (HTTP ${r.status})`);
+    await loadHistory();
+    alert('Import reverted successfully.');
+  }catch(e){
+    alert(`Could not revert this import: ${e.message}`);
+  }
+}
+
+async function loadHistory(){
+  const body=$('#hist-body');
+  try{
+    const r = await fetch(`${API}/api/admin/batches`);
+    let batches=[];
+    try{ batches = await r.json(); }catch(_){ }
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    if(!batches.length){
+      body.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px 10px;">No imports yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = batches.map(b=>`<tr>
+      <td>${(MANIFEST.reports.find(x=>x.key===b.reportKey)||{}).title||b.reportKey}</td>
+      <td class="muted">${b.filename}</td>
+      <td>${b.rowCount}</td>
+      <td><span class="st ${b.status}">${b.status}</span></td>
+      <td class="muted">${fmtDate(b.uploadedAt)}</td>
+      <td>${b.status==='COMMITTED' && b.revertable
+        ? `<button class="btn btn-ghost" style="padding:5px 11px;font-size:12px;" onclick="revert('${b.id}')">Revert</button>`
+        : (b.status==='COMMITTED' ? `<span class="muted" style="font-size:11px;" title="${b.revertReason||'This batch cannot be safely reverted.'}">Not reversible</span>` : '')}</td>
+    </tr>`).join('');
+  }catch(e){
+    body.innerHTML = `<tr><td colspan="6" class="muted" style="padding:16px 10px;color:#b5391f;">Could not load import history: ${e.message}</td></tr>`;
+  }
+}
+
+boot();
+</script>
+</body>
+</html>

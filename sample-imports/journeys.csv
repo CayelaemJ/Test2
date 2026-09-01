@@ -1,0 +1,2 @@
+journey_ref,employer_ref,payroll_ref,type,status,started_at,completed_at,monthly_saving_rand,balance_impact_rand,source_updated_at,is_deleted
+JNY-991201,VIG,EMP-004821,CREDIT_LIFE,COMPLETED,2026-03-02,2026-03-20,298.00,18830.00,2026-04-01T08:00:00Z,false

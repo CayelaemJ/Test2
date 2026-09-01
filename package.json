@@ -1,0 +1,45 @@
+{
+  "name": "empower-fin-dashboard-portal",
+  "version": "0.5.3",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "prisma generate && tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push --skip-generate",
+    "check:contract": "tsx tests/contract-check.ts",
+    "check:ui": "node scripts/ui-regression-check.mjs",
+    "db:deploy": "node scripts/deploy-db.mjs",
+    "db:reset:prelive": "prisma db push --force-reset --skip-generate",
+    "check:imports": "node scripts/import-regression-check.mjs",
+    "check:scheduling": "node scripts/scheduling-regression-check.mjs"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^9.3.1",
+    "@fastify/multipart": "^8.3.0",
+    "@fastify/static": "^7.0.4",
+    "@prisma/client": "^5.22.0",
+    "@types/node": "^22.9.0",
+    "csv-parse": "^5.5.6",
+    "fastify": "^4.28.1",
+    "prisma": "^5.22.0",
+    "typescript": "^5.6.3",
+    "xlsx": "^0.18.5",
+    "pg": "^8.12.0",
+    "mysql2": "^3.11.0",
+    "mssql": "^11.0.1",
+    "nodemailer": "^7.0.3",
+    "luxon": "^3.7.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "@types/pg": "^8.11.10",
+    "@types/mssql": "^9.1.5",
+    "@types/nodemailer": "^6.4.17",
+    "@types/luxon": "^3.6.2"
+  }
+}

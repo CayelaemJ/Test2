@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/portal-nav-v054.css?v=0.5.4">
+<link rel="stylesheet" href="/static/ui-enhance-v1.css?v=1">
+<title>empower-fin Dashboard Portal — Users</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
+  :root{--blue:#b15be8;--blue-d:#8e42bd;--navy:#32217c;--ice:#f3efff;--ice-2:#f4f9fd;--line:#e8e1f7;--line-soft:#f7f4ff;--ink:#0f2438;--grey:#5b6b7a;--grey-l:#8497a7;--green:#1fa463;--green-soft:#e7f7ef;--amber:#e8910c;--amber-soft:#fdf3e2;--red:#e0492f;--red-soft:#fdecea;--shadow:0 1px 2px rgba(13,42,71,.04),0 8px 24px rgba(13,42,71,.06);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);background:radial-gradient(1100px 560px at 88% -10%,rgba(0,120,199,.07),transparent 60%),#f3f7fb;min-height:100vh;}
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(243,247,251,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+  .topbar-inner{max-width:1040px;margin:0 auto;padding:0 28px;height:64px;display:flex;align-items:center;gap:14px;}
+  .logo-text{font-weight:800;font-size:16px;color:var(--navy);}.logo-text .opt{color:var(--blue);}
+  .pill{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);background:var(--ice);border:1px solid var(--line);padding:5px 11px;border-radius:8px;}
+  .nav{margin-left:auto;display:flex;gap:8px;}
+  .nav a{font-size:13px;font-weight:700;color:var(--grey);text-decoration:none;padding:7px 13px;border-radius:9px;}
+  .nav a:hover,.nav a.on{background:var(--ice);color:var(--navy);}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 28px 72px;}
+  .head{padding:34px 0 18px;}.head h1{font-family:'Fraunces',serif;font-weight:600;font-size:32px;color:var(--navy);}
+  .head p{margin-top:8px;color:var(--grey);font-size:14px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);margin-bottom:22px;}
+  .card-hd{padding:18px 22px 12px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;}
+  .card-hd h2{font-size:14px;font-weight:800;color:var(--navy);}
+  .card-bd{padding:18px 22px 22px;}
+  .btn{font-family:inherit;font-weight:700;font-size:13px;border-radius:10px;padding:9px 15px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--navy);}
+  .btn:hover{border-color:var(--blue);color:var(--blue);}
+  .btn-primary{background:var(--navy);color:#fff;border-color:var(--navy);}.btn-primary:hover{background:var(--blue-d);color:#fff;}
+  .btn-sm{padding:5px 11px;font-size:12px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line-soft);vertical-align:middle;}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--grey-l);font-weight:800;}
+  .role{font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;}
+  .role.ADMIN{background:var(--amber-soft);color:var(--amber);}
+  .role.EMPLOYER_VIEW{background:var(--ice);color:var(--blue-d);}
+  .role.PORTFOLIO_VIEW{background:var(--green-soft);color:#137a47;}
+  .chip{display:inline-block;font-size:11px;font-weight:700;background:var(--ice);color:var(--grey);padding:2px 8px;border-radius:6px;margin:2px 3px 2px 0;}
+  .tag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;}
+  .tag.live{background:var(--green-soft);color:#137a47;}.tag.pend{background:var(--amber-soft);color:var(--amber);}.tag.off{background:#f1f1f4;color:#777;}
+  label{display:block;font-size:12px;font-weight:700;color:var(--navy);margin:12px 0 5px;}
+  input,select{width:100%;font-family:inherit;font-size:13.5px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fafcfe;}
+  input:focus,select:focus{outline:none;border-color:var(--blue);background:#fff;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .emp-pick{border:1px solid var(--line);border-radius:10px;padding:10px;max-height:150px;overflow:auto;background:#fafcfe;}
+  .emp-pick label{display:flex;align-items:center;gap:8px;font-weight:600;margin:4px 0;cursor:pointer;}
+  .emp-pick input{width:auto;}
+  .radio-row{display:flex;gap:10px;margin-top:5px;}
+  .radio-row label{display:flex;align-items:center;gap:6px;font-weight:600;margin:0;cursor:pointer;}
+  .radio-row input{width:auto;}
+  .msg{display:none;font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-top:14px;}
+  .msg.ok{background:var(--green-soft);color:#137a47;}.msg.err{background:var(--red-soft);color:#b5391f;}
+  .link-box{background:var(--ice-2);border:1px dashed var(--line);border-radius:10px;padding:12px;margin-top:12px;font-size:12.5px;word-break:break-all;display:none;}
+  .muted{color:var(--grey);font-size:13px;}
+  .hidden{display:none;}
+</style>
+</head>
+<body data-portal-build="0.5.3">
+<div class="topbar"><div class="topbar-inner">
+  <img src="/static/logo.png" alt="empower-fin Dashboard Portal" style="height:30px;width:auto;">
+  <span class="pill">User Management</span>
+  <div id="portal-nav" style="margin-left:auto;"></div>
+  <div id="portal-account"></div>
+</div></div>
+
+<div class="wrap">
+  <div class="head"><h1>Users</h1><p>Create users, set their role, and link them to the employers they may see.</p></div>
+
+  <div class="card">
+    <div class="card-hd"><h2>Add a user</h2></div>
+    <div class="card-bd">
+      <div class="row2">
+        <div><label>Full name</label><input id="n-name" placeholder="Jane Smith"></div>
+        <div><label>Email</label><input id="n-email" type="email" placeholder="jane@company.com"></div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Role</label>
+          <select id="n-role" onchange="onRoleChange()">
+            <option value="EMPLOYER_VIEW">Employer view — sees linked employers' dashboards</option>
+            <option value="PORTFOLIO_VIEW">Portfolio view — compares linked employers</option>
+            <option value="ADMIN">Admin — full access incl. imports & users</option>
+          </select>
+        </div>
+        <div>
+          <label>How they get access</label>
+          <div class="radio-row">
+            <label><input type="radio" name="access" value="temp" checked onchange="onAccessChange()"> Set a temp password</label>
+            <label><input type="radio" name="access" value="link" onchange="onAccessChange()"> Send a set-password link</label>
+          </div>
+          <input id="n-pass" type="text" placeholder="temporary password" style="margin-top:8px;">
+        </div>
+      </div>
+      <div id="emp-wrap">
+        <label>Linked employers <span class="muted" id="emp-hint">(which employers this user may see)</span></label>
+        <div class="emp-pick" id="emp-pick"><span class="muted">Loading employers…</span></div>
+      </div>
+      <div style="margin-top:14px;">
+        <label>Channel partner <span class="muted">(applies their branding — optional)</span></label>
+        <select id="n-partner"><option value="">None (standard empower-fin branding)</option></select>
+      </div>
+      <button class="btn btn-primary" style="margin-top:18px;" onclick="addUser()">Create user</button>
+      <div class="msg" id="add-msg"></div>
+      <div class="link-box" id="link-box"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><h2>Existing users</h2></div>
+    <div class="card-bd" style="padding:6px 10px 12px;">
+      <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Employers</th><th>Partner</th><th>Status</th><th></th></tr></thead>
+      <tbody id="user-rows"><tr><td colspan="6" class="muted" style="padding:16px;">Loading…</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#f3c9c0;">
+    <div class="card-hd" style="border-bottom-color:#fbe4df;"><h2 style="color:#b5391f;">Past users</h2><div class="note" style="margin-left:10px;color:#8497a7;font-size:12px;">Who once had access, and why it ended · admin-only</div></div>
+    <div class="card-bd" style="padding:6px 10px 12px;">
+      <table><thead><tr><th>User</th><th>Role</th><th>Reason</th><th>Revoked by</th><th>Date</th><th></th></tr></thead>
+      <tbody id="revoked-rows"><tr><td colspan="6" class="muted" style="padding:16px;">Loading…</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script src="/static/engagement-v1.js?v=1" defer></script>
+<script src="/static/portal-nav-v054.js?v=0.5.4"></script>
+<script>
+const $=s=>document.querySelector(s);
+const escHtml=value=>String(value??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));
+let EMPLOYERS=[], ME=null;
+
+async function getJson(url, options){
+  const response=await fetch(url,{cache:'no-store',...options});
+  let payload=null;
+  try{ payload=await response.json(); }catch(_){ payload=null; }
+  if(response.status===401){ location.href='/login'; throw new Error('Session expired'); }
+  if(!response.ok) throw new Error(payload?.error || `Request failed (${response.status})`);
+  return payload;
+}
+
+function renderEmpPick(){
+  const host=$('#emp-pick');
+  if(!host) return;
+  if(!Array.isArray(EMPLOYERS)||EMPLOYERS.length===0){
+    host.innerHTML='<span class="muted">No employers are available yet.</span>';
+    return;
+  }
+  host.innerHTML=EMPLOYERS.map(e=>`<label><input type="checkbox" value="${escHtml(e.id)}"><span>${escHtml(e.name)}</span></label>`).join('');
+}
+
+function showUsersLoadError(message){
+  const rows=$('#user-rows');
+  if(rows){
+    rows.innerHTML=`<tr><td colspan="7" style="padding:16px;"><span style="color:#b5391f;font-weight:700;">Could not load users.</span> <span class="muted">${escHtml(message)}</span> <button class="btn btn-sm" style="margin-left:8px;" onclick="loadUsers()">Retry</button></td></tr>`;
+  }
+}
+
+async function boot(){
+  try{
+    ME=await getJson('/api/auth/me');
+    if(!ME||ME.role!=='ADMIN'){ location.href='/login'; return; }
+    renderNav();
+    EMPLOYERS=Array.isArray(ME.employers)?ME.employers:[];
+    renderEmpPick();
+    onRoleChange();
+    onAccessChange();
+    await Promise.allSettled([loadPartnersDropdown(),loadUsers(),loadRevokedUsers()]);
+  }catch(error){
+    console.error('[users] startup failed',error);
+    const host=$('#emp-pick');
+    if(host) host.innerHTML=`<span style="color:#b5391f;font-weight:700;">Could not load employers.</span> <span class="muted">${escHtml(error.message||error)}</span>`;
+    showUsersLoadError(error.message||String(error));
+  }
+}
+function renderNav(){
+  if(window.EmpowerPortalNav){
+    window.EmpowerPortalNav.render({me:ME,navSelector:'#portal-nav',accountSelector:'#portal-account',active:'users'});
+  }
+}
+function onRoleChange(){
+  const role=$('#n-role').value;
+  // admins see everything, so hide employer linking for admins
+  $('#emp-wrap').style.display = role==='ADMIN' ? 'none' : 'block';
+}
+function onAccessChange(){
+  const mode=document.querySelector('input[name=access]:checked').value;
+  $('#n-pass').style.display = mode==='temp' ? 'block' : 'none';
+}
+
+async function addUser(){
+  const msg=$('#add-msg'), box=$('#link-box'); msg.style.display='none'; box.style.display='none';
+  const role=$('#n-role').value;
+  const mode=document.querySelector('input[name=access]:checked').value;
+  const employerIds=[...document.querySelectorAll('#emp-pick input:checked')].map(c=>c.value);
+  const body={ name:$('#n-name').value, email:$('#n-email').value, role, employerIds:role==='ADMIN'?[]:employerIds };
+  const pid=$('#n-partner').value; if(pid) body.partnerId=pid;
+  if(mode==='temp'){ body.tempPassword=$('#n-pass').value; } else { body.sendSetupLink=true; }
+  const r=await fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d=await r.json();
+  if(!r.ok){ show(msg,'err',d.error||'Could not create user'); return; }
+  if(d.setupPath && d.emailSent){
+    show(msg,'ok','User created — a set-password email was sent to '+body.email+'.');
+  } else if(d.setupPath){
+    show(msg,'ok','User created, but the email could not be sent'+(d.emailError?(' ('+d.emailError+')'):'')+'. Share this link with them manually:');
+    box.style.display='block'; box.innerHTML='<b>Set-password link</b> (copy & send to the user):<br>'+location.origin+d.setupPath;
+  } else {
+    show(msg,'ok','User created.');
+  }
+  $('#n-name').value=''; $('#n-email').value=''; $('#n-pass').value=''; $('#n-partner').value='';
+  document.querySelectorAll('#emp-pick input:checked').forEach(c=>c.checked=false);
+  loadUsers();
+}
+
+async function loadPartnersDropdown(){
+  try{
+    const partners=await getJson('/api/admin/partners');
+    PARTNERS_LIST=Array.isArray(partners)?partners:[];
+    const sel=$('#n-partner');
+    if(!sel) return;
+    sel.innerHTML='<option value="">None (standard empower-fin branding)</option>'+
+      PARTNERS_LIST.map(p=>`<option value="${escHtml(p.id)}">${escHtml(p.displayName||p.name)}</option>`).join('');
+  }catch(error){
+    console.error('[users] partners load failed',error);
+  }
+}
+
+let USERS=[], PARTNERS_LIST=[];
+async function loadUsers(){
+  const rows=$('#user-rows');
+  if(rows) rows.innerHTML='<tr><td colspan="7" class="muted" style="padding:16px;">Loading users…</td></tr>';
+  try{
+    const users=await getJson('/api/users');
+    USERS=Array.isArray(users)?users:[];
+    if(!PARTNERS_LIST.length){
+      try{
+        const partners=await getJson('/api/admin/partners');
+        PARTNERS_LIST=Array.isArray(partners)?partners:[];
+      }catch(error){
+        console.error('[users] partners load failed',error);
+        PARTNERS_LIST=[];
+      }
+    }
+    if(!USERS.length){
+      if(rows) rows.innerHTML='<tr><td colspan="7" class="muted" style="padding:16px;">No users yet.</td></tr>';
+      return;
+    }
+    if(rows) rows.innerHTML=USERS.map(u=>{
+      const userEmployers=Array.isArray(u.employers)?u.employers:[];
+      const emps=u.role==='ADMIN'
+        ? '<span class="muted">All</span>'
+        : (userEmployers.map(e=>`<span class="chip">${escHtml(e.name)}</span>`).join('')||'<span class="muted">none</span>');
+      const partner=u.partner?`<span class="chip">${escHtml(u.partner.name)}</span>`:'<span class="muted">—</span>';
+      const status=!u.active?'<span class="tag off">disabled</span>':u.pendingSetup?'<span class="tag pend">pending setup</span>':'<span class="tag live">active</span>';
+      const id=escHtml(u.id);
+      const role=escHtml(String(u.role||'').replace('_',' '));
+      return `<tr id="row-${id}">
+        <td><b>${escHtml(u.name)}</b></td><td class="muted">${escHtml(u.email)}</td>
+        <td><span class="role ${escHtml(u.role)}">${role}</span></td>
+        <td>${emps}</td><td>${partner}</td><td>${status}</td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn-sm" onclick="editUser('${id}')">Edit</button>
+          <button class="btn btn-sm" onclick="toggleActive('${id}',${!u.active})">${u.active?'Disable':'Enable'}</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }catch(error){
+    console.error('[users] user list load failed',error);
+    showUsersLoadError(error.message||String(error));
+  }
+}
+
+function editUser(id){
+  const u=USERS.find(x=>x.id===id); if(!u) return;
+  // if an editor is already open, close it first
+  document.getElementById('editor-'+id)?.remove();
+  const empIds=new Set(u.employers.map(e=>e.id));
+  const empBoxes = EMPLOYERS.length
+    ? EMPLOYERS.map(e=>`<label style="display:inline-flex;align-items:center;gap:6px;margin:3px 12px 3px 0;font-weight:600;"><input type="checkbox" value="${e.id}" ${empIds.has(e.id)?'checked':''} style="width:auto;"> ${e.name}</label>`).join('')
+    : '<span class="muted">No employers yet.</span>';
+  const partnerOpts = '<option value="">None (standard branding)</option>'+
+    PARTNERS_LIST.map(p=>`<option value="${p.id}" ${u.partner&&u.partner.id===p.id?'selected':''}>${p.displayName||p.name}</option>`).join('');
+  const roleOpts = ['EMPLOYER_VIEW','PORTFOLIO_VIEW','ADMIN'].map(r=>`<option value="${r}" ${u.role===r?'selected':''}>${r.replace('_',' ')}</option>`).join('');
+  const tr=document.createElement('tr');
+  tr.id='editor-'+id;
+  tr.innerHTML=`<td colspan="7" style="background:#f7fafd;padding:16px 14px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:760px;">
+      <label style="font-size:12px;font-weight:700;color:#5b6b7a;">Full name
+        <input id="e-name-${id}" value="${u.name.replace(/"/g,'&quot;')}" style="display:block;width:100%;margin-top:4px;padding:8px 11px;border:1px solid #e8e1f7;border-radius:8px;font:inherit;">
+      </label>
+      <label style="font-size:12px;font-weight:700;color:#5b6b7a;">Role
+        <select id="e-role-${id}" onchange="document.getElementById('e-emp-wrap-${id}').style.display=this.value==='ADMIN'?'none':'block'" style="display:block;width:100%;margin-top:4px;padding:8px 11px;border:1px solid #e8e1f7;border-radius:8px;font:inherit;">${roleOpts}</select>
+      </label>
+      <label style="font-size:12px;font-weight:700;color:#5b6b7a;grid-column:span 2;">Channel partner
+        <select id="e-partner-${id}" style="display:block;width:100%;margin-top:4px;padding:8px 11px;border:1px solid #e8e1f7;border-radius:8px;font:inherit;">${partnerOpts}</select>
+      </label>
+    </div>
+    <div id="e-emp-wrap-${id}" style="margin-top:12px;${u.role==='ADMIN'?'display:none;':''}">
+      <div style="font-size:12px;font-weight:700;color:#5b6b7a;margin-bottom:5px;">Linked employers (which employers this user may see)</div>
+      <div style="border:1px solid #e8e1f7;border-radius:9px;padding:10px;background:#fff;">${empBoxes}</div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-primary btn-sm" onclick="saveUser('${id}')">Save changes</button>
+      <button class="btn btn-sm" onclick="document.getElementById('editor-${id}').remove()">Cancel</button>
+      <span id="e-msg-${id}" style="font-size:12.5px;"></span>
+    </div>
+  </td>`;
+  document.getElementById('row-'+id).after(tr);
+}
+
+async function saveUser(id){
+  const role=$('#e-role-'+id).value;
+  const employerIds=[...document.querySelectorAll('#e-emp-wrap-'+id+' input:checked')].map(c=>c.value);
+  const body={
+    name: $('#e-name-'+id).value.trim(),
+    role,
+    partnerId: $('#e-partner-'+id).value || null,
+    employerIds: role==='ADMIN' ? [] : employerIds,
+  };
+  const msg=$('#e-msg-'+id); msg.textContent='Saving…'; msg.style.color='#5b6b7a';
+  try{
+    const r=await fetch('/api/users/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok){ const d=await r.json().catch(()=>({})); msg.textContent='✕ '+(d.error||'save failed'); msg.style.color='#b5391f'; return; }
+    loadUsers();
+  }catch(e){ msg.textContent='✕ '+e.message; msg.style.color='#b5391f'; }
+}
+async function toggleActive(id,active){
+  const body={active};
+  if(!active){
+    const reason=prompt('Reason for deactivating this account? (shown to other admins in Past users)','');
+    if(reason===null) return; // cancelled
+    body.reason=reason.trim();
+  }
+  await fetch('/api/users/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  loadUsers();
+  loadRevokedUsers();
+}
+
+// ── past users (admin-only): who once had access and why it was revoked ──
+async function loadRevokedUsers(){
+  const rows=$('#revoked-rows');
+  if(!rows) return;
+  try{
+    const revoked=await getJson('/api/admin/users/revoked');
+    if(!revoked.length){ rows.innerHTML='<tr><td colspan="6" class="muted" style="padding:16px;">No past users — nobody has been deactivated yet.</td></tr>'; return; }
+    rows.innerHTML=revoked.map(u=>{
+      const id=escHtml(u.id);
+      const role=escHtml(String(u.role||'').replace('_',' '));
+      const by=u.revokedBy==='self' ? '<span class="chip">Self-deactivated</span>' : escHtml(u.revokedBy||'—');
+      return `<tr>
+        <td><b>${escHtml(u.name)}</b><div class="muted">${escHtml(u.email)}</div></td>
+        <td><span class="role ${escHtml(u.role)}">${role}</span></td>
+        <td>${escHtml(u.revokedReason||'—')}</td>
+        <td>${by}</td>
+        <td class="muted">${u.revokedAt?new Date(u.revokedAt).toLocaleDateString():'—'}</td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn-sm" onclick="toggleActive('${id}',true)">Reactivate</button>
+          <button class="btn btn-sm" style="color:#b5391f;" onclick="deleteUserForever('${id}','${escHtml(u.name).replace(/'/g,"")}')">Delete permanently</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }catch(error){
+    rows.innerHTML=`<tr><td colspan="6" style="padding:16px;color:#b5391f;">Could not load past users. ${escHtml(error.message||error)}</td></tr>`;
+  }
+}
+async function deleteUserForever(id,name){
+  if(!confirm(`Permanently delete "${name}"? This removes their account entirely and cannot be undone.`)) return;
+  const r=await fetch('/api/users/'+id,{method:'DELETE'});
+  if(!r.ok){ const d=await r.json().catch(()=>({})); alert(d.error||'Could not delete this user.'); return; }
+  loadRevokedUsers();
+}
+function show(el,t,m){ el.className='msg '+t; el.textContent=m; el.style.display='block'; }
+boot();
+</script>
+</body>
+</html>

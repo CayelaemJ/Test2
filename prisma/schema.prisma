@@ -1,0 +1,917 @@
+// ════════════════════════════════════════════════════════════════════
+//  EMPOWER-FIN DASHBOARD PORTAL — DATED INTEGRATION DATA MODEL
+//
+//  The model separates three time concepts used by the dashboard:
+//    • business events inside a selected window (journeys, ratings, referrals, EWA, etc.)
+//    • effective/observed state as at the window end (workforce, debt, cover)
+//    • source_updated_at for incremental transport and last-write ordering
+//
+//  Current projection tables keep the application fast; immutable observation
+//  tables retain history so past periods are never rebuilt from today's state.
+//  ScoreSnapshot stores complete calculated payloads and never relies on demo data.
+// ════════════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────── 1. Tenancy ───────────────────────────
+
+model Employer {
+  // External, stable employer_ref supplied by the integration (not a generated ID).
+  id                String   @id
+  name              String
+  // Current cached headcount. Historical headcount is preserved in
+  // EmployerHeadcountSnapshot and selected as-at the dashboard end date.
+  eligibleCount     Int      @default(0)
+  eligibleCountAsAt DateTime?
+  partnerId         String?
+  sourceUpdatedAt   DateTime @default(now())
+  sourceDeletedAt   DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now()) @updatedAt
+
+  partner            Partner?                    @relation(fields: [partnerId], references: [id])
+  sites              Site[]
+  employees          Employee[]
+  headcountSnapshots EmployerHeadcountSnapshot[]
+  scoreSnapshots     ScoreSnapshot[]
+  scoreWeights       ScoreWeight[]
+  targets            AchievableTarget[]
+  chatSessions       ChatSession[]
+  userLinks          UserEmployer[]
+  salaryAdvances     SalaryAdvance[]
+  reportSchedules    ReportSchedule[]
+
+  @@index([name])
+  @@index([sourceUpdatedAt])
+  @@index([sourceDeletedAt])
+}
+
+// Effective-dated employer headcount. This is the authoritative denominator for
+// historical score calculations and avoids applying today's headcount to old months.
+model EmployerHeadcountSnapshot {
+  id              String   @id @default(cuid())
+  employerId      String
+  asOfDate        DateTime
+  eligibleCount   Int
+  sourceUpdatedAt DateTime @default(now())
+  sourceDeletedAt DateTime?
+  importBatchId   String?
+  createdAt       DateTime @default(now())
+
+  employer Employer @relation(fields: [employerId], references: [id], onDelete: Cascade)
+
+  @@unique([employerId, asOfDate])
+  @@index([employerId, asOfDate])
+  @@index([sourceUpdatedAt])
+}
+
+
+model Site {
+  id         String   @id @default(cuid())
+  employerId String
+  name       String
+
+  employer  Employer   @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  employees Employee[]
+
+  @@unique([employerId, name])
+  @@index([employerId])
+}
+
+enum IncomeBand {
+  UNDER_5K
+  BAND_5_10K
+  BAND_10_20K
+  BAND_20_40K
+  OVER_40K
+}
+
+model Employee {
+  id              String     @id @default(cuid())
+  employerId      String
+  siteId          String?
+  // external payroll id, never PII in the clear in prod (tokenise upstream)
+  payrollRef      String
+  incomeBand      IncomeBand?
+  active          Boolean    @default(true)
+  // Date this current site/income/eligibility projection was observed.
+  observedAt      DateTime   @default(now())
+  // Business-effective workforce dates. Null means the source did not provide
+  // historical coverage; the dashboard then treats the row as a current baseline.
+  eligibleFrom    DateTime?
+  eligibleTo      DateTime?
+  sourceUpdatedAt DateTime   @default(now())
+  sourceDeletedAt DateTime?
+  importBatchId   String?
+  updatedAt       DateTime @default(now()) @updatedAt
+
+  employer     Employer      @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  site         Site?         @relation(fields: [siteId], references: [id])
+  platformUser PlatformUser?
+  chatSessions ChatSession[]
+  salaryAdvances SalaryAdvance[]
+  versions       EmployeeVersion[]
+
+  @@unique([employerId, payrollRef])
+  @@index([employerId])
+  @@index([siteId])
+  @@index([eligibleFrom, eligibleTo])
+  @@index([observedAt])
+  @@index([sourceUpdatedAt])
+  @@index([sourceDeletedAt])
+}
+
+// Immutable workforce observations retain the site, income band and eligibility
+// that were true at each observation date. Employee is the latest projection.
+model EmployeeVersion {
+  id              String     @id @default(cuid())
+  employeeId      String
+  observedAt      DateTime
+  siteName        String?
+  incomeBand      IncomeBand?
+  active          Boolean    @default(true)
+  eligibleFrom    DateTime
+  eligibleTo      DateTime?
+  isDeleted       Boolean    @default(false)
+  sourceUpdatedAt DateTime
+  importBatchId   String?
+  createdAt       DateTime   @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, observedAt])
+  @@index([employeeId, observedAt])
+  @@index([observedAt])
+}
+
+// ──────────────────────── 2. Programme ────────────────────────
+// An Employee who has created/activated an account becomes a PlatformUser.
+// "enrolled" = account exists; "activated" = started >=1 journey.
+
+model PlatformUser {
+  id               String    @id @default(cuid())
+  employeeId       String    @unique
+  enrolledAt       DateTime  @default(now())
+  // first journey start — null until activated. Cached for fast funnel queries.
+  activatedAt      DateTime?
+  // credit-profile visibility: we can only see debt for users who logged in.
+  hasCreditProfile Boolean   @default(false)
+  sourceUpdatedAt  DateTime  @default(now())
+  sourceDeletedAt  DateTime?
+  importBatchId    String?
+  updatedAt        DateTime @default(now()) @updatedAt
+
+  employee     Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  journeys     Journey[]
+  debtAccounts DebtAccount[]
+  policies     InsurancePolicy[]
+  ratings      Rating[]
+  referrals    Referral[]
+
+  @@index([enrolledAt])
+  @@index([activatedAt])
+  @@index([sourceUpdatedAt])
+  @@index([sourceDeletedAt])
+}
+
+// ──────────────────────── 3. Journeys ────────────────────────
+
+enum JourneyType {
+  CREDIT_LIFE   // credit life replacement   -> cashflow + insurance efficiency
+  FUNERAL       // funeral consolidation     -> cashflow + insurance efficiency
+  SHORT_TERM    // short-term insurance audit -> insurance efficiency
+  ARREARS       // arrears resolution        -> debt risk
+  PRESCRIBED    // prescribed debt challenge -> debt (challenged)
+  EMERGENCY     // emergency cash assistance
+}
+
+enum JourneyStatus {
+  STARTED
+  IN_PROGRESS
+  COMPLETED       // reached a concrete outcome (a "fix")
+  GUIDANCE_ONLY   // no affordable arrangement -> educated to self-manage
+  ABANDONED
+}
+
+model Journey {
+  id                 String        @id @default(cuid())
+  platformUserId     String
+  type               JourneyType
+  status             JourneyStatus @default(STARTED)
+  startedAt          DateTime      @default(now())
+  completedAt        DateTime?
+
+  // outcome figures populated when a journey produces a result
+  monthlySavingCents Int?
+  balanceImpactCents Int?
+  sourceUpdatedAt    DateTime      @default(now())
+  sourceDeletedAt    DateTime?
+  importBatchId      String?
+  updatedAt          DateTime @default(now()) @updatedAt
+
+  platformUser PlatformUser   @relation(fields: [platformUserId], references: [id], onDelete: Cascade)
+  events       JourneyEvent[]
+  debtAccounts DebtAccount[]
+
+  @@index([platformUserId])
+  @@index([type, status])
+  @@index([startedAt])
+  @@index([completedAt])
+  @@index([sourceUpdatedAt])
+  @@index([sourceDeletedAt])
+}
+
+// Optional internal append-only journey audit log. The v2 integration contract
+// supplies Journey state directly; this table is available for richer source events.
+// Never UPDATE a row here — only insert.
+model JourneyEvent {
+  id        String      @id @default(cuid())
+  journeyId String
+  kind      String      // e.g. "started", "arrangement_dispatched", "creditor_conceded"
+  payload   Json        // event-specific detail
+  occurredAt DateTime   @default(now())
+
+  journey Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+
+  @@index([journeyId])
+  @@index([kind])
+  @@index([occurredAt])
+}
+
+// ──────────────────────── 4. Debt detail ────────────────────────
+
+enum CreditType {
+  BANK_LOAN
+  RETAIL_STORE
+  MICROLOAN
+  OTHER_UNSECURED
+}
+
+enum DebtState {
+  NONE
+  ACTIVE_INTERVENTION  // arrangement actually dispatched
+  CHALLENGED           // prescription challenge lodged
+  GUIDED               // self-managed via prescription education
+}
+
+enum ChallengeStatus {
+  IDENTIFIED
+  LETTER_SENT
+  CREDITOR_CONCEDED
+  WRITTEN_OFF
+}
+
+model DebtAccount {
+  id               String          @id @default(cuid())
+  platformUserId   String
+  journeyId        String?
+  creditorName     String
+  creditType       CreditType
+  balanceCents     Int
+  inArrears        Boolean         @default(false)
+  state            DebtState       @default(NONE)
+  challengeStatus  ChallengeStatus?
+  // Date/time at which this balance and state were observed by the source.
+  observedAt       DateTime        @default(now())
+  closedAt         DateTime?
+  sourceUpdatedAt  DateTime        @default(now())
+  sourceDeletedAt  DateTime?
+  importBatchId    String?
+  updatedAt        DateTime @default(now()) @updatedAt
+
+  platformUser PlatformUser        @relation(fields: [platformUserId], references: [id], onDelete: Cascade)
+  journey      Journey?            @relation(fields: [journeyId], references: [id])
+  versions     DebtAccountVersion[]
+
+  @@index([platformUserId])
+  @@index([creditorName])
+  @@index([state])
+  @@index([inArrears])
+  @@index([observedAt])
+  @@index([sourceUpdatedAt])
+  @@index([sourceDeletedAt])
+}
+
+// Immutable observations used for exact as-at debt reporting. The current
+// DebtAccount row is a convenience projection of the latest observation.
+model DebtAccountVersion {
+  id               String          @id @default(cuid())
+  accountId        String
+  observedAt       DateTime
+  creditorName     String
+  creditType       CreditType
+  balanceCents     Int
+  inArrears        Boolean
+  state            DebtState
+  challengeStatus  ChallengeStatus?
+  journeyId        String?
+  closedAt         DateTime?
+  isDeleted        Boolean         @default(false)
+  sourceUpdatedAt  DateTime
+  importBatchId    String?
+  createdAt        DateTime        @default(now())
+
+  account DebtAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, observedAt])
+  @@index([accountId, observedAt])
+  @@index([observedAt])
+}
+
+
+// ──────────────────────── 5. Insurance cover ────────────────────────
+
+enum PolicyType {
+  CREDIT_LIFE
+  FUNERAL
+  SHORT_TERM
+}
+
+model InsurancePolicy {
+  id               String     @id @default(cuid())
+  platformUserId   String
+  type             PolicyType
+  premiumCents     Int
+  isWasteful       Boolean    @default(false)
+  isResolved       Boolean    @default(false)
+  // Observation/effective dates make historical insurance filters auditable.
+  observedAt       DateTime   @default(now())
+  effectiveFrom    DateTime?
+  effectiveTo      DateTime?
+  resolvedAt       DateTime?
+  sourceUpdatedAt  DateTime   @default(now())
+  sourceDeletedAt  DateTime?
+  importBatchId    String?
+  updatedAt        DateTime @default(now()) @updatedAt
+
+  platformUser PlatformUser             @relation(fields: [platformUserId], references: [id], onDelete: Cascade)
+  versions     InsurancePolicyVersion[]
+
+  @@index([platformUserId])
+  @@index([isWasteful, isResolved])
+  @@index([observedAt])
+  @@index([effectiveFrom, effectiveTo])
+  @@index([sourceUpdatedAt])
+  @@index([sourceDeletedAt])
+}
+
+// Immutable policy observations. Historical views select the latest version at
+// or before the dashboard end date and never substitute today's policy state.
+model InsurancePolicyVersion {
+  id              String     @id @default(cuid())
+  policyId        String
+  observedAt      DateTime
+  type            PolicyType
+  premiumCents    Int
+  isWasteful      Boolean
+  isResolved      Boolean
+  effectiveFrom   DateTime?
+  effectiveTo     DateTime?
+  resolvedAt      DateTime?
+  isDeleted       Boolean    @default(false)
+  sourceUpdatedAt DateTime
+  importBatchId   String?
+  createdAt       DateTime   @default(now())
+
+  policy InsurancePolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+
+  @@unique([policyId, observedAt])
+  @@index([policyId, observedAt])
+  @@index([observedAt])
+}
+
+
+// ──────────────────────── 6. Feedback ────────────────────────
+
+model Rating {
+  id               String    @id @default(cuid())
+  platformUserId   String
+  journeyType      JourneyType?
+  stars            Int
+  createdAt        DateTime  @default(now())
+  sourceUpdatedAt  DateTime  @default(now())
+  sourceDeletedAt  DateTime?
+  importBatchId    String?
+  updatedAt        DateTime @default(now()) @updatedAt
+
+  platformUser PlatformUser @relation(fields: [platformUserId], references: [id], onDelete: Cascade)
+
+  @@index([platformUserId])
+  @@index([createdAt])
+  @@index([sourceUpdatedAt])
+  @@index([sourceDeletedAt])
+}
+
+model ChatSession {
+  id                 String      @id @default(cuid())
+  employerId         String
+  employeeId         String?
+  journeyType        JourneyType?
+  resolvedInChat     Boolean     @default(false)
+  firstReplySeconds  Int?
+  satisfaction       Int?
+  sentiment          Float?
+  theme              String?
+  primaryQuestion    String?
+  startedAt          DateTime    @default(now())
+  sourceUpdatedAt    DateTime    @default(now())
+  sourceDeletedAt    DateTime?
+  importBatchId      String?
+  updatedAt          DateTime @default(now()) @updatedAt
+
+  employer Employer @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  employee Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employerId])
+  @@index([employeeId])
+  @@index([startedAt])
+  @@index([sourceUpdatedAt])
+  @@index([sourceDeletedAt])
+  @@index([importBatchId])
+}
+
+// ──────────────────────── Referrals (organic sharing) ────────────────────────
+// One row per share/referral action by a platform user. Drives the organic
+// referral rate and implied reach on the opportunities panel.
+model Referral {
+  id               String    @id @default(cuid())
+  platformUserId   String
+  channel          String?
+  sharedAt         DateTime  @default(now())
+  converted        Boolean   @default(false)
+  convertedAt      DateTime?
+  sourceUpdatedAt  DateTime  @default(now())
+  sourceDeletedAt  DateTime?
+  importBatchId    String?
+  updatedAt        DateTime @default(now()) @updatedAt
+
+  platformUser PlatformUser @relation(fields: [platformUserId], references: [id], onDelete: Cascade)
+
+  @@index([platformUserId])
+  @@index([sharedAt])
+  @@index([sourceUpdatedAt])
+  @@index([sourceDeletedAt])
+  @@index([importBatchId])
+}
+
+// ──────────────────────── 7. Derived: the score story ────────────────────────
+// One row per employer per period. This is what makes "64 -> 70" possible:
+// we never recompute history, we snapshot it. The four sub-scores are stored
+// so the breakdown is auditable forever, even if weights/targets change later.
+
+model ScoreSnapshot {
+  id         String   @id @default(cuid())
+  employerId String
+  period     String   // ISO period key, e.g. "2026-05" (monthly)
+  computedAt DateTime @default(now())
+  rangeStart DateTime?
+  rangeEnd   DateTime?
+  asAt       DateTime?
+  payloadVersion Int @default(3)
+
+  optimiseScore Int
+  rawScore      Float
+
+  engagementScore Int
+  cashflowScore   Int
+  debtRiskScore   Int
+  insuranceScore  Int
+
+  engagementWeight Float
+  cashflowWeight   Float
+  debtRiskWeight   Float
+  insuranceWeight  Float
+
+  payload Json
+
+  employer Employer @relation(fields: [employerId], references: [id], onDelete: Cascade)
+
+  @@unique([employerId, period])
+  @@index([employerId])
+  @@index([period])
+  @@index([asAt])
+}
+
+// ──────────────────────── Early Wage Access ────────────────────────
+// One row per salary advance. Employer-level activity is matched by employer_ref
+// and payroll_ref so site and income cohorts are applied consistently. Counts
+// unique EWA client ids, totals and averages; only FINALISED advances contribute.
+
+enum AdvanceStatus {
+  FINALISED
+  PENDING
+  DECLINED
+  CANCELLED
+}
+
+model SalaryAdvance {
+  id               String        @id @default(cuid())
+  advanceRef       String        @unique
+  employerId       String
+  employeeId       String?
+  clientId         String
+  amountCents      Int
+  status           AdvanceStatus @default(FINALISED)
+  bankVerified     Boolean       @default(true)
+  blacklisted      Boolean       @default(false)
+  advancedAt       DateTime
+  sourceUpdatedAt  DateTime      @default(now())
+  sourceDeletedAt  DateTime?
+  importBatchId    String?
+  updatedAt        DateTime @default(now()) @updatedAt
+
+  employer Employer @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  employee Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employerId])
+  @@index([employeeId])
+  @@index([clientId])
+  @@index([status])
+  @@index([advancedAt])
+  @@index([sourceUpdatedAt])
+  @@index([sourceDeletedAt])
+  @@index([importBatchId])
+}
+
+// ──────────────────────── External Source Integration ────────────────────────
+// Stores API or direct read-only SQL source settings for scheduled empower-fin Dashboard Portal pulls.
+// Single row (id = "default"). Secrets remain server-side only.
+
+model IntegrationConfig {
+  id                        String    @id @default("default")
+  enabled                   Boolean   @default(false)
+  sourceMode                String    @default("API")
+
+  // API source settings
+  baseUrl                   String?
+  authToken                 String?
+
+  // Direct read-only SQL source settings. The password may instead be supplied
+  // as SOURCE_SQL_PASSWORD so production secrets do not need to be stored here.
+  sqlDialect                String    @default("POSTGRESQL")
+  sqlHost                   String?
+  sqlPort                   Int?
+  sqlDatabase               String?
+  sqlSchema                 String?
+  sqlUsername               String?
+  sqlPassword               String?
+  sqlSsl                    Boolean   @default(true)
+  sqlTrustServerCertificate Boolean   @default(false)
+  sqlViewPrefix             String    @default("v_")
+  sqlQueryTimeoutMs         Int       @default(60000)
+  sqlMaxRowsPerReport       Int       @default(250000)
+
+  scheduleHours             Int       @default(24)
+  lastSyncAt                DateTime?
+  lastSuccessfulSyncAt      DateTime?
+  lastSyncStatus            String?
+  lastSyncNote              String?
+  updatedAt                 DateTime @default(now()) @updatedAt
+}
+
+model SyncLog {
+  id          String   @id @default(cuid())
+  startedAt   DateTime @default(now())
+  throughAt   DateTime?
+  finishedAt  DateTime?
+  status      String   @default("RUNNING")
+  trigger     String   @default("manual")
+  summary     Json?
+  note        String?
+
+  @@index([startedAt])
+}
+
+// Per-report incremental cursor. A failed report does not advance its cursor,
+// so a partial sync cannot silently skip changes on the next run.
+model IntegrationCursor {
+  reportKey           String   @id
+  lastAttemptAt       DateTime?
+  lastSuccessAt       DateTime?
+  lastSourceUpdatedAt DateTime?
+  lastStatus          String?
+  lastNote            String?
+  updatedAt           DateTime @default(now()) @updatedAt
+}
+
+
+// ──────────────────────── Channel Partners (white-label) ────────────────────────
+// A channel partner (broker / distributor) that manages a set of employers and
+// has its own users. Carries the white-label branding applied after login.
+
+model Partner {
+  id          String   @id @default(cuid())
+  name        String   @unique // internal/display name, e.g. "Acme Financial"
+  slug        String   @unique // url-safe key for partner-specific entry, e.g. "acme"
+  displayName String?  // brand name shown in the header (defaults to name)
+  // branding — all optional; sensible empower-fin defaults apply when blank
+  primaryColor   String?  // hex, e.g. "31207C"
+  accentColor    String?  // hex, e.g. "0078C7"
+  navyColor      String?  // hex deep tone
+  logoDataUrl    String?  @db.Text // base64 data URL of the partner logo
+  tagline        String?  // optional sub-line under the title
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  users     User[]
+  employers Employer[]
+}
+
+// ──────────────────────── Auth & access control ────────────────────────
+// Roles gate which MODULES a user can reach. Employer/portfolio scope is
+// controlled by the UserEmployer link table — a user sees only the employers
+// linked to them (admins bypass the link and see everything). This same link
+// is what a future broker login will use.
+
+enum Role {
+  ADMIN          // everything: admin console, all dashboards, portfolio, user mgmt
+  EMPLOYER_VIEW  // dashboard for linked employers only
+  PORTFOLIO_VIEW // portfolio across linked employers only
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  role          Role     @default(EMPLOYER_VIEW)
+  passwordHash  String?  // null until a set-password link is used
+  active        Boolean  @default(true)
+  // one-time token for "send link to set password"
+  setupToken    String?  @unique
+  setupExpires  DateTime?
+  createdAt     DateTime @default(now())
+  createdBy     String?
+  partnerId     String?
+
+  // ── revocation / self-service deactivation audit trail ──
+  // Set whenever `active` flips false (self-service or admin-initiated) and
+  // cleared on reactivation. Powers the admin-only "Past users" view — the
+  // record is kept (not hard-deleted) so admins can see who once had access
+  // and why it was revoked. Hard delete is a separate, explicit admin action.
+  revokedAt     DateTime?
+  revokedReason String?
+  revokedBy     String?  // email of the admin who revoked, or "self" for self-service
+  deletedAt     DateTime? // soft marker set just before a permanent delete completes
+
+  partner  Partner?       @relation(fields: [partnerId], references: [id])
+  links    UserEmployer[]
+  sessions Session[]
+  reportSchedules ReportSchedule[]
+  sectionAccess UserSectionAccess[]
+  analyticsEvents AnalyticsEvent[]
+
+  @@index([email])
+}
+
+// ──────────────────────── Engagement analytics ────────────────────────
+// Lightweight client-reach tracking: how many people engage with the portal,
+// which pages they visit, and how far they scroll. Intentionally minimal —
+// no third-party tracking, no PII beyond the linked user.
+enum AnalyticsEventType {
+  PAGEVIEW
+  SCROLL_DEPTH
+  SESSION_END
+}
+
+model AnalyticsEvent {
+  id        String             @id @default(cuid())
+  userId    String?
+  type      AnalyticsEventType
+  path      String             // e.g. "/dashboard"
+  value     Int?               // scroll % (0-100) for SCROLL_DEPTH, seconds for SESSION_END
+  partnerId String?            // channel partner the user was branded as, if any, at event time
+  createdAt DateTime           @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// many-to-many: which employers a user may see
+model UserEmployer {
+  id         String @id @default(cuid())
+  userId     String
+  employerId String
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employer Employer @relation(fields: [employerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, employerId])
+  @@index([userId])
+  @@index([employerId])
+}
+
+// ──────────────────────── Per-section dashboard permissions ────────────────────────
+// Controls visibility of individual dashboard sections (e.g. "Voice of the employee"
+// while it's still in development), independent of the coarser Role/UserEmployer gates.
+//
+// A section is visible to a user if:
+//   • the user is ADMIN (admins can always preview unfinished sections), OR
+//   • there is a UserSectionAccess override for that user + section (explicit grant), OR
+//   • the section is enabled AND the user's role is in allowedRoles
+model DashboardSection {
+  key          String   @id            // stable key referenced by the frontend, e.g. "voiceOfEmployee"
+  label        String                  // human-readable name shown in the admin UI
+  enabled      Boolean  @default(true) // master switch — set false while a feature is unfinished
+  allowedRoles String                  // comma-separated Role values, e.g. "ADMIN,EMPLOYER_VIEW,PORTFOLIO_VIEW"
+  updatedAt    DateTime @updatedAt
+
+  overrides UserSectionAccess[]
+}
+
+// explicit per-user grant, independent of role — e.g. give a beta tester early access
+// to a section that's otherwise disabled for everyone else
+model UserSectionAccess {
+  id         String @id @default(cuid())
+  userId     String
+  sectionKey String
+
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  section DashboardSection @relation(fields: [sectionKey], references: [key], onDelete: Cascade)
+
+  @@unique([userId, sectionKey])
+  @@index([userId])
+  @@index([sectionKey])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+
+// ──────────────────────── System email & scheduled reports ────────────────────────
+// SMTP settings are configured by an administrator and used for scheduled report
+// delivery. Secrets are server-side only and are never returned to the browser.
+
+model SystemEmailConfig {
+  id                      String   @id @default("default")
+  smtpHost                String?
+  smtpPort                Int      @default(587)
+  smtpSecure              Boolean  @default(false)
+  smtpRequireTls          Boolean  @default(true)
+  smtpRejectUnauthorized  Boolean  @default(true)
+  smtpUsername            String?
+  smtpPassword            String?
+  fromName                String   @default("empower-fin Dashboard Portal")
+  fromEmail               String?
+  replyTo                 String?
+  defaultTimezone         String   @default("Africa/Johannesburg")
+  portalBaseUrl           String?
+  lastTestAt              DateTime?
+  lastTestStatus          String?
+  lastTestNote            String?
+  updatedAt               DateTime @default(now()) @updatedAt
+}
+
+enum ReportFrequency {
+  ONCE
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+model ReportSchedule {
+  id                  String          @id @default(cuid())
+  userId              String
+  employerId          String
+  name                String
+  frequency           ReportFrequency
+  timezone            String          @default("Africa/Johannesburg")
+  sendTime            String          @default("08:00")
+  dayOfWeek           Int?
+  dayOfMonth          Int?
+  onceDate            DateTime?
+  filters             Json
+  recipients          Json
+  active              Boolean         @default(true)
+  nextRunAt           DateTime
+  lastRunAt           DateTime?
+  lastSentAt          DateTime?
+  lastStatus          String?
+  lastError           String?
+  consecutiveFailures Int             @default(0)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @default(now()) @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employer Employer @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  deliveries ReportDeliveryLog[]
+
+  @@index([userId])
+  @@index([employerId])
+  @@index([active, nextRunAt])
+}
+
+model ReportDeliveryLog {
+  id             String   @id @default(cuid())
+  scheduleId     String?
+  triggeredBy    String   @default("scheduled")
+  status         String
+  recipients     Json
+  subject        String?
+  filters        Json?
+  sentAt         DateTime @default(now())
+  error          String?
+
+  schedule ReportSchedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+
+  @@index([scheduleId])
+  @@index([sentAt])
+  @@index([status])
+}
+
+// ──────────────────────── Import tracking (admin module) ────────────────────────
+// Every upload is a Batch. We record what was loaded so the admin can see
+// history and roll a batch back. Each committed row links to its batch via
+// `importBatchId` on the target models (added below), enabling undo.
+
+enum ImportStatus {
+  UPLOADED    // file received, not yet validated
+  VALIDATED   // passed validation, staged, awaiting commit
+  COMMITTED   // written to the live tables
+  FAILED      // validation failed
+  REVERTED    // rolled back by an admin
+}
+
+model ImportBatch {
+  id            String       @id @default(cuid())
+  reportKey     String
+  employerRef   String?
+  filename      String
+  fileFormat    String
+  status        ImportStatus @default(UPLOADED)
+  rowCount      Int          @default(0)
+  errorCount    Int          @default(0)
+  insertedCount Int         @default(0)
+  updatedCount  Int          @default(0)
+  deletedCount  Int          @default(0)
+  errors        Json?
+  stagedRows    Json?
+  uploadedBy    String?
+  sourceSince   DateTime?
+  sourceThrough DateTime?
+  uploadedAt    DateTime     @default(now())
+  committedAt   DateTime?
+  revertedAt    DateTime?
+
+  @@index([reportKey])
+  @@index([status])
+  @@index([uploadedAt])
+}
+
+// ──────────────────────── 8. Config: actuarial constants ────────────────────────
+// Weights and "achievable" targets are the only judgement in the model.
+// Held per-employer (override) with system defaults, and versioned by
+// effectiveFrom so a change never silently rewrites history.
+
+enum ScoreDriver {
+  ENGAGEMENT
+  CASHFLOW
+  DEBT_RISK
+  INSURANCE
+}
+
+model ScoreWeight {
+  id         String      @id @default(cuid())
+  employerId String?     // null = system default
+  driver     ScoreDriver
+  weight     Float        // 0..1, the four must sum to 1.0
+  effectiveFrom DateTime  @default(now())
+
+  employer Employer? @relation(fields: [employerId], references: [id], onDelete: Cascade)
+
+  @@index([employerId, driver, effectiveFrom])
+}
+
+model AchievableTarget {
+  id         String      @id @default(cuid())
+  employerId String?     // null = system default
+  driver     ScoreDriver
+  // the "achievable" denominator inputs, e.g. total savings still achievable.
+  // stored as Json so each driver can carry its own shape.
+  config     Json
+  effectiveFrom DateTime @default(now())
+
+  employer Employer? @relation(fields: [employerId], references: [id], onDelete: Cascade)
+
+  @@index([employerId, driver, effectiveFrom])
+}

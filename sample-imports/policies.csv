@@ -1,0 +1,2 @@
+policy_ref,employer_ref,payroll_ref,observed_at,effective_from,effective_to,resolved_at,type,premium_rand,is_wasteful,is_resolved,source_updated_at,is_deleted
+POL-7781,VIG,EMP-004821,2026-03-31,2024-09-01,2026-04-30,2026-03-20,FUNERAL,189.00,true,true,2026-04-01T08:00:00Z,false

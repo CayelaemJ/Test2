@@ -1,0 +1,2 @@
+employer_ref,payroll_ref,observed_at,site_name,income_band,eligible_from,eligible_to,active,source_updated_at,is_deleted
+VIG,EMP-004821,2026-03-31,Secunda Site,BAND_10_20K,2025-11-01,2026-07-31,true,2026-04-01T08:00:00Z,false

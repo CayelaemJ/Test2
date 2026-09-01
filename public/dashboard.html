@@ -1,0 +1,2726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/portal-nav-v054.css?v=0.5.4">
+<link rel="stylesheet" href="/static/ui-enhance-v1.css?v=1">
+<title>empower-fin Dashboard Portal — Employer Insights</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+
+  :root{
+    --blue:#b15be8;
+    --blue-d:#8e42bd;
+    --navy:#32217c;
+    --navy-deep:#0d2a47;
+    --ice:#f3efff;
+    --ice-2:#f4f9fd;
+    --line:#e8e1f7;
+    --line-soft:#f7f4ff;
+    --ink:#0f2438;
+    --grey:#5b6b7a;
+    --grey-l:#8497a7;
+    --green:#1fa463;
+    --green-soft:#e7f7ef;
+    --amber:#e8910c;
+    --amber-soft:#fdf3e2;
+    --red:#e0492f;
+    --white:#fff;
+    --shadow:0 1px 2px rgba(13,42,71,.04), 0 8px 24px rgba(13,42,71,.06);
+    --shadow-lg:0 2px 4px rgba(13,42,71,.05), 0 20px 48px rgba(13,42,71,.10);
+    --radius:18px;
+    --radius-sm:13px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+  body{
+    font-family:'Manrope',system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(0,120,199,.07), transparent 60%),
+      radial-gradient(900px 500px at -5% 110%, rgba(0,58,102,.06), transparent 55%),
+      #f3f7fb;
+    min-height:100vh;
+  }
+  .wrap{max-width:1280px;margin:0 auto;padding:0 28px 64px;}
+
+  /* ── top bar ───────────────────────────────────────── */
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    background:linear-gradient(180deg, rgba(243,247,251,.92), rgba(243,247,251,.78));
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{max-width:1280px;margin:0 auto;padding:0 28px;height:68px;display:flex;align-items:center;gap:18px;}
+  .logo{display:flex;align-items:center;gap:11px;}
+  .logo svg{display:block;}
+  .logo-text{font-weight:800;font-size:17px;letter-spacing:-.3px;color:var(--navy);}
+  .logo-text .opt{color:var(--blue);}
+  .topbar-divider{width:1px;height:26px;background:var(--line);}
+  .audience-switch{display:flex;gap:4px;background:var(--ice);border:1px solid var(--line);border-radius:11px;padding:3px;}
+  .audience-switch button{
+    border:none;background:none;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--grey);
+    padding:7px 15px;border-radius:8px;cursor:pointer;transition:.16s;letter-spacing:.01em;
+  }
+  .audience-switch button.on{background:var(--white);color:var(--navy);box-shadow:0 1px 3px rgba(13,42,71,.1);}
+  .topbar-spacer{flex:1;}
+  .topbar-meta{display:flex;align-items:center;gap:16px;}
+  .nav-inline{display:flex;align-items:center;gap:4px;}
+  .nav-link{font-size:12.5px;font-weight:700;color:var(--grey);text-decoration:none;padding:6px 11px;border-radius:9px;transition:.14s;white-space:nowrap;}
+  .nav-link:hover{background:var(--ice);color:var(--navy);}
+  .nav-emp{font:600 12.5px 'Manrope',sans-serif;border:1px solid var(--line);border-radius:9px;padding:6px 10px;background:#fafcfe;color:var(--navy);cursor:pointer;max-width:200px;}
+  .nav-who{display:flex;align-items:center;gap:8px;}
+  .data-fresh{font-size:11.5px;color:var(--grey-l);font-weight:600;display:flex;align-items:center;gap:6px;}
+  .data-fresh .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-soft);}
+  .data-fresh.is-error{color:var(--red);}
+  .data-fresh.is-error .dot{background:var(--red);box-shadow:0 0 0 3px var(--red-soft);}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--navy));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;}
+
+  /* ── header block ──────────────────────────────────── */
+  .head{padding:34px 0 22px;display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap;}
+  .head-eyebrow{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--blue);margin-bottom:9px;}
+  .head h1{font-family:'Fraunces',serif;font-weight:600;font-size:38px;line-height:1.05;letter-spacing:-.8px;color:var(--navy);}
+  .head h1 .emp{color:var(--ink);}
+  .head-sub{margin-top:11px;font-size:14.5px;color:var(--grey);max-width:62ch;line-height:1.55;}
+  .head-actions{display:flex;gap:10px;}
+  .btn{font-family:inherit;font-weight:700;font-size:13px;border-radius:11px;padding:11px 17px;cursor:pointer;border:1px solid var(--line);background:var(--white);color:var(--navy);transition:.16s;box-shadow:var(--shadow);display:inline-flex;align-items:center;gap:8px;}
+  .btn:hover{border-color:var(--blue);color:var(--blue);}
+  .btn-primary{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .btn-primary:hover{background:var(--blue);border-color:var(--blue);color:#fff;}
+
+  /* ── period filter row ─────────────────────────────── */
+  .filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+  .seg{display:flex;gap:3px;background:var(--white);border:1px solid var(--line);border-radius:11px;padding:3px;box-shadow:var(--shadow);}
+  .seg button{border:none;background:none;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--grey);padding:7px 14px;border-radius:8px;cursor:pointer;transition:.16s;}
+  .seg button.on{background:var(--navy);color:#fff;}
+  .filter-tag{font-size:12px;font-weight:700;color:var(--blue-d);background:var(--ice);border:1px solid var(--line);border-radius:999px;padding:7px 14px;display:inline-flex;align-items:center;gap:7px;}
+  .filter-emp{font:700 12.5px 'Manrope',sans-serif;color:#fff;background:var(--navy);border:1px solid var(--navy);border-radius:999px;padding:8px 16px;cursor:pointer;max-width:280px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none'><path d='M6 9l6 6 6-6' stroke='white' stroke-width='2.6' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;}
+  .filter-emp:hover{background:var(--blue-d);border-color:var(--blue-d);}
+  .filter-month{font:700 12.5px 'Manrope',sans-serif;color:var(--blue-d);background:var(--ice);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none'><path d='M6 9l6 6 6-6' stroke='%23005e9e' stroke-width='2.6' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;}
+  .filter-month:hover{border-color:var(--blue);}
+  .filter-tag svg{opacity:.7;}
+
+  /* ── grid system ───────────────────────────────────── */
+  .grid{display:grid;gap:18px;}
+  .g-4{grid-template-columns:repeat(4,1fr);}
+  .g-3{grid-template-columns:repeat(3,1fr);}
+  .g-2{grid-template-columns:repeat(2,1fr);}
+  .g-12{grid-template-columns:repeat(12,1fr);}
+  .section-gap{margin-top:18px;}
+
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;position:relative;}
+  .card.tight{padding:18px 20px;}
+  .card-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;}
+  .card-title{font-size:14px;font-weight:800;color:var(--navy);letter-spacing:-.2px;}
+  .card-note{font-size:11.5px;color:var(--grey-l);font-weight:600;margin-top:3px;line-height:1.4;}
+  .card-tag{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:5px 9px;border-radius:7px;background:var(--ice);color:var(--blue-d);white-space:nowrap;}
+
+  /* ── KPI hero cards ────────────────────────────────── */
+  .kpi{overflow:hidden;}
+  .kpi-label{font-size:12px;font-weight:700;color:var(--grey);display:flex;align-items:center;gap:8px;margin-bottom:13px;}
+  .kpi-ico{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .kpi-value{font-family:'Fraunces',serif;font-weight:600;font-size:34px;line-height:1;letter-spacing:-1px;color:var(--navy);}
+  .kpi-value .cur{font-size:19px;font-weight:600;color:var(--grey);margin-right:2px;vertical-align:.06em;}
+  .kpi-sub{margin-top:11px;font-size:12px;color:var(--grey);display:flex;align-items:center;gap:7px;}
+  .delta{font-weight:800;font-size:11.5px;padding:3px 8px;border-radius:7px;display:inline-flex;align-items:center;gap:3px;}
+  .delta.up{color:var(--green);background:var(--green-soft);}
+  .delta.flat{color:var(--grey);background:var(--ice);}
+  .kpi-spark{position:absolute;right:0;bottom:0;width:46%;height:54px;opacity:.9;}
+
+  /* ── funnel ────────────────────────────────────────── */
+  .funnel{display:flex;flex-direction:column;gap:9px;}
+  .funnel-row{display:grid;grid-template-columns:140px 1fr auto;align-items:center;gap:14px;}
+  .funnel-lbl{font-size:12.5px;font-weight:700;color:var(--ink);}
+  .funnel-lbl small{display:block;font-weight:600;color:var(--grey-l);font-size:10.5px;margin-top:1px;}
+  .funnel-bar-bg{height:30px;background:var(--ice-2);border-radius:8px;overflow:hidden;border:1px solid var(--line-soft);}
+  .funnel-bar{height:100%;border-radius:7px;display:flex;align-items:center;padding-left:11px;color:#fff;font-size:12px;font-weight:800;transition:width 1s cubic-bezier(.2,.7,.2,1);}
+  .funnel-val{font-size:13px;font-weight:800;color:var(--navy);min-width:46px;text-align:right;}
+
+  /* ── outcomes list ─────────────────────────────────── */
+  .outcome{display:grid;grid-template-columns:38px 1fr auto;gap:13px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line-soft);}
+  .outcome:last-child{border-bottom:none;}
+  .outcome-ico{width:38px;height:38px;border-radius:11px;background:var(--ice);display:flex;align-items:center;justify-content:center;}
+  .outcome-name{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .outcome-meta{font-size:11.5px;color:var(--grey-l);font-weight:600;margin-top:2px;}
+  .outcome-stat{text-align:right;}
+  .outcome-stat .v{font-size:15px;font-weight:800;color:var(--navy);letter-spacing:-.3px;}
+  .outcome-stat .l{font-size:10.5px;color:var(--grey-l);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+
+  /* ── bars / regional ───────────────────────────────── */
+  .hbar{display:flex;flex-direction:column;gap:13px;}
+  .hbar-row{display:grid;grid-template-columns:118px 1fr 64px;align-items:center;gap:13px;}
+  .hbar-lbl{font-size:12.5px;font-weight:700;color:var(--ink);}
+  .hbar-track{height:22px;background:var(--ice-2);border-radius:7px;overflow:hidden;}
+  .hbar-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,var(--blue),var(--blue-d));transition:width .9s cubic-bezier(.2,.7,.2,1);}
+  .hbar-val{font-size:12.5px;font-weight:800;color:var(--navy);text-align:right;}
+
+  /* ── donut + legend ────────────────────────────────── */
+  .donut-wrap{display:flex;align-items:center;gap:22px;}
+  .legend{flex:1;display:flex;flex-direction:column;gap:11px;}
+  .legend-row{display:flex;align-items:center;gap:10px;}
+  .legend-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0;}
+  .legend-name{font-size:12.5px;font-weight:700;color:var(--ink);flex:1;}
+  .legend-val{font-size:12.5px;font-weight:800;color:var(--navy);}
+  .legend-sub{font-size:11px;color:var(--grey-l);font-weight:600;}
+
+  /* ── ratings ───────────────────────────────────────── */
+  .rating-hero{display:flex;align-items:baseline;gap:10px;}
+  .rating-big{font-family:'Fraunces',serif;font-weight:600;font-size:46px;line-height:1;color:var(--navy);letter-spacing:-1.5px;}
+  .rating-stars{color:var(--blue);font-size:17px;letter-spacing:2px;}
+  .rating-bars{margin-top:18px;display:flex;flex-direction:column;gap:8px;}
+  .rb-row{display:grid;grid-template-columns:42px 1fr 38px;align-items:center;gap:10px;}
+  .rb-lbl{font-size:11.5px;font-weight:700;color:var(--grey);}
+  .rb-track{height:9px;background:var(--ice-2);border-radius:6px;overflow:hidden;}
+  .rb-fill{height:100%;border-radius:6px;background:var(--blue);}
+  .rb-val{font-size:11px;font-weight:700;color:var(--grey-l);text-align:right;}
+  .rating-share-pill{margin-top:18px;background:var(--green-soft);border:1px solid #c4ecd5;border-radius:13px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
+  .rating-share-pill .v{font-family:'Fraunces',serif;font-weight:600;font-size:26px;color:var(--green);letter-spacing:-.5px;}
+  .rating-share-pill .l{font-size:12px;font-weight:700;color:#137a47;}
+
+  /* ── creditor table ────────────────────────────────── */
+  table.ct{width:100%;border-collapse:collapse;}
+  table.ct th{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-l);text-align:left;padding:0 12px 11px;border-bottom:1px solid var(--line);}
+  table.ct th.r,table.ct td.r{text-align:right;}
+  table.ct td{padding:13px 12px;border-bottom:1px solid var(--line-soft);font-size:13px;}
+  table.ct tr:last-child td{border-bottom:none;}
+  .cred-name{display:flex;align-items:center;gap:11px;font-weight:700;color:var(--ink);}
+  .cred-logo{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;}
+  .num{font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .muted{color:var(--grey);font-weight:600;}
+  .chip-mini{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:6px;}
+  .chip-elig{background:var(--green-soft);color:#137a47;}
+  .chip-prog{background:var(--ice);color:var(--blue-d);}
+
+  /* ── region map / income ───────────────────────────── */
+  .stat-strip{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;background:var(--white);}
+  .stat-cell{flex:1;padding:16px 18px;border-right:1px solid var(--line-soft);}
+  .stat-cell:last-child{border-right:none;}
+  .stat-cell .l{font-size:11px;font-weight:700;color:var(--grey-l);text-transform:uppercase;letter-spacing:.05em;}
+  .stat-cell .v{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--navy);letter-spacing:-.5px;margin-top:6px;}
+  .stat-cell .d{font-size:11px;font-weight:700;margin-top:4px;color:var(--green);}
+
+  .footnote{font-size:11px;color:var(--grey-l);line-height:1.6;margin-top:26px;padding-top:18px;border-top:1px solid var(--line);}
+
+  /* reveal animation */
+  .reveal{opacity:0;transform:translateY(14px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+
+  @media(max-width:1080px){
+    .g-4{grid-template-columns:repeat(2,1fr);}
+    .g-3{grid-template-columns:1fr;}
+  }
+
+  /* ── interactivity ── */
+  .seg button:hover{color:var(--navy);}
+  .filter-tag.interactive{cursor:pointer;position:relative;user-select:none;transition:.15s;}
+  .filter-tag.interactive:hover{border-color:var(--blue);color:var(--blue);}
+  .filter-tag .caret{margin-left:1px;opacity:.6;}
+  .dropdown-menu{position:absolute;top:calc(100% + 7px);left:0;min-width:185px;background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow-lg);padding:6px;z-index:80;opacity:0;visibility:hidden;transform:translateY(-6px);transition:.16s;}
+  .dropdown-menu.open{opacity:1;visibility:visible;transform:none;}
+  .dropdown-item{display:block;width:100%;text-align:left;border:none;background:none;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--grey);padding:9px 12px;border-radius:9px;cursor:pointer;transition:.12s;}
+  .dropdown-item:hover{background:var(--ice-2);color:var(--navy);}
+  .dropdown-item.on{background:var(--ice);color:var(--blue-d);}
+
+  .outcome{grid-template-columns:38px 1fr auto 14px;}
+  .outcome.clickable{cursor:pointer;border-radius:11px;margin:0 -10px;padding-left:10px;padding-right:10px;transition:background .14s;}
+  .outcome.clickable:hover{background:var(--ice-2);}
+  .row-chevron{font-size:20px;color:var(--grey-l);font-weight:400;transition:.14s;}
+  .outcome.clickable:hover .row-chevron{color:var(--blue);transform:translateX(2px);}
+  .ct-row{cursor:pointer;transition:background .14s;}
+  .ct-row:hover{background:var(--ice-2);}
+
+  .btn.loading{opacity:.7;pointer-events:none;}
+
+  /* drawer */
+  .drawer-backdrop{position:fixed;inset:0;background:rgba(13,42,71,.4);backdrop-filter:blur(2px);z-index:90;opacity:0;transition:.26s;}
+  .drawer-backdrop.show{opacity:1;}
+  .drawer{position:fixed;top:0;right:0;height:100vh;width:460px;max-width:92vw;background:#fff;z-index:100;box-shadow:-20px 0 60px rgba(13,42,71,.2);transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;}
+  .drawer.show{transform:none;}
+  .drawer-hd{padding:26px 26px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+  .drawer-eyebrow{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:7px;}
+  .drawer-title{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--navy);letter-spacing:-.5px;line-height:1.1;}
+  .drawer-sub{font-size:12.5px;color:var(--grey);font-weight:600;margin-top:6px;}
+  .drawer-x{border:none;background:var(--ice);color:var(--grey);width:34px;height:34px;border-radius:9px;font-size:22px;line-height:1;cursor:pointer;flex-shrink:0;transition:.14s;}
+  .drawer-x:hover{background:var(--blue);color:#fff;}
+  .drawer-body{padding:24px 26px;overflow-y:auto;}
+  .drawer-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:6px;}
+  .ds{background:var(--ice-2);border:1px solid var(--line-soft);border-radius:13px;padding:13px 14px;}
+  .dsl{font-size:10.5px;font-weight:700;color:var(--grey-l);text-transform:uppercase;letter-spacing:.04em;}
+  .dsv{font-family:'Fraunces',serif;font-weight:600;font-size:21px;color:var(--navy);letter-spacing:-.4px;margin-top:6px;}
+  .drawer-section-title{font-size:13px;font-weight:800;color:var(--navy);margin:24px 0 4px;}
+  .drawer-note{font-size:12px;color:var(--grey);line-height:1.6;margin-top:18px;background:var(--ice-2);border:1px solid var(--line-soft);border-radius:12px;padding:14px 15px;}
+
+  /* toast */
+
+  /* scheduled report modal */
+  .schedule-backdrop{position:fixed;inset:0;background:rgba(36,21,54,.48);backdrop-filter:blur(3px);z-index:130;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .schedule-modal{width:min(760px,96vw);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 28px 80px rgba(36,21,54,.28);border:1px solid var(--line);}
+  .schedule-hd{padding:22px 24px 16px;border-bottom:1px solid var(--line-soft);display:flex;align-items:flex-start;justify-content:space-between;gap:18px;}
+  .schedule-title{font-family:'Fraunces',serif;font-size:25px;font-weight:600;color:var(--navy);letter-spacing:-.4px;}
+  .schedule-sub{font-size:12.5px;color:var(--grey);margin-top:5px;line-height:1.5;}
+  .schedule-close{border:0;background:var(--ice);width:34px;height:34px;border-radius:9px;font-size:22px;color:var(--navy);cursor:pointer;}
+  .schedule-body{padding:20px 24px 24px;}
+  .schedule-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .schedule-field{display:block;font-size:12px;font-weight:800;color:var(--grey);}
+  .schedule-field.full{grid-column:1/-1;}
+  .schedule-field input,.schedule-field select{display:block;width:100%;margin-top:5px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:600 13px 'Manrope',sans-serif;color:var(--ink);outline:none;}
+  .schedule-field input:focus,.schedule-field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(177,91,232,.08);}
+  .schedule-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap;}
+  .schedule-note{padding:11px 13px;border-radius:10px;background:var(--ice);color:var(--grey);font-size:12px;line-height:1.5;margin-bottom:16px;}
+  .schedule-note.err{background:var(--red-soft);color:#b5391f;}
+  .schedule-list{margin-top:24px;border-top:1px solid var(--line-soft);padding-top:18px;}
+  .schedule-list-title{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:9px;}
+  .schedule-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft);}
+  .schedule-row:last-child{border-bottom:0;}
+  .schedule-row strong{display:block;font-size:12.5px;color:var(--ink);}
+  .schedule-row small{display:block;font-size:11px;color:var(--grey-l);margin-top:3px;}
+  .schedule-row-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+  .schedule-mini{font:700 11px 'Manrope',sans-serif;border:1px solid var(--line);background:#fff;color:var(--navy);padding:6px 9px;border-radius:8px;cursor:pointer;}
+  .schedule-mini.danger{color:#b5391f;}
+  @media(max-width:700px){.schedule-grid{grid-template-columns:1fr}.schedule-field.full{grid-column:auto}.schedule-row{grid-template-columns:1fr}.schedule-row-actions{justify-content:flex-start}}
+
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--navy);color:#fff;font-size:13px;font-weight:600;padding:14px 20px;border-radius:13px;box-shadow:var(--shadow-lg);z-index:120;opacity:0;transition:.28s;max-width:90vw;}
+  .toast.show{opacity:1;transform:translateX(-50%);}
+
+  /* ── stress map ── */
+  .stress-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .stress-cell{background:var(--white);border:1px solid var(--line);border-left:4px solid var(--t);border-radius:var(--radius-sm);padding:16px 18px;box-shadow:var(--shadow);}
+  .stress-l{font-size:11px;font-weight:700;color:var(--grey-l);text-transform:uppercase;letter-spacing:.04em;}
+  .stress-v{font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--navy);letter-spacing:-.4px;margin-top:7px;}
+  .stress-d{font-size:11.5px;color:var(--grey);font-weight:600;margin-top:4px;}
+  @media(max-width:1080px){ .stress-grid{grid-template-columns:repeat(2,1fr);} }
+
+  /* ── debt pressure profile ── */
+  .dp-bar{display:flex;height:26px;border-radius:8px;overflow:hidden;border:1px solid var(--line-soft);}
+  .dp-seg{height:100%;transition:width .9s cubic-bezier(.2,.7,.2,1);}
+  .dp-legend{display:grid;grid-template-columns:1fr 1fr;gap:9px 26px;margin-top:14px;}
+  .dp-leg{display:grid;grid-template-columns:13px 1fr auto auto;align-items:center;gap:9px;}
+  .dp-dot{width:11px;height:11px;border-radius:3px;}
+  .dp-type{font-size:12.5px;font-weight:700;color:var(--ink);}
+  .dp-bal{font-size:12.5px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .dp-pct{font-size:11px;font-weight:700;color:var(--grey-l);width:34px;text-align:right;}
+  .dp-toggle{margin-top:16px;background:var(--ice-2);border:1px solid var(--line);color:var(--blue-d);font-family:inherit;font-size:12px;font-weight:700;padding:8px 14px;border-radius:9px;cursor:pointer;transition:.14s;}
+  .dp-toggle:hover{background:var(--ice);border-color:var(--blue);}
+
+  /* ── financial risk signals ── */
+  .risk-row{display:grid;grid-template-columns:4px 1fr auto;gap:13px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft);}
+  .risk-row:last-child{border-bottom:none;}
+  .risk-bar{width:4px;height:34px;border-radius:3px;}
+  .risk-sig{font-size:13px;font-weight:700;color:var(--ink);}
+  .risk-note{font-size:11px;color:var(--grey-l);font-weight:600;margin-top:2px;}
+  .risk-stat{text-align:right;}
+  .risk-n{font-size:16px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .risk-sev{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-top:1px;}
+
+  /* ── opportunities identified ── */
+  .opp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .opp-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-sm);padding:18px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .opp-card::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--blue-d));}
+  .opp-ico{width:38px;height:38px;border-radius:11px;background:var(--ice);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+  .opp-name{font-size:13.5px;font-weight:800;color:var(--navy);line-height:1.25;margin-bottom:9px;min-height:34px;}
+  .opp-elig{font-size:12px;color:var(--grey);font-weight:600;}
+  .opp-n{font-family:'Fraunces',serif;font-weight:600;font-size:22px;color:var(--blue);letter-spacing:-.5px;margin-right:3px;}
+  .opp-save{font-size:11.5px;font-weight:700;color:var(--green);margin-top:9px;}
+  .opp-foot{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;margin-top:16px;background:linear-gradient(135deg,var(--navy-deep),var(--navy) 60%,var(--blue-d));border-radius:var(--radius);padding:20px 26px;color:#fff;}
+  .opp-foot-l{font-size:11.5px;font-weight:700;color:#aacdec;text-transform:uppercase;letter-spacing:.05em;}
+  .opp-foot-v{font-family:'Fraunces',serif;font-weight:600;font-size:30px;letter-spacing:-.8px;margin-top:6px;}
+  .opp-foot-v span{font-size:15px;color:#aacdec;font-weight:600;}
+  .opp-foot-note{font-size:12px;color:#cfe6f7;font-weight:600;margin-top:7px;}
+  .opp-foot-ref{text-align:right;border-left:1px solid rgba(255,255,255,.15);padding-left:24px;}
+  .opp-ref-v{font-family:'Fraunces',serif;font-weight:600;font-size:28px;color:#3ddc91;letter-spacing:-.5px;}
+  .opp-ref-l{font-size:10.5px;font-weight:700;color:#aacdec;line-height:1.4;margin-top:3px;}
+  .opp-ref-l span{color:#7fa8cc;font-weight:600;}
+  @media(max-width:1080px){ .opp-grid{grid-template-columns:repeat(2,1fr);} .dp-legend{grid-template-columns:1fr;} .opp-foot{grid-template-columns:1fr;} .opp-foot-ref{border-left:none;border-top:1px solid rgba(255,255,255,.15);padding-left:0;padding-top:16px;text-align:left;} }
+
+  /* ── debt states (three buckets) ── */
+  .ds-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;border:1px solid var(--line-soft);margin-bottom:18px;}
+  .ds-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .ds-card{background:var(--white);border:1px solid var(--line);border-top:3px solid var(--c);border-radius:var(--radius-sm);padding:16px 18px;box-shadow:var(--shadow);}
+  .ds-tag{font-size:10px;font-weight:800;letter-spacing:.07em;}
+  .ds-v{font-family:'Fraunces',serif;font-weight:600;font-size:26px;color:var(--navy);letter-spacing:-.6px;margin-top:6px;}
+  .ds-name{font-size:13px;font-weight:800;color:var(--ink);margin-top:4px;}
+  .ds-note{font-size:11.5px;color:var(--grey);line-height:1.5;margin-top:6px;min-height:48px;}
+  .ds-emp{font-size:11.5px;font-weight:700;color:var(--blue-d);margin-top:8px;padding-top:8px;border-top:1px solid var(--line-soft);}
+  .ds-foot{font-size:12px;color:var(--grey);line-height:1.6;margin-top:16px;background:var(--ice-2);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px;}
+  .ds-foot strong{color:var(--navy);}
+  @media(max-width:1080px){ .ds-grid{grid-template-columns:1fr;} }
+
+  /* ── portfolio (internal) view ── */
+  .pf-banner{display:flex;align-items:center;gap:9px;background:linear-gradient(135deg,#0d2a47,#32217c);color:#fff;font-size:12.5px;font-weight:700;padding:11px 18px;border-radius:11px;margin-top:18px;}
+  .pf-banner svg{opacity:.85;flex-shrink:0;}
+  .pf-picker{display:flex;flex-wrap:wrap;gap:6px;max-width:62%;justify-content:flex-end;}
+  .pf-chip{font-size:11.5px;font-weight:700;color:var(--grey);background:var(--ice-2);border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;transition:.13s;}
+  .pf-chip:hover{border-color:var(--blue);color:var(--blue);}
+  .pf-chip.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+  table.pf-heat{width:100%;border-collapse:separate;border-spacing:3px;font-size:12px;min-width:880px;}
+  table.pf-heat th{font-size:10.5px;font-weight:800;color:var(--grey-l);text-transform:uppercase;letter-spacing:.03em;padding:8px 6px;text-align:center;cursor:pointer;border-radius:6px;transition:.13s;white-space:nowrap;}
+  table.pf-heat th.pf-emp-h{text-align:left;cursor:default;padding-left:12px;}
+  table.pf-heat th.pf-mh:hover{background:var(--ice);color:var(--blue-d);}
+  table.pf-heat th.pf-mh.sort{background:var(--navy);color:#fff;}
+  table.pf-heat td{padding:11px 8px;text-align:center;border-radius:7px;font-variant-numeric:tabular-nums;}
+  table.pf-heat td.pf-emp{text-align:left;font-weight:800;color:var(--navy);font-size:12.5px;background:var(--ice-2);padding-left:12px;white-space:nowrap;}
+  table.pf-heat td.pf-emp small{display:block;font-weight:600;color:var(--grey-l);font-size:10.5px;margin-top:2px;}
+  .pf-lg-row{display:grid;grid-template-columns:34px 1fr 2fr auto;gap:14px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft);}
+  .pf-lg-row:last-child{border-bottom:none;}
+  .pf-lg-rank{font-family:'Fraunces',serif;font-weight:600;font-size:20px;text-align:center;}
+  .pf-lg-name{font-size:13px;font-weight:700;color:var(--ink);}
+  .pf-lg-name small{display:block;font-weight:600;color:var(--grey-l);font-size:10.5px;margin-top:1px;}
+  .pf-lg-track{height:13px;background:var(--ice-2);border-radius:7px;overflow:hidden;}
+  .pf-lg-fill{height:100%;border-radius:7px;transition:width .8s cubic-bezier(.2,.7,.2,1);}
+  .pf-lg-val{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;min-width:74px;text-align:right;}
+
+  /* portfolio controls */
+  .pf-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:16px 18px;margin-bottom:18px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.82);box-shadow:var(--shadow);}
+  .pf-toolbar-left{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;}
+  .pf-filter-block{position:relative;min-width:280px;}
+  .pf-filter-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--grey-l);font-weight:800;margin-bottom:6px;}
+  .pf-filter-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);background:#fff;color:var(--navy);font:inherit;font-size:12.5px;font-weight:800;padding:10px 12px;border-radius:10px;cursor:pointer;}
+  .pf-filter-btn:hover,.pf-filter-btn:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px rgba(177,91,232,.08);}
+  .pf-filter-menu{display:none;position:absolute;z-index:50;left:0;top:calc(100% + 7px);width:min(390px,88vw);background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 45px rgba(35,35,65,.16);overflow:hidden;}
+  .pf-filter-menu.open{display:block;}
+  .pf-filter-actions{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line-soft);background:var(--ice-2);}
+  .pf-filter-action{border:0;background:transparent;color:var(--blue-d);font-size:11.5px;font-weight:800;cursor:pointer;padding:4px 6px;border-radius:6px;}
+  .pf-filter-action:hover{background:#fff;}
+  .pf-filter-search{width:100%;border:0;border-bottom:1px solid var(--line-soft);padding:10px 13px;font:inherit;font-size:12px;outline:none;}
+  .pf-filter-options{max-height:260px;overflow:auto;padding:6px;}
+  .pf-filter-option{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:8px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;}
+  .pf-filter-option:hover{background:var(--ice-2);}
+  .pf-filter-option input{accent-color:#32217c;width:15px;height:15px;}
+  .pf-scope-note{font-size:11.5px;color:var(--grey);line-height:1.45;}
+  .pf-scope-note strong{color:var(--navy);}
+  .pf-toolbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+  .pf-window-pill{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border-radius:999px;background:var(--ice-2);border:1px solid var(--line);font-size:11.5px;font-weight:800;color:var(--navy);white-space:nowrap;}
+
+  /* metric glossary hover/focus tooltips */
+  .metric-info{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;border:1px solid #cdbef8;background:#f8f5ff;color:#6f4bd8;font-size:10px;font-weight:900;line-height:1;cursor:help;margin-left:5px;vertical-align:middle;padding:0;}
+  .metric-info:hover,.metric-info:focus{background:#eee7ff;border-color:#9f87f9;outline:none;}
+  .metric-tooltip{position:fixed;z-index:9999;display:none;width:min(330px,calc(100vw - 28px));background:#19152a;color:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 18px 45px rgba(20,15,40,.25);font-size:11.5px;line-height:1.5;pointer-events:none;}
+  .metric-tooltip.open{display:block;}
+  .metric-tooltip b{display:block;font-size:12px;margin-bottom:4px;color:#fff;}
+  .metric-tooltip .metric-formula{display:block;margin-top:6px;color:#d8cff8;font-size:10.5px;}
+  .pf-mh .metric-info{margin-left:4px;transform:translateY(-1px);}
+  .pf-chip .metric-info{width:15px;height:15px;font-size:9px;margin-left:4px;background:rgba(255,255,255,.7);}
+  .pf-chip.on .metric-info{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff;}
+  .kpi-label .metric-info{margin-left:auto;}
+  .card-title .metric-info{transform:translateY(-1px);}
+  .exec-l .metric-info{width:15px;height:15px;font-size:9px;margin-left:4px;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.32);color:#fff;}
+  .wd-name .metric-info,.funnel-lbl .metric-info,.stat-cell .metric-info,.stress-l .metric-info,.ds-name .metric-info,.risk-sig .metric-info,.opp-name .metric-info,.opp-foot-l .metric-info,.opp-ref-l .metric-info,.rating-share-pill .metric-info{width:15px;height:15px;font-size:9px;margin-left:4px;}
+  .stat-cell .l,.stress-l{display:flex;align-items:center;gap:3px;}
+  .wd-name small{display:block;}
+  .pf-no-data{background:#f6f5f9!important;color:#98a3ad!important;font-weight:700!important;}
+  @media(max-width:1080px){ .pf-picker{max-width:100%;} .pf-toolbar{align-items:stretch;flex-direction:column;} .pf-filter-block{min-width:0;width:100%;} .pf-toolbar-right{justify-content:flex-start;} }
+
+  @media print{
+    .topbar,.filters,.head-actions,.row-chevron{display:none!important;}
+    body{background:#fff;}
+    .card{box-shadow:none;border-color:#d8e5f0;break-inside:avoid;}
+  }
+
+  /* ── executive summary band ── */
+  .exec-band{background:linear-gradient(135deg,var(--navy-deep),var(--navy) 55%,var(--blue-d));border-radius:var(--radius);padding:22px 26px;box-shadow:var(--shadow-lg);color:#fff;margin-top:4px;}
+  .exec-head{display:flex;align-items:center;gap:13px;margin-bottom:18px;}
+  .exec-pulse{width:9px;height:9px;border-radius:50%;background:#3ddc91;box-shadow:0 0 0 4px rgba(61,220,145,.25);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(61,220,145,.25);}50%{box-shadow:0 0 0 7px rgba(61,220,145,.08);}}
+  .exec-title{font-family:'Fraunces',serif;font-weight:600;font-size:18px;letter-spacing:-.3px;}
+  .exec-sub{font-size:11.5px;color:#aacdec;font-weight:600;margin-top:2px;}
+  .exec-verdict{margin-left:auto;font-size:12.5px;font-weight:800;color:#3ddc91;background:rgba(61,220,145,.12);border:1px solid rgba(61,220,145,.3);padding:7px 13px;border-radius:9px;}
+  .exec-verdict span{font-size:10px;}
+  .exec-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;}
+  .exec-item{display:flex;gap:9px;align-items:flex-start;}
+  .exec-item svg{flex-shrink:0;margin-top:3px;background:rgba(61,220,145,.14);border-radius:6px;padding:2px;width:19px;height:19px;}
+  .exec-v{font-family:'Fraunces',serif;font-weight:600;font-size:21px;letter-spacing:-.5px;line-height:1.05;}
+  .exec-l{font-size:10.5px;color:#aacdec;font-weight:600;line-height:1.3;margin-top:3px;}
+  @media(max-width:1080px){ .exec-grid{grid-template-columns:repeat(2,1fr);} }
+
+  /* ── wellness score ── */
+  .wellness-card{border-top:3px solid var(--blue);}
+  .wellness-inner{display:grid;grid-template-columns:230px 1fr;gap:30px;align-items:center;}
+  .wellness-left{text-align:center;border-right:1px solid var(--line-soft);padding-right:26px;}
+  .wellness-band{display:inline-block;font-size:12px;font-weight:800;color:#137a47;background:var(--green-soft);border:1px solid #c4ecd5;padding:5px 13px;border-radius:999px;margin-top:6px;}
+  .wellness-delta{font-size:12px;font-weight:800;color:var(--green);margin-top:10px;}
+  .wellness-note{font-size:11px;color:var(--grey-l);line-height:1.55;margin-top:12px;max-width:30ch;margin-left:auto;margin-right:auto;}
+  .wellness-right{display:flex;flex-direction:column;gap:13px;}
+  .wd-row{display:grid;grid-template-columns:200px 1fr 34px;align-items:center;gap:14px;}
+  .wd-name{font-size:13px;font-weight:700;color:var(--ink);}
+  .wd-name small{display:block;font-weight:600;color:var(--grey-l);font-size:10.5px;margin-top:1px;}
+  .wd-track{height:11px;background:var(--ice-2);border-radius:7px;overflow:hidden;}
+  .wd-fill{height:100%;border-radius:7px;transition:width 1s cubic-bezier(.2,.7,.2,1);}
+  .wd-val{font-size:14px;font-weight:800;color:var(--navy);text-align:right;font-variant-numeric:tabular-nums;}
+  @media(max-width:1080px){ .wellness-inner{grid-template-columns:1fr;} .wellness-left{border-right:none;border-bottom:1px solid var(--line-soft);padding-right:0;padding-bottom:18px;} .wd-row{grid-template-columns:140px 1fr 34px;} }
+
+  /* ── chat engagement ── */
+  .chat-jrow{display:grid;grid-template-columns:200px 1fr 120px;align-items:center;gap:14px;padding:11px 10px;border-radius:11px;cursor:pointer;transition:background .14s;border:1px solid transparent;}
+  .chat-jrow:hover{background:var(--ice-2);}
+  .chat-jrow.sel{background:var(--ice);border-color:var(--line);}
+  .chat-jbar-lbl{font-size:12.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:9px;}
+  .chat-jdot{width:9px;height:9px;border-radius:3px;flex-shrink:0;}
+  .chat-jbar-track{height:20px;background:var(--ice-2);border-radius:6px;overflow:hidden;}
+  .chat-jrow.sel .chat-jbar-track{background:#fff;}
+  .chat-jbar{height:100%;border-radius:6px;transition:width .9s cubic-bezier(.2,.7,.2,1);}
+  .chat-jmeta{text-align:right;font-size:14px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .chat-jmeta small{display:block;margin-top:4px;}
+
+  .trend-row{display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line-soft);}
+  .trend-row:last-child{border-bottom:none;}
+  .trend-rank{width:26px;height:26px;border-radius:8px;background:var(--ice);color:var(--blue-d);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;}
+  .trend-q{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.35;}
+  .trend-meta{font-size:11px;color:var(--grey-l);font-weight:600;margin-top:3px;}
+  .trend-stat{text-align:right;}
+  .trend-n{font-size:14px;font-weight:800;color:var(--navy);}
+  .trend-up{font-size:11px;font-weight:800;margin-top:2px;}
+
+  .theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 32px;}
+  .theme-row{display:grid;grid-template-columns:1fr;gap:7px;}
+  .theme-q{font-size:13px;font-weight:700;color:var(--ink);}
+  .theme-track{height:9px;background:var(--ice-2);border-radius:6px;overflow:hidden;}
+  .theme-fill{height:100%;border-radius:6px;transition:width .9s cubic-bezier(.2,.7,.2,1);}
+  .theme-n{display:none;}
+  .theme-row{grid-template-columns:1fr 52px;align-items:center;gap:5px 12px;}
+  .theme-row .theme-q{grid-column:1;}
+  .theme-row .theme-track{grid-column:1;}
+  .theme-row .theme-n{display:block;grid-column:2;grid-row:1/3;align-self:center;text-align:right;font-size:14px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  @media(max-width:1080px){ .theme-grid{grid-template-columns:1fr;} .chat-jrow{grid-template-columns:150px 1fr 90px;} }
+
+  /* ── welcome splash (shown briefly right after sign-in) ── */
+  #welcome-splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 700px at 50% -10%, rgba(177,91,232,.18), transparent 60%), linear-gradient(160deg,#f3f7fb 0%,#eef2ff 100%);transition:opacity .45s ease, visibility .45s ease;}
+  #welcome-splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
+  .welcome-splash-inner{text-align:center;}
+  .welcome-splash-logo{height:40px;width:auto;margin-bottom:22px;opacity:.94;}
+  .welcome-splash-spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--blue);margin:0 auto 20px;animation:welcome-spin .8s linear infinite;}
+  @keyframes welcome-spin{to{transform:rotate(360deg);}}
+  .welcome-splash-greeting{font-family:'Fraunces',serif;font-weight:600;font-size:26px;color:var(--navy);}
+  .welcome-splash-sub{margin-top:6px;font-size:13.5px;color:var(--grey);font-weight:600;}
+</style>
+</head>
+<body data-portal-build="0.5.3">
+
+<!-- ════════════════════════ WELCOME SPLASH ════════════════════════ -->
+<div id="welcome-splash">
+  <div class="welcome-splash-inner">
+    <img id="welcome-splash-logo" class="welcome-splash-logo" src="/static/logo-large.png" alt="">
+    <div class="welcome-splash-spinner"></div>
+    <div class="welcome-splash-greeting" id="welcome-splash-greeting">Welcome</div>
+    <div class="welcome-splash-sub">Loading your dashboard…</div>
+  </div>
+</div>
+<script>setTimeout(function(){var e=document.getElementById('welcome-splash');if(e)e.classList.add('hide');},4500);</script>
+
+<!-- ════════════════════════ TOP BAR ════════════════════════ -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">
+      <img src="/static/logo.png" alt="empower-fin Dashboard Portal" style="height:32px;width:auto;"><span id="channel-brand-name" style="font:800 13px Manrope,sans-serif;color:var(--navy);white-space:nowrap;"></span>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="audience-switch" id="audience-switch">
+      <button class="on" data-a="employer">Employer view</button>
+      <button data-a="portfolio">Portfolio view</button>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-meta">
+      <div class="data-fresh"><span class="dot"></span> <span id="data-fresh-label">Loading…</span></div>
+      <div id="portal-account"></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div id="employer-view">
+
+  <!-- ════════════════════════ HEADER ════════════════════════ -->
+  <div class="head">
+    <div>
+      <div class="head-eyebrow">Employer Insights · Financial Wellbeing Programme</div>
+      <h1>Vaalwater Industrial Group <span class="emp"></span></h1>
+      <div class="head-sub">How the financial wellbeing programme is landing across your workforce — who is using it, the outcomes achieved, and how employees rate the service.</div>
+      <div id="ctx-sub" style="font-size:12px;font-weight:700;color:var(--blue-d);margin-top:10px;letter-spacing:.01em;">Programme to date</div>
+    </div>
+    <div class="head-actions">
+      <button class="btn" id="btn-schedule">Schedule report</button>
+      <button class="btn btn-primary" id="btn-export">Export PDF</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ FILTERS ════════════════════════ -->
+  <div class="filters">
+    <select class="filter-emp" id="employer-select" style="display:none;" onchange="switchEmployer(this.value)"></select>
+    <select class="filter-month" id="month-select" style="display:none;" onchange="switchPeriod(this.value)"></select>
+    <div class="seg" id="period-seg">
+      <button data-p="30">Last 30 days</button>
+      <button data-p="q">Quarter</button>
+      <button class="on" data-p="all">Programme to date</button>
+    </div>
+    <span class="filter-tag interactive" id="region-filter">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M6 12h12M10 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="tag-label">All regions</span>
+      <svg class="caret" width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="filter-tag interactive" id="income-filter">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M6 12h12M10 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="tag-label">All income bands</span>
+      <svg class="caret" width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="filter-tag" id="emp-tag">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      — enrolled
+    </span>
+  </div>
+
+  <!-- ════════════════════════ EXECUTIVE SUMMARY ════════════════════════ -->
+  <div id="exec-summary"></div>
+
+  <!-- ════════════════════════ WORKFORCE WELLNESS SCORE ════════════════════════ -->
+  <div class="card reveal wellness-card section-gap" style="animation-delay:.04s">
+    <div class="card-hd">
+      <div>
+        <div class="card-title">Workforce Financial Wellness Score <button type="button" class="metric-info" data-metric="wellness" aria-label="What is the Workforce Financial Wellness Score?">i</button></div>
+        <div class="card-note">The single number that tracks your people's financial health — and its trajectory</div>
+      </div>
+      <span class="card-tag">Index · modelled</span>
+    </div>
+    <div id="wellness"></div>
+  </div>
+
+  <!-- ════════════════════════ ACT 1 · REACH ════════════════════════ -->
+  <div id="kpis" class="grid g-4"></div>
+
+  <!-- ════════════════════════ ACT 2 · ENGAGEMENT FUNNEL + OUTCOMES ════════════ -->
+  <div class="grid g-12 section-gap">
+    <div class="card reveal" style="grid-column:span 7;animation-delay:.05s">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">From enrolled to better off <button type="button" class="metric-info" data-metric="funnel" aria-label="What is the engagement funnel?">i</button></div>
+          <div class="card-note">The journey every employee can take — and where they are on it</div>
+        </div>
+        <span class="card-tag">Engagement funnel</span>
+      </div>
+      <div id="funnel" class="funnel"></div>
+    </div>
+    <div class="card reveal" style="grid-column:span 5;animation-delay:.1s">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">Financial problems resolved <button type="button" class="metric-info" data-metric="outcomes" aria-label="What are financial problems resolved?">i</button></div>
+          <div class="card-note" id="outcomes-note">Financial problems resolved — and the value created</div>
+        </div>
+        <span class="card-tag">Outcomes</span>
+      </div>
+      <div id="outcomes"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ ACT 3 · VALUE DELIVERED ════════════════════════ -->
+  <section class="dash-section" data-section="valueDelivered">
+  <div class="head" style="padding:36px 0 14px;">
+    <div>
+      <div class="head-eyebrow">The bottom line</div>
+      <h1 style="font-size:27px;">Value delivered to your people</h1>
+    </div>
+  </div>
+  <div id="value-strip"></div>
+
+  <div class="grid g-12 section-gap">
+    <div class="card reveal" style="grid-column:span 5;animation-delay:.05s">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">Monthly cash freed up <button type="button" class="metric-info" data-metric="saving" aria-label="What is monthly cash freed up?">i</button></div>
+          <div class="card-note">Recurring savings unlocked, cumulative</div>
+        </div>
+        <span class="card-tag">Run-rate</span>
+      </div>
+      <div id="savings-chart"></div>
+    </div>
+
+    <div class="card reveal" style="grid-column:span 7;animation-delay:.1s">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">Debt Pressure Profile <button type="button" class="metric-info" data-metric="debtProfile" aria-label="What is the Debt Pressure Profile?">i</button></div>
+          <div class="card-note">Where your people's arrears sit — by credit type, then by creditor</div>
+        </div>
+        <span class="card-tag">Arrears journey</span>
+      </div>
+      <div id="debt-profile"></div>
+      <div id="creditor-table" style="margin-top:18px"></div>
+    </div>
+  </div>
+  </section>
+
+  <!-- ════════════════════════ EARLY WAGE ACCESS ═══════════════════ -->
+  <section class="dash-section" data-section="earlyWageAccess">
+  <div class="head" style="padding:36px 0 14px;">
+    <div>
+      <div class="eyebrow">ON-DEMAND PAY</div>
+      <h1 style="font-size:27px;">Early Wage Access</h1>
+      <div class="head-sub">How many employees are drawing earned wages early, and how much — a live read on cashflow pressure between paydays.</div>
+    </div>
+  </div>
+  <div id="ewa-kpis" class="grid g-4"></div>
+  <div class="grid g-12 section-gap">
+    <div class="card reveal" style="grid-column:span 12;">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">Total advanced per month <button type="button" class="metric-info" data-metric="ewaTrend" aria-label="What is total advanced per month?">i</button></div>
+          <div class="card-note">Finalised advances only · cumulative value drawn</div>
+        </div>
+        <span class="card-tag">Trend</span>
+      </div>
+      <div id="ewa-chart"></div>
+    </div>
+  </div>
+  </section>
+
+  <section class="dash-section" data-section="stressMap">
+  <div class="head" style="padding:36px 0 14px;">
+    <div>
+      <div class="head-eyebrow">Where the pressure sits</div>
+      <h1 style="font-size:27px;">Workforce Financial Stress Map</h1>
+      <div class="head-sub">Financial pressure is not evenly spread. This is where it concentrates — so you and your broker can direct the programme to the people and sites that need it most.</div>
+    </div>
+  </div>
+
+  <div id="stress-strip" class="section-gap" style="margin-top:0"></div>
+
+  <div class="grid g-12 section-gap">
+    <div class="card reveal" style="grid-column:span 4;animation-delay:.05s">
+      <div class="card-hd">
+        <div><div class="card-title">Stress index by site <button type="button" class="metric-info" data-metric="stressBySite" aria-label="What is the stress index by site?">i</button></div><div class="card-note">Higher = more financial pressure (arrears, debt load, low resilience)</div></div>
+        <span class="card-tag">By site</span>
+      </div>
+      <div id="region-bars" class="hbar"></div>
+    </div>
+
+    <div class="card reveal" style="grid-column:span 4;animation-delay:.1s">
+      <div class="card-hd">
+        <div><div class="card-title">Who the programme is reaching <button type="button" class="metric-info" data-metric="incomeReach" aria-label="What is reach by income band?">i</button></div><div class="card-note">Activated employees by income band</div></div>
+      </div>
+      <div id="income-donut"></div>
+    </div>
+
+    <div class="card reveal" style="grid-column:span 4;animation-delay:.15s">
+      <div class="card-hd">
+        <div><div class="card-title">How employees rate us <button type="button" class="metric-info" data-metric="rating" aria-label="What is the employee experience rating?">i</button></div><div class="card-note">From end-of-journey ratings</div></div>
+        <span class="card-tag">Experience</span>
+      </div>
+      <div id="ratings"></div>
+    </div>
+  </div>
+  </section>
+
+  <!-- ════════════════════════ ACT 5 · PROOF (prescription + referral) ════════ -->
+  <section class="dash-section" data-section="problemDebt">
+  <div class="head" style="padding:36px 0 14px;">
+    <div>
+      <div class="head-eyebrow">Tackling problem debt</div>
+      <h1 style="font-size:27px;">How problem debt is being handled</h1>
+      <div class="head-sub">Not all distressed debt is dealt with the same way. Here is exactly what is happening to each rand — and we are precise about which debt is under active arrangement versus self-managed with our guidance.</div>
+    </div>
+  </div>
+  <div class="card reveal section-gap" style="margin-top:0;animation-delay:.04s">
+    <div class="card-hd">
+      <div>
+        <div class="card-title">Problem debt by how it's being handled <button type="button" class="metric-info" data-metric="debtStates" aria-label="How is problem debt being handled?">i</button></div>
+        <div class="card-note">Three honest states — only the first is an active arrangement</div>
+      </div>
+      <span class="card-tag">Debt intervention</span>
+    </div>
+    <div id="debt-states"></div>
+  </div>
+
+  <div class="grid g-12 section-gap">
+    <div class="card reveal" style="grid-column:span 7;animation-delay:.05s">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">Potentially prescribed debt challenged <button type="button" class="metric-info" data-metric="prescription" aria-label="What is prescribed debt recovery?">i</button></div>
+          <div class="card-note">Old debt employees may no longer legally owe — identified and contested</div>
+        </div>
+        <span class="card-tag">Recovery</span>
+      </div>
+      <div id="prescription"></div>
+    </div>
+
+    <div class="card reveal" style="grid-column:span 5;animation-delay:.1s">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">Financial Risk Signals <button type="button" class="metric-info" data-metric="riskSignals" aria-label="What are Financial Risk Signals?">i</button></div>
+          <div class="card-note">Exposure detected across your workforce — your early-warning list</div>
+        </div>
+        <span class="card-tag">Diagnostic</span>
+      </div>
+      <div id="risk-signals"></div>
+    </div>
+  </div>
+  </section>
+
+  <!-- ════════════════════════ OPPORTUNITIES IDENTIFIED ════════════════════ -->
+  <section class="dash-section" data-section="opportunities">
+  <div class="head" style="padding:36px 0 14px;">
+    <div>
+      <div class="head-eyebrow">What to do next</div>
+      <h1 style="font-size:27px;">Opportunities identified</h1>
+      <div class="head-sub">The programme has already mapped the next wave of value sitting in your workforce — eligible employees who haven't yet been helped.</div>
+    </div>
+  </div>
+  <div id="opportunities"></div>
+  </section>
+
+  <!-- ════════════════════════ ACT 6 · WEBCHAT ENGAGEMENT ════════════════════ -->
+  <section class="dash-section" data-section="voiceOfEmployee">
+  <div class="head" style="padding:36px 0 14px;">
+    <div>
+      <div class="head-eyebrow">Voice of the employee</div>
+      <h1 style="font-size:27px;">What your people are asking</h1>
+      <div class="head-sub">Every question asked in the in-app chat, categorised by journey. This is your early-warning system for where employees hesitate, what reassurance they need, and which objections to pre-empt.</div>
+    </div>
+  </div>
+
+  <div id="chat-kpis" class="grid g-4"></div>
+
+  <div class="grid g-12 section-gap">
+    <div class="card reveal" style="grid-column:span 7;animation-delay:.05s">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">Conversations by journey <button type="button" class="metric-info" data-metric="chatByJourney" aria-label="What are conversations by journey?">i</button></div>
+          <div class="card-note">Where the questions are coming from — click a journey for its top themes</div>
+        </div>
+        <span class="card-tag" id="chat-count-tag">Chat data</span>
+      </div>
+      <div id="chat-journeys"></div>
+    </div>
+
+    <div class="card reveal" style="grid-column:span 5;animation-delay:.1s">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">Trending questions <button type="button" class="metric-info" data-metric="chatTrending" aria-label="What are trending questions?">i</button></div>
+          <div class="card-note">Rising across the workforce this period</div>
+        </div>
+        <span class="card-tag">Themes</span>
+      </div>
+      <div id="chat-trending"></div>
+    </div>
+  </div>
+
+  <div class="card reveal section-gap" style="animation-delay:.05s">
+    <div class="card-hd">
+      <div>
+        <div class="card-title" id="chat-theme-title">Chat themes <button type="button" class="metric-info" data-metric="chatThemes" aria-label="What are chat themes?">i</button></div>
+        <div class="card-note" id="chat-theme-note">Themes from the separate chat data source.</div>
+      </div>
+      <span class="card-tag">Drill-down</span>
+    </div>
+    <div id="chat-themes"></div>
+  </div>
+  </section>
+
+  <div class="footnote" id="footnote"></div>
+
+  </div><!-- /employer-view -->
+
+  <!-- ════════════════════════ PORTFOLIO VIEW (INTERNAL) ════════════════════════ -->
+  <div id="portfolio-view" style="display:none">
+
+    <div class="pf-banner">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.4-3 7.5-7 9-4-1.5-7-4.6-7-9V6l7-3z" stroke="#fff" stroke-width="1.8"/></svg>
+      Internal portfolio view — authorised empower-fin and channel partner users only. Not shared with employers.
+    </div>
+
+    <div class="head" style="padding:26px 0 18px;">
+      <div>
+        <div class="head-eyebrow">Across all employer clients</div>
+        <h1 style="font-size:34px;">Portfolio insights</h1>
+        <div class="head-sub">Every reportable metric, across your whole book of employers. Spot where opportunity is highest, where satisfaction is slipping, and where financial stress is concentrated — at a glance.</div>
+      </div>
+      <div class="head-actions">
+        <button class="btn" id="btn-pf-export">Export book</button>
+      </div>
+    </div>
+
+    <div class="pf-toolbar" id="pf-toolbar">
+      <div class="pf-toolbar-left">
+        <div class="pf-filter-block" id="pf-employer-filter">
+          <div class="pf-filter-label">Employers</div>
+          <button class="pf-filter-btn" id="pf-employer-filter-btn" type="button" aria-haspopup="true" aria-expanded="false"><span id="pf-employer-filter-label">All employers</span><span>⌄</span></button>
+          <div class="pf-filter-menu" id="pf-employer-filter-menu">
+            <div class="pf-filter-actions"><button type="button" class="pf-filter-action" id="pf-select-all">Select all</button><button type="button" class="pf-filter-action" id="pf-clear-all">Clear all</button></div>
+            <input class="pf-filter-search" id="pf-employer-search" type="search" placeholder="Search employers…" autocomplete="off">
+            <div class="pf-filter-options" id="pf-employer-options"></div>
+          </div>
+        </div>
+        <div class="pf-scope-note" id="pf-scope-note">All authorised employers are included.</div>
+      </div>
+      <div class="pf-toolbar-right">
+        <span class="pf-window-pill" id="pf-window-pill">Reporting window: —</span>
+        <span class="pf-window-pill">Hover <span class="metric-info" data-metric="measureGuide" tabindex="0" aria-label="What do these measures mean?">i</span> for measure definitions</span>
+      </div>
+    </div>
+
+    <div id="pf-kpis" class="grid g-4"></div>
+
+    <div class="card reveal section-gap" style="animation-delay:.05s">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">Portfolio heatmap</div>
+          <div class="card-note">Every employer, every metric. Greener = stronger, redder = needs attention. Click a column header to rank by it below.</div>
+        </div>
+        <span class="card-tag" id="pf-employer-count">— employers</span>
+      </div>
+      <div id="pf-heatmap" style="overflow-x:auto"></div>
+    </div>
+
+    <div class="card reveal section-gap" style="animation-delay:.1s">
+      <div class="card-hd">
+        <div>
+          <div class="card-title">League table</div>
+          <div class="card-note" id="pf-league-note">Employers ranked by the selected metric</div>
+        </div>
+        <div id="pf-metric-picker" class="pf-picker"></div>
+      </div>
+      <div id="pf-league"></div>
+    </div>
+
+    <div class="footnote" id="pf-footnote"></div>
+
+  </div><!-- /portfolio-view -->
+
+</div>
+
+<script src="/static/engagement-v1.js?v=1" defer></script>
+<script src="/static/portal-nav-v054.js?v=0.5.4"></script>
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   EMPOWER-FIN DASHBOARD PORTAL — EMPLOYER DASHBOARD
+   The static DATA object below is an explicit visual-demonstration fixture.
+   Production mode replaces it with the complete API payload and never merges
+   missing live fields into these values. Open with ?demo=1 to use the fixture.
+   ════════════════════════════════════════════════════════════════════ */
+let DATA = {
+  employer: "Vaalwater Industrial Group",
+  headcount: 1575,
+
+  // ── Executive summary (one-glance) ──
+  exec: {
+    items: [
+      { v:"1,182",      l:"employees enrolled" },
+      { v:"R 384,900",  l:"monthly cashflow restored" },
+      { v:"R 6.4m",     l:"debt under active intervention" },
+      { v:"274",        l:"prescribed debts challenged" },
+      { v:"812",        l:"employees better off" },
+      { v:"4.6/5",      l:"employee satisfaction" },
+    ],
+  },
+
+  // ── Debt intervention, split into three honest states ──
+  // active = arrangements/reductions actually sent; challenged = prescribed debt contested;
+  // guided = couldn't afford an arrangement, so educated on prescription to self-manage.
+  debtStates: {
+    active:    { rand: 6_390_000, employees: 214, label:"Under active intervention", note:"settlement or reduced-instalment arrangements sent" },
+    challenged:{ rand: 2_740_000, employees: 274, label:"Being challenged",          note:"potentially prescribed debt contested" },
+    guided:    { rand: 2_790_000, employees: 133, label:"Self-managed via guidance",  note:"couldn't afford an arrangement — educated on prescription to manage it themselves" },
+  },
+
+  // ── Workforce Financial Wellness Score (pass 6) ──
+  wellness: {
+    score: 70,
+    prior: 64,           // last period, for progression story
+    band: "Improving",
+    drivers: [
+      { name:"Engagement",          score:60, weight:0.20, note:"started a journey vs. eligible" },
+      { name:"Cashflow relief",     score:76, weight:0.30, note:"savings unlocked vs. potential" },
+      { name:"Debt risk",           score:63, weight:0.30, note:"users in arrears (lower = riskier)" },
+      { name:"Insurance efficiency",score:80, weight:0.20, note:"duplicate / overpriced cover removed" },
+    ],
+  },
+
+  // ── Act 1: reach KPIs ──
+  kpis: {
+    takeUp:        { pct: 75,   enrolled: 1182, delta: "+6 pts" },
+    activated:     { pct: 59,   count: 938,     delta: "+11 pts" },
+    monthlySaving: { rand: 384900, perHead: 326, delta: "+R41k" },
+    avgRating:     { val: 4.6,  responses: 1640, delta: "stable" },
+  },
+
+  // ── Act 2: engagement funnel ──
+  funnel: [
+    { label: "Eligible workforce",    sub: "all employees",            n: 1575, pct: 100 },
+    { label: "Enrolled",              sub: "joined the programme",     n: 1182, pct: 75 },
+    { label: "Activated",             sub: "started a fix",            n: 938,  pct: 60 },
+    { label: "Completed a fix",       sub: "at least one resolved",    n: 812,  pct: 52 },
+    { label: "Multiple fixes",        sub: "two or more resolved",     n: 503,  pct: 32 },
+  ],
+
+  // ── Act 2: outcomes by fix type ──  (count = fixes completed)
+  outcomes: [
+    { key:"credit",    name:"Credit Life Replacement",    meta:"avg R298/mo saved",      count:744, ico:"shield",  stat:"R 222k", statL:"saved / mo" },
+    { key:"funeral",   name:"Funeral Consolidation",      meta:"duplicate cover removed", count:486, ico:"umbrella", stat:"R 71k",  statL:"saved / mo" },
+    { key:"arrears",   name:"Arrears Resolution",         meta:"settlement plans live",  count:318, ico:"scale",   stat:"R 9.2m", statL:"in resolution" },
+    { key:"prescribed",name:"Prescribed Debt Challenge",  meta:"accounts contested",     count:274, ico:"scroll",  stat:"R 2.74m",statL:"challenged" },
+    { key:"emergency", name:"Emergency Cash Assistance",   meta:"interest-free advances drawn", count:206, ico:"wallet",  stat:"206",   statL:"advances set up" },
+    { key:"sti",       name:"Short-Term Insurance Audit", meta:"policies reviewed",      count:86,  ico:"car",     statL:"audited", stat:"86" },
+  ],
+
+  // ── Act 3: value strip ──
+  valueStrip: [
+    { l:"Monthly cash freed up",         v:"R 384,900", d:"R 4.62m annualised" },
+    { l:"Prescribed debt challenged",    v:"R 2.74m",   d:"274 accounts" },
+    { l:"Arrears under active intervention", v:"R 6.4m", d:"214 employees" },
+    { l:"Avg saving per active employee",v:"R 326/mo",  d:"R 3,912 / year" },
+  ],
+
+  // ── Act 3: cumulative monthly savings run-rate (R000s) ──
+  savings: [42, 78, 121, 168, 214, 258, 297, 331, 358, 384],
+  savingsLabels: ["Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May"],
+
+  // ── Act 3: creditor breakdown (arrears journey) ──
+  creditors: [
+    { name:"African Bank",    color:"#e0492f", accounts:128, balance:"R 2.41m", avg:"R 18,830", status:"elig", statusL:"In journey" },
+    { name:"Capitec",         color:"#b15be8", accounts: 96, balance:"R 1.88m", avg:"R 19,580", status:"elig", statusL:"In journey" },
+    { name:"Standard Bank",   color:"#8e42bd", accounts: 74, balance:"R 1.62m", avg:"R 21,890", status:"elig", statusL:"In journey" },
+    { name:"FNB",             color:"#1fa463", accounts: 61, balance:"R 1.39m", avg:"R 22,790", status:"prog", statusL:"Negotiating" },
+    { name:"Truworths",       color:"#8a4fc4", accounts: 88, balance:"R 1.04m", avg:"R 11,820", status:"prog", statusL:"Negotiating" },
+    { name:"Other retailers", color:"#8497a7", accounts:142, balance:"R 0.84m", avg:"R 5,915",  status:"prog", statusL:"Negotiating" },
+  ],
+  creditorsTotal: { accounts:589, balance:"R 9.18m" },
+
+  // debt pressure by credit TYPE (the employer-legible cut; creditors are the drill-down)
+  debtProfile: [
+    { type:"Bank personal loans", balance:"R 5.91m", pct:64, col:"#32217c" },
+    { type:"Retail / store credit", balance:"R 1.88m", pct:20, col:"#b15be8" },
+    { type:"Microloans",            balance:"R 0.92m", pct:10, col:"#e8910c" },
+    { type:"Other unsecured",       balance:"R 0.47m", pct:6,  col:"#8497a7" },
+  ],
+
+  // ── Act 4: stress map (by site) ──
+  // stress = composite financial-pressure index (arrears load, debt exposure, low resilience). Higher = more pressure.
+  regions: [
+    { name:"Secunda Site",    pct:71, stress:74, indebted:"R 31,200" },
+    { name:"Field / Remote",  pct:49, stress:68, indebted:"R 27,800" },
+    { name:"Sasolburg",       pct:68, stress:61, indebted:"R 24,100" },
+    { name:"Vaalwater Plant", pct:84, stress:52, indebted:"R 19,600" },
+    { name:"Head Office",     pct:62, stress:38, indebted:"R 14,300" },
+  ],
+  stressMap: [
+    { l:"Highest stress site",   v:"Secunda Site",    d:"index 74 · avg debt R31,200", tone:"red" },
+    { l:"Lowest stress site",    v:"Head Office",     d:"index 38 · most resilient",   tone:"green" },
+    { l:"Most engaged site",     v:"Vaalwater Plant", d:"84% enrolled",                tone:"blue" },
+    { l:"Most indebted site",    v:"Secunda Site",    d:"R31,200 avg unsecured debt",  tone:"amber" },
+  ],
+
+  // ── Act 4: income bands (activated employees) ──
+  income: [
+    { name:"Under R8k/mo",  count:281, color:"#32217c" },
+    { name:"R8k–R15k/mo",   count:392, color:"#b15be8" },
+    { name:"R15k–R25k/mo",  count:178, color:"#4ea3da" },
+    { name:"Over R25k/mo",  count:87,  color:"#bfe0f5" },
+  ],
+
+  // ── Act 4: ratings ──
+  ratings: {
+    avg: 4.6,
+    dist: { 5:71, 4:19, 3:6, 2:3, 1:1 },   // % distribution
+    fiveStarPct: 71,
+    responses: 1640,
+  },
+
+  // ── Act 5: prescription ──
+  prescription: {
+    total: "R 2.74m",
+    accounts: 274,
+    avgPerAccount: "R 10,000",
+    statusBars: [
+      { l:"Identified",        n:274, pct:100, c:"#bfe0f5" },
+      { l:"Letter dispatched", n:241, pct:88,  c:"#4ea3da" },
+      { l:"Creditor conceded", n:163, pct:59,  c:"#b15be8" },
+      { l:"Written off",       n:118, pct:43,  c:"#1fa463" },
+    ],
+    writtenOff: "R 1.18m",
+  },
+
+  // ── Act 5: referral ──
+  referral: {
+    shares: 1284,
+    shareRate: 47,        // % of completers who shared
+    channel: "WhatsApp",
+    impliedReach: "≈ 3,900",
+  },
+
+  // ── Financial Risk Signals (diagnostic of exposure) ──
+  riskSignals: [
+    { sig:"Paying duplicate credit life", n:438, sev:"high",   note:"insurance on loans they could replace cheaper" },
+    { sig:"Excessive / duplicate funeral cover", n:512, sev:"high", note:"two or more overlapping policies" },
+    { sig:"Unsecured arrears", n:347, sev:"high",   note:"behind on one or more accounts" },
+    { sig:"Possible prescribed debt", n:291, sev:"med", note:"old debt that may no longer be owed" },
+    { sig:"No access to emergency cash", n:684, sev:"med", note:"would turn to expensive credit in a cash crunch" },
+    { sig:"Over-insured short-term", n:156, sev:"low", note:"paying more than cover requires" },
+  ],
+
+  // ── Opportunities Identified (next-wave sales engine) ──
+  opportunities: {
+    cards: [
+      { name:"Credit life replacement", eligible:412, saving:"R 122,800", icon:"shield" },
+      { name:"Funeral consolidation",   eligible:278, saving:"R 40,900",  icon:"umbrella" },
+      { name:"Short-term insurance audit", eligible:236, saving:"R 31,400", icon:"car" },
+      { name:"Prescription review",     eligible:183, saving:"—", extra:"R 1.6m challengeable", icon:"scroll" },
+      { name:"Emergency cash access",   eligible:341, saving:"—", extra:"alternative to costly credit", icon:"wallet" },
+    ],
+    estMonthly: "R 241,000",
+    estAnnual: "R 2.89m",
+  },
+
+  // ── Act 6: webchat engagement (categorised) ──
+  chat: {
+    // Explicit demonstration data. This object is only used when ?demo=1.
+    // Live mode always replaces DATA with the server payload before rendering.
+    available: true,
+    conversations: 3247,
+    resolvedInChat: 81,        // % resolved without escalation
+    escalated: 19,             // % handed to a human/agent
+    avgFirstReply: "12s",
+    csat: 4.5,
+    // per product-journey breakdown
+    byJourney: [
+      { key:"credit",    name:"Credit Life Replacement",    convos:1042, pct:32, sentiment:71,
+        themes:[ {t:"Is this legitimate / a scam?", n:286}, {t:"Will it affect my credit score?", n:241}, {t:"What happens to my existing cover?", n:198}, {t:"How long until I see the saving?", n:154}, {t:"Can the bank refuse?", n:163} ] },
+      { key:"funeral",   name:"Funeral Consolidation",      convos:638, pct:20, sentiment:78,
+        themes:[ {t:"Will I lose my waiting period?", n:212}, {t:"Are all my family still covered?", n:188}, {t:"Which policies are being cancelled?", n:131}, {t:"What if someone passes during switch?", n:107} ] },
+      { key:"arrears",   name:"Arrears Resolution",         convos:561, pct:17, sentiment:62,
+        themes:[ {t:"Will this flag me at the bureau?", n:204}, {t:"Is this debt review?", n:178}, {t:"What do I say to the creditor?", n:96}, {t:"Can they still take legal action?", n:83} ] },
+      { key:"prescribed",name:"Prescribed Debt Challenge",  convos:489, pct:15, sentiment:66,
+        themes:[ {t:"Is it legal to not pay?", n:171}, {t:"Will they come after me?", n:148}, {t:"How do you know it's prescribed?", n:97}, {t:"What if I paid recently?", n:73} ] },
+      { key:"emergency", name:"Emergency Cash Assistance",   convos:312, pct:10, sentiment:74,
+        themes:[ {t:"Is this a loan?", n:128}, {t:"When can I claim?", n:92}, {t:"Who gets the payout?", n:92} ] },
+      { key:"general",   name:"General / account & login",  convos:205, pct:6,  sentiment:69,
+        themes:[ {t:"Can't log in / reset password", n:88}, {t:"Is my data safe (POPIA)?", n:67}, {t:"How is this free to me?", n:50} ] },
+    ],
+    // top trending questions across all journeys
+    trending: [
+      { q:"Will any of this affect my credit score?", n:445, trend:"+18%", journey:"Credit Life · Arrears" },
+      { q:"Is empower-fin Dashboard Portal legitimate / safe?", n:353, trend:"+9%",  journey:"Credit Life · General" },
+      { q:"Is this debt review or a loan?", n:306, trend:"+22%", journey:"Arrears · Emergency" },
+      { q:"Will I keep my funeral waiting period?", n:212, trend:"flat", journey:"Funeral" },
+      { q:"Is it legal not to pay prescribed debt?", n:171, trend:"+14%", journey:"Prescribed Debt" },
+    ],
+    // weekly volume sparkline
+    volume: [180, 214, 248, 263, 291, 318, 342, 360, 351, 374],
+  },
+};
+
+/* ════════════════════════════════════════════════════════════════════
+   PORTFOLIO (internal) — every employer across the key reportable metrics.
+   Static rows below are used only when the page is opened with ?demo=1.
+   Metric directions: higher-is-better for most; for stress & arrears,
+   higher-is-worse (handled in the heatmap colouring).
+   ════════════════════════════════════════════════════════════════════ */
+const PORTFOLIO = {
+  // metric definitions: key, label, unit, format, goodHigh (true = higher is better)
+  metrics: [
+    { key:"takeUp",      label:"Take-up",            unit:"%",  goodHigh:true  },
+    { key:"engaged",     label:"Active engagement",  unit:"%",  goodHigh:true  },
+    { key:"wellness",    label:"Financial Wellness Score", unit:"", goodHigh:true },
+    { key:"saving",      label:"Cashflow / mo",      unit:"R",  goodHigh:true  },
+    { key:"betterOff",   label:"Better off",         unit:"n",  goodHigh:true  },
+    { key:"oppValue",    label:"Opportunity / mo",   unit:"R",  goodHigh:true  },
+    { key:"stress",      label:"Stress index",       unit:"",   goodHigh:false },
+    { key:"arrears",     label:"Arrears %",          unit:"%",  goodHigh:false },
+    { key:"rating",      label:"Rating",             unit:"/5", goodHigh:true  },
+    { key:"fiveStarPct", label:"5-star share",       unit:"%",  goodHigh:true  },
+  ],
+  live:false,
+  explicitDemo:new URLSearchParams(location.search).get('demo')==='1',
+  error:false,
+  employers: [
+    { name:"Vaalwater Industrial Group", heads:1575, takeUp:75, engaged:60, wellness:70, saving:384900, betterOff:812, oppValue:241000, stress:62, arrears:30, rating:4.6, fiveStarPct:71 },
+    { name:"Sasol Downstream",           heads:2840, takeUp:68, engaged:54, wellness:66, saving:612400, betterOff:1240, oppValue:398000, stress:71, arrears:37, rating:4.4, fiveStarPct:64 },
+    { name:"Vantage Benefits",           heads:980,  takeUp:82, engaged:71, wellness:78, saving:301500, betterOff:602, oppValue:128000, stress:44, arrears:21, rating:4.7, fiveStarPct:76 },
+    { name:"Midrand Logistics",          heads:1210, takeUp:58, engaged:41, wellness:59, saving:214800, betterOff:418, oppValue:286000, stress:78, arrears:43, rating:4.1, fiveStarPct:49 },
+    { name:"Cape Mutual Services",       heads:1660, takeUp:79, engaged:66, wellness:74, saving:451200, betterOff:902, oppValue:174000, stress:51, arrears:25, rating:4.6, fiveStarPct:70 },
+    { name:"Highveld Steel",             heads:3120, takeUp:63, engaged:49, wellness:61, saving:548900, betterOff:1080, oppValue:472000, stress:74, arrears:39, rating:4.2, fiveStarPct:54 },
+    { name:"Tshwane Retail Group",       heads:740,  takeUp:71, engaged:58, wellness:68, saving:188300, betterOff:392, oppValue:96000,  stress:57, arrears:33, rating:4.5, fiveStarPct:67 },
+    { name:"Boland Agri Co-op",          heads:520,  takeUp:86, engaged:74, wellness:80, saving:142600, betterOff:318, oppValue:61000,  stress:39, arrears:18, rating:4.8, fiveStarPct:82 },
+  ],
+};
+
+/* Portfolio measure glossary. Plain-language definitions are based on the
+   approved financial-wellbeing measure dictionary supplied for the build. */
+const EMPLOYER_METRIC_INFO = {
+  execEmployeesEnrolled:{ title:'Employees enrolled', text:'Headcount who have created an account on the platform.', formula:'Count of registered user accounts for this employer.' },
+  execCashflow:{ title:'Monthly cashflow restored', text:'Total recurring rand saved per month across completed fixes.', formula:'Sum of monthly premium or instalment reductions from completed credit-life, funeral and short-term fixes.' },
+  execDebtIntervention:{ title:'Debt under active intervention', text:'Arrears where a settlement or reduced-instalment arrangement has actually been sent. Prescribed-debt challenges and guidance-only cases are excluded.', formula:'Sum of balances on accounts with a dispatched arrangement in the arrears journey.' },
+  execPrescribed:{ title:'Prescribed debts challenged', text:'Rand value or account count of debt flagged as potentially prescribed and formally contested.', formula:'Sum of balances, or count of accounts, where a prescription challenge has been lodged.' },
+  execBetterOff:{ title:'Employees better off', text:'Unique employees who completed at least one fix with a concrete result. A person is counted once even if they completed more than one fix.', formula:'Distinct employees with at least one completed outcome; guidance-only journeys are excluded.' },
+  execSatisfaction:{ title:'Employee satisfaction', text:'Average end-of-journey star rating given by employees.', formula:'Mean of all post-journey ratings from 1 to 5.' },
+  wellness:{ title:'Workforce Financial Wellness Score', text:'A single score out of 100 that tracks workforce financial health and movement over time. It combines engagement, cashflow relief, debt risk and insurance efficiency.', formula:'Engagement 20% + Cashflow relief 30% + Debt risk 30% + Insurance efficiency 20%.' },
+  wellnessEngagement:{ title:'Engagement driver', text:'Measures whether eligible employees are actually using the programme by starting a journey.', formula:'Users who started a journey ÷ eligible employees × 100. Weight: 20%.' },
+  wellnessCashflow:{ title:'Cashflow relief driver', text:'Measures how much recurring monthly saving has already been unlocked against the monthly saving still achievable.', formula:'Monthly savings unlocked ÷ monthly savings achievable × 100. Weight: 30%.' },
+  wellnessDebt:{ title:'Debt risk driver', text:'Measures the share of platform users in arrears, inverted so lower arrears produces a higher score.', formula:'100 − (platform users in arrears ÷ platform users × 100). Weight: 30%.' },
+  wellnessInsurance:{ title:'Insurance efficiency driver', text:'Measures how much identified wasteful or duplicate cover has already been fixed.', formula:'Wasteful or duplicate cover fixed ÷ total wasteful or duplicate cover found × 100. Weight: 20%.' },
+  takeUp:{ title:'Programme take-up', text:'Share of the eligible workforce who have enrolled by creating an account on the platform.', formula:'Enrolled employees ÷ eligible workforce × 100.' },
+  engaged:{ title:'Actively engaged', text:'Share of the eligible workforce who have started at least one product journey.', formula:'Activated users ÷ eligible workforce × 100.' },
+  saving:{ title:'Cash freed up / month', text:'Total recurring monthly saving created by completed fixes.', formula:'Sum of monthly reductions from completed credit-life, funeral and short-term fixes.' },
+  rating:{ title:'Average experience rating', text:'Average end-of-journey star rating, together with the number of ratings collected.', formula:'Mean of post-journey ratings from 1 to 5.' },
+  funnel:{ title:'Engagement funnel', text:'Shows how employees move from eligibility through enrolment and activation to completing one or more fixes.', formula:'Each stage is a distinct employee count; percentages are shown against the eligible workforce.' },
+  funnelEligible:{ title:'Eligible', text:'Everyone in the workforce the employer has switched on for the programme.', formula:'Employer eligible headcount for the selected as-at date.' },
+  funnelEnrolled:{ title:'Enrolled', text:'Employees who joined the programme by creating an account.', formula:'Count of registered user accounts.' },
+  funnelActivated:{ title:'Activated', text:'Employees who started at least one product journey.', formula:'Distinct employees who began one or more journeys.' },
+  funnelCompleted:{ title:'Completed a fix', text:'Employees who finished at least one journey with a concrete result.', formula:'Distinct employees with at least one completed journey.' },
+  funnelMultiple:{ title:'Multiple fixes', text:'Employees who completed two or more journeys.', formula:'Distinct employees with at least two completed journeys.' },
+  outcomes:{ title:'Financial problems resolved', text:'Shows the number of completed fixes by journey type and the rand impact created by each type.', formula:'Count completed journeys by type; value is the relevant monthly saving or balance challenged/under arrangement.' },
+  valueMonthly:{ title:'Monthly cash freed up', text:'Recurring monthly saving delivered by completed fixes, with the annualised equivalent.', formula:'Sum of monthly reductions; annualised value = monthly amount × 12.' },
+  valuePrescribed:{ title:'Prescribed debt challenged', text:'Value and number of potentially prescribed debt accounts being contested.', formula:'Sum of challenged balances and count of accounts with a lodged challenge.' },
+  valueArrears:{ title:'Arrears under active intervention', text:'Value and employee count where settlement or reduced-instalment arrangements have actually been sent.', formula:'Sum of balances and distinct employees with a dispatched arrangement.' },
+  valueAvgSaving:{ title:'Average saving per active employee', text:'Average recurring monthly cashflow restored for each activated employee.', formula:'Monthly cashflow restored ÷ activated employees.' },
+  debtProfile:{ title:'Debt Pressure Profile', text:'Shows arrears balances by credit type, with an optional drill-down by named creditor, account count, average balance and current status.', formula:'Sum arrears balances by credit type; creditor view aggregates the same balances by creditor.' },
+  stressBySite:{ title:'Stress index by site', text:'A pressure score by site. Higher values mean greater financial stress, reflecting arrears incidence and debt load.', formula:'Composite of arrears rate and average debt load among users at each site. Higher = more pressure.' },
+  stressHighest:{ title:'Highest stress site', text:'The site with the greatest financial pressure in the selected view.', formula:'Site with the highest stress index.' },
+  stressLowest:{ title:'Lowest stress site', text:'The site with the lowest financial pressure in the selected view.', formula:'Site with the lowest stress index.' },
+  stressEngaged:{ title:'Most engaged site', text:'The site with the strongest programme take-up.', formula:'Site with the highest enrolled ÷ eligible headcount.' },
+  stressIndebted:{ title:'Most indebted site', text:'The site with the highest average unsecured debt exposure per user.', formula:'Site with the highest average arrears balance per user.' },
+  incomeReach:{ title:'Reach by income band', text:'Shows which income bands the programme is reaching among activated employees.', formula:'Activated employees grouped by payroll income band.' },
+  ratingDistribution:{ title:'Average rating & distribution', text:'Shows the mean employee rating and the spread of 1 to 5 star responses.', formula:'Mean and frequency distribution of post-journey star ratings.' },
+  fiveStarPct:{ title:'5-star share', text:'Share of post-journey ratings that received the highest 5-star rating.', formula:'5-star ratings ÷ all ratings × 100.' },
+  debtStates:{ title:'How problem debt is being handled', text:'Separates problem debt into active intervention, debt being challenged and guidance-only cases so the states are not overstated.', formula:'Balances and employee counts are grouped by the current intervention state.' },
+  debtActive:{ title:'Under active intervention', text:'Arrears where a settlement or reduced-instalment arrangement has actually been sent.', formula:'Balances and distinct employees where an arrangement has been dispatched.' },
+  debtChallenged:{ title:'Being challenged', text:'Potentially prescribed debt that is being formally contested.', formula:'Balances and distinct employees with a lodged prescription challenge.' },
+  debtGuided:{ title:'Self-managed via guidance', text:'Employees who could not afford an arrangement and were educated on prescription so they can manage the account themselves. This is not counted as active intervention.', formula:'Balances and distinct employees in the guidance-only state.' },
+  prescription:{ title:'Prescribed debt recovery', text:'Tracks potentially prescribed debt from identification through challenge and creditor outcome.', formula:'Value challenged and status counts across identified → letter sent → creditor conceded → written off.' },
+  prescriptionValue:{ title:'Value challenged', text:'Total rand value of potentially prescribed debt that has been contested.', formula:'Sum of challenged account balances.' },
+  prescriptionWrittenOff:{ title:'Already written off', text:'Value creditors have already conceded or confirmed as written off.', formula:'Sum of balances confirmed written off.' },
+  prescriptionAccounts:{ title:'Challenge accounts', text:'Number of accounts included in the prescribed-debt challenge process.', formula:'Count of challenge accounts in the selected view.' },
+  riskSignals:{ title:'Financial Risk Signals', text:'Counts employees showing specific exposures such as duplicate cover, arrears, possible prescribed debt, limited emergency resilience or over-insurance.', formula:'Per signal: distinct users flagged by the diagnostic scan of their accounts or cover.' },
+  opportunities:{ title:'Opportunities identified', text:'Shows employees who appear eligible for a fix they have not yet completed, and the potential value associated with the next wave of action.', formula:'Eligibility is based on diagnostic flags with no completed fix. Value is shown using the portal\'s configured opportunity method.' },
+  opportunityValue:{ title:'Estimated additional value', text:'Projected additional monthly and annual value associated with the identified next-wave opportunities.', formula:'The displayed value follows the portal\'s current opportunity calculation for the selected employer and filters.' },
+  referralRate:{ title:'Organic referral rate', text:'Share of employees who completed a journey and then shared or referred the programme.', formula:'Referral/share events relative to the relevant completed-user population.' },
+  ewaEmployees:{ title:'Employees took up Early Wage Access', text:'Number of unique employees who used Early Wage Access in the selected period.', formula:'Distinct employees with finalised salary advances.' },
+  ewaTotal:{ title:'Total advanced', text:'Total rand value of finalised Early Wage Access drawdowns in the selected period.', formula:'Sum of finalised advance amounts.' },
+  ewaAverage:{ title:'Average advance', text:'Average rand amount per finalised Early Wage Access drawdown.', formula:'Total finalised advance value ÷ number of finalised advances.' },
+  ewaFrequency:{ title:'Advances per employee', text:'Average number of finalised Early Wage Access drawdowns per employee who used the service.', formula:'Finalised advances ÷ unique employees with a finalised advance.' },
+  ewaTrend:{ title:'Total advanced per month', text:'Monthly trend in the total value of finalised Early Wage Access advances.', formula:'Sum finalised advance amounts by advance month.' },
+  chatTotal:{ title:'Total conversations', text:'Number of chat conversations for this employer in the selected period.', formula:'Count of chat sessions from the separate chat source.' },
+  chatResolved:{ title:'Resolved in chat', text:'Share of conversations closed without handing the employee to a person.', formula:'Sessions resolved in chat ÷ all chat sessions × 100.' },
+  chatFirstReply:{ title:'First reply time', text:'Typical time to the first response across chat sessions.', formula:'The source specification defines this as the median first-response time.' },
+  chatSatisfaction:{ title:'Chat satisfaction', text:'Average rating employees give after a chat.', formula:'Mean post-chat rating from the separate chat source.' },
+  chatByJourney:{ title:'Conversations by journey', text:'Chat volume split across product journeys, with the available sentiment read.', formula:'Chat sessions grouped by journey tag.' },
+  chatTrending:{ title:'Trending questions', text:'Specific employee questions that are appearing most often or rising in the selected period.', formula:'Question text grouped/classified and compared period to period.' },
+  chatThemes:{ title:'Chat themes', text:'Groups employee questions into recurring themes so common concerns and objections are visible.', formula:'Question/message text classified into themes by the separate chat system.' }
+};
+
+const PORTFOLIO_METRIC_INFO = {
+  employerClients:{ title:'Employer clients', text:'The number of authorised employer clients currently included in this portfolio selection.', formula:'Employees covered = the eligible workforce across the selected employers.' },
+  takeUp:{ title:'Programme take-up', text:'Share of the eligible workforce who have enrolled by creating an account on the platform.', formula:'Enrolled employees ÷ eligible workforce × 100.' },
+  engaged:{ title:'Actively engaged', text:'Share of the eligible workforce who have started at least one product journey.', formula:'Activated users ÷ eligible workforce × 100.' },
+  wellness:{ title:'Financial Wellness Score', text:'A single score out of 100 that tracks workforce financial health. It combines engagement, cashflow relief, debt risk and insurance efficiency.', formula:'Default model: Engagement 20% + Cashflow 30% + Debt risk 30% + Insurance 20%.' },
+  saving:{ title:'Cashflow restored / month', text:'Total recurring rand saved per month across completed fixes such as credit life, funeral and short-term insurance journeys.', formula:'Sum of monthly saving amounts from completed fixes.' },
+  betterOff:{ title:'Employees better off', text:'Unique employees who completed at least one journey with a concrete result. People are counted once even if they completed multiple fixes.', formula:'Distinct employees with at least one completed outcome.' },
+  oppValue:{ title:'Open opportunity / month', text:'The current portal value of unresolved monthly premium identified for further action. It is an observed exposure value, not an assumed saving percentage.', formula:'Sum of monthly premium on unresolved wasteful or duplicate policies currently under review.' },
+  stress:{ title:'Financial stress index', text:'A composite pressure indicator. Higher values mean greater financial stress, driven by arrears incidence and debt load.', formula:'Portfolio uses the same arrears/debt pressure model as the employer dashboard. Lower is better.' },
+  arrears:{ title:'Arrears %', text:'Share of platform users whose debt is visible and who are currently in arrears.', formula:'Users in arrears ÷ users with visible debt × 100. Lower is better.' },
+  rating:{ title:'Average experience rating', text:'Average end-of-journey star rating received from employees.', formula:'Mean of post-journey ratings from 1 to 5.' },
+  fiveStarPct:{ title:'5-star share', text:'Share of all post-journey ratings that received the highest 5-star rating.', formula:'5-star ratings ÷ all ratings × 100.' },
+  measureGuide:{ title:'What these measures mean', text:'Portfolio measures use the same dated source records and calculation rules as the corresponding employer dashboard metrics. Select employers to recalculate the portfolio cards, heatmap and league table for that subset.', formula:'Missing source data is shown as unavailable and is excluded from averages/rankings rather than treated as zero.' }
+};
+const PORTFOLIO_KPI_INFO = {
+  employerClients:'employerClients', saving:'saving', oppValue:'oppValue', wellness:'wellness'
+};
+
+/* ─────────────────── tiny SVG / icon helpers ─────────────────── */
+const ICON = {
+  shield:'<path d="M12 3l7 3v5c0 4.4-3 7.5-7 9-4-1.5-7-4.6-7-9V6l7-3z" stroke="#b15be8" stroke-width="1.8" fill="none"/>',
+  umbrella:'<path d="M12 3v2M3.5 11a8.5 8.5 0 0117 0H3.5zM12 11v7a2.5 2.5 0 01-5 0" stroke="#b15be8" stroke-width="1.8" fill="none" stroke-linecap="round"/>',
+  scale:'<path d="M12 4v16M7 20h10M5 8l-2.5 5a2.5 2.5 0 005 0L5 8zm14 0l-2.5 5a2.5 2.5 0 005 0L19 8zM5 8l7-2 7 2" stroke="#b15be8" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  scroll:'<path d="M6 4h10a2 2 0 012 2v11a3 3 0 01-3 3H7a2 2 0 01-2-2V6M9 8h6M9 12h6M9 16h4" stroke="#b15be8" stroke-width="1.7" fill="none" stroke-linecap="round"/>',
+  wallet:'<path d="M3 8a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm14 3h-3a2 2 0 000 4h3" stroke="#b15be8" stroke-width="1.8" fill="none" stroke-linecap="round"/>',
+  car:'<path d="M5 13l1.5-4.5A2 2 0 018.4 7h7.2a2 2 0 011.9 1.5L19 13m-14 0h14m-14 0v4h2v-2m10 2h2v-4m-12 1h1m9 0h1" stroke="#b15be8" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+};
+function svgIco(name){ return '<svg width="20" height="20" viewBox="0 0 24 24">'+(ICON[name]||'')+'</svg>'; }
+
+const KPI_ICONS = {
+  takeUp:    {bg:'#f3efff', path:'<circle cx="12" cy="8" r="3.5" stroke="#b15be8" stroke-width="1.8" fill="none"/><path d="M5 19c0-3 3.1-5 7-5s7 2 7 5" stroke="#b15be8" stroke-width="1.8" fill="none" stroke-linecap="round"/>'},
+  activated: {bg:'#f3efff', path:'<path d="M13 3L5 13h6l-1 8 8-10h-6l1-8z" stroke="#b15be8" stroke-width="1.7" fill="none" stroke-linejoin="round"/>'},
+  saving:    {bg:'#e7f7ef', path:'<path d="M12 4v16m4-13H10a2.5 2.5 0 000 5h4a2.5 2.5 0 010 5H8" stroke="#1fa463" stroke-width="1.8" fill="none" stroke-linecap="round"/>'},
+  rating:    {bg:'#fdf3e2', path:'<path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5L12 3z" stroke="#e8910c" stroke-width="1.6" fill="none" stroke-linejoin="round"/>'},
+};
+
+function el(html){ const d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstElementChild; }
+const hasValue=v=>v!==null&&v!==undefined&&v!==''&&!(typeof v==='number'&&Number.isNaN(v));
+function fmtCount(v){ return hasValue(v)?Number(v).toLocaleString('en-ZA'):'—'; }
+function employerMetricKey(label){
+  const k=String(label||'').trim().toLowerCase();
+  const map={
+    'employees enrolled':'execEmployeesEnrolled',
+    'monthly cashflow restored':'execCashflow',
+    'debt under active intervention':'execDebtIntervention',
+    'prescribed debts challenged':'execPrescribed',
+    'employees better off':'execBetterOff',
+    'employee satisfaction':'execSatisfaction',
+    'eligible workforce':'funnelEligible',
+    'eligible':'funnelEligible',
+    'enrolled':'funnelEnrolled',
+    'activated':'funnelActivated',
+    'completed a fix':'funnelCompleted',
+    'multiple fixes':'funnelMultiple',
+    'monthly cash freed up':'valueMonthly',
+    'prescribed debt challenged':'valuePrescribed',
+    'arrears under active intervention':'valueArrears',
+    'avg saving per active employee':'valueAvgSaving',
+    'highest stress site':'stressHighest',
+    'lowest stress site':'stressLowest',
+    'most engaged site':'stressEngaged',
+    'most indebted site':'stressIndebted',
+    'engagement':'wellnessEngagement',
+    'cashflow relief':'wellnessCashflow',
+    'debt risk':'wellnessDebt',
+    'insurance efficiency':'wellnessInsurance'
+  };
+  return map[k]||'';
+}
+function employerInfoButton(key){ return key?pfInfoButton(key):''; }
+
+/* ─────────────────── ACT 1: KPI cards ─────────────────── */
+function sparkline(points, color){
+  const w=180,h=54,max=Math.max(...points),min=Math.min(...points);
+  const norm=v=>h-6-((v-min)/(max-min||1))*(h-14);
+  const step=w/(points.length-1);
+  let d=points.map((p,i)=>(i?'L':'M')+(i*step).toFixed(1)+' '+norm(p).toFixed(1)).join(' ');
+  let area=d+` L${w} ${h} L0 ${h} Z`;
+  const id='sp'+Math.random().toString(36).slice(2,7);
+  return `<svg class="kpi-spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${color}" stop-opacity=".22"/><stop offset="1" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#${id})"/>
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/* ─────────────────── Executive summary band ─────────────────── */
+function renderExec(){
+  const wrap=document.getElementById('exec-summary');
+  const tick='<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#1fa463" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const items=DATA.exec.items.map(it=>{ const mk=employerMetricKey(it.l); return `<div class="exec-item">${tick}<div><div class="exec-v">${it.v}</div><div class="exec-l">${it.l} ${employerInfoButton(mk)}</div></div></div>`; }).join('');
+  wrap.appendChild(el(`<div class="exec-band reveal">
+    <div class="exec-head">
+      <div class="exec-pulse"></div>
+      <div><div class="exec-title">Financial wellbeing impact summary</div><div class="exec-sub" id="exec-period">Programme to date · at a glance</div></div>
+      <div class="exec-verdict">${window.__LIVE__ ? (DATA.wellness?.complete===false || !hasValue(DATA.wellness?.score) ? 'Data incomplete' : (DATA.wellness.score>=75?'Strong':DATA.wellness.score>=60?'On track':'Needs attention')) : 'On track'}</div>
+    </div>
+    <div class="exec-grid">${items}</div>
+  </div>`));
+}
+
+/* ─────────────────── Workforce Financial Wellness Score ─────────────────── */
+function renderWellness(){
+  const wrap=document.getElementById('wellness');
+  if(!wrap) return;
+  const w=DATA.wellness||{};
+  if(window.__LIVE__ && (w.complete===false || !hasValue(w.score))){
+    const drivers=(w.drivers||[]).map(d=>{
+      const available=d.available!==false && hasValue(d.score);
+      const score=available?Number(d.score):null;
+      const col=score>=75?'#1fa463':score>=62?'#b15be8':'#e8910c';
+      const mk=employerMetricKey(d.name); return `<div class="wd-row"><div class="wd-name">${d.name} ${employerInfoButton(mk)}<small>${d.note||''}</small></div><div class="wd-track"><div class="wd-fill" style="width:${available?score:0}%;background:${available?col:'#e8e1f7'}"></div></div><div class="wd-val">${available?score:'—'}</div></div>`;
+    }).join('');
+    wrap.appendChild(el(`<div class="wellness-inner"><div class="wellness-left"><div style="font-family:'Fraunces',serif;font-size:46px;color:#32217c;line-height:1">—</div><div style="font-size:11px;color:#8497a7;font-weight:800;margin-top:4px">/ 100</div><div class="wellness-band" style="color:#8a6610;background:#fff8e8;border-color:#efd49b">Data incomplete</div><div class="wellness-note">The score is calculated only when all required driver feeds are available. Missing data is never treated as zero.</div></div><div class="wellness-right">${drivers||'<div class="muted">Required score drivers have not been loaded.</div>'}</div></div>`));
+    return;
+  }
+  const delta=hasValue(w.prior)?w.score-w.prior:null;
+  const R=64, C=Math.PI*R, frac=(Number(w.score)||0)/100;
+  const gauge=`<svg viewBox="0 0 160 96" width="180" style="display:block;margin:0 auto">
+    <path d="M16 88 A64 64 0 0 1 144 88" fill="none" stroke="#f7f4ff" stroke-width="13" stroke-linecap="round"/>
+    <path d="M16 88 A64 64 0 0 1 144 88" fill="none" stroke="url(#wg)" stroke-width="13" stroke-linecap="round" stroke-dasharray="${(C*frac).toFixed(1)} ${C.toFixed(1)}"/>
+    <defs><linearGradient id="wg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e8910c"/><stop offset=".55" stop-color="#b15be8"/><stop offset="1" stop-color="#1fa463"/></linearGradient></defs>
+    <text x="80" y="74" text-anchor="middle" font-family="Fraunces,serif" font-size="34" font-weight="600" fill="#32217c">${w.score}</text><text x="80" y="90" text-anchor="middle" font-size="9.5" font-weight="700" fill="#8497a7">/ 100</text></svg>`;
+  const drivers=(w.drivers||[]).map(d=>{ const available=d.available!==false&&hasValue(d.score); const score=available?Number(d.score):0; const col=score>=75?'#1fa463':score>=62?'#b15be8':'#e8910c'; const mk=employerMetricKey(d.name); return `<div class="wd-row"><div class="wd-name">${d.name} ${employerInfoButton(mk)}<small>${d.note||''}</small></div><div class="wd-track"><div class="wd-fill" style="width:0;background:${available?col:'#e8e1f7'}" data-w="${available?score:0}"></div></div><div class="wd-val">${available?score:'—'}</div></div>`; }).join('');
+  wrap.appendChild(el(`<div class="wellness-inner"><div class="wellness-left">${gauge}<div class="wellness-band">${w.band||'Index'}</div><div class="wellness-delta">${delta===null?'No prior period':(delta>=0?'▲ +'+delta:'▼ '+delta)+' pts vs. last period'}</div><div class="wellness-note">A composite of four weighted drivers. Use it to track workforce financial health over time.</div></div><div class="wellness-right">${drivers}</div></div>`));
+  setTimeout(()=>wrap.querySelectorAll('.wd-fill').forEach(f=>f.style.width=f.dataset.w+'%'),150);
+}
+
+function renderKPIs(){
+  const k=DATA.kpis||{};
+  const live=!!window.__LIVE__;
+  const safeSpark=(pts,col)=>Array.isArray(pts)&&pts.length>=2?sparkline(pts,col):'';
+  const cards=[
+    {label:'Programme take-up',infoKey:'takeUp',ico:KPI_ICONS.takeUp,data:k.takeUp,num:k.takeUp?.pct,suffix:'%',sub:k.takeUp?.available===false?'Data not loaded':`${fmtCount(k.takeUp?.enrolled)} of ${fmtCount(DATA.headcount)} enrolled`,spark:live?'':safeSpark([40,46,52,58,63,67,70,72,k.takeUp?.pct],'#b15be8')},
+    {label:'Actively engaged',infoKey:'engaged',ico:KPI_ICONS.activated,data:k.activated,num:k.activated?.pct,suffix:'%',sub:k.activated?.available===false?'Data not loaded':`${fmtCount(k.activated?.count)} started a fix`,spark:live?'':safeSpark([28,33,38,44,49,53,56,58,k.activated?.pct],'#b15be8')},
+    {label:'Cash freed up / month',infoKey:'saving',ico:KPI_ICONS.saving,data:k.monthlySaving,num:k.monthlySaving?.rand,prefix:'R',money:true,sub:k.monthlySaving?.available===false?'Data not loaded':`R ${fmtCount(k.monthlySaving?.perHead)} avg per active employee`,spark:safeSpark(DATA.savings,'#1fa463')},
+    {label:'Avg experience rating',infoKey:'rating',ico:KPI_ICONS.rating,data:k.avgRating,num:k.avgRating?.val,suffix:'/5',decimals:1,sub:k.avgRating?.available===false?'Data not loaded':`${fmtCount(DATA.ratings?.responses)} ratings collected`,spark:live?'':safeSpark([4.3,4.4,4.4,4.5,4.5,4.6,4.6,4.6,4.6],'#e8910c')},
+  ];
+  const wrap=document.getElementById('kpis');
+  cards.forEach((c,i)=>{
+    const available=c.data?.available!==false && hasValue(c.num);
+    const delta=hasValue(c.data?.delta)?`${Number(c.data.delta)>=0?'▲':'▼'} ${c.data.delta} vs. last period`:'No prior period';
+    const card=el(`<div class="card kpi reveal" style="animation-delay:${i*.06}s"><div class="kpi-label"><span class="kpi-ico" style="background:${c.ico.bg}"><svg width="18" height="18" viewBox="0 0 24 24">${c.ico.path}</svg></span>${c.label}${employerInfoButton(c.infoKey)}</div><div class="kpi-value">${available&&c.prefix?'<span class="cur">'+c.prefix+'</span>':''}<span class="kpi-num">${available?'0':'—'}</span>${available&&c.suffix?'<span style="font-size:18px">'+c.suffix+'</span>':''}</div><div class="kpi-sub">${available?`<span class="delta">${delta}</span>`:'<span style="color:#8497a7">Data not loaded</span>'}</div>${available?c.spark:''}</div>`);
+    wrap.appendChild(card); if(available) countUp(card.querySelector('.kpi-num'),Number(c.num),{money:c.money,decimals:c.decimals||0,delay:120+i*60});
+  });
+}
+
+function countUp(el, target, opts={}){
+  const dur=750, dec=opts.decimals||0, start=performance.now()+(opts.delay||0);
+  function fmt(v){
+    if(opts.money) return Math.round(v).toLocaleString();
+    return dec? v.toFixed(dec) : Math.round(v).toLocaleString();
+  }
+  function tick(now){
+    if(now<start){ requestAnimationFrame(tick); return; }
+    const t=Math.min(1,(now-start)/dur), e=1-Math.pow(1-t,3);
+    el.textContent=fmt(target*e);
+    if(t<1) requestAnimationFrame(tick); else el.textContent=fmt(target);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ─────────────────── ACT 2: funnel ─────────────────── */
+function renderFunnel(){
+  const wrap=document.getElementById('funnel');
+  const colors=['#32217c','#8e42bd','#b15be8','#3a93d2','#6bb2e0'];
+  (DATA.funnel||[]).forEach((f,i)=>{
+    const available=f.available!==false && hasValue(f.n) && hasValue(f.pct);
+    const mk=employerMetricKey(f.label); const row=el(`<div class="funnel-row"><div class="funnel-lbl">${f.label} ${employerInfoButton(mk)}<small>${available?f.sub:'Data not loaded'}</small></div><div class="funnel-bar-bg"><div class="funnel-bar" style="width:0;background:${available?colors[i]:'#e8e1f7'}">${available?f.pct+'%':'—'}</div></div><div class="funnel-val">${available?fmtCount(f.n):'—'}</div></div>`);
+    wrap.appendChild(row); if(available) setTimeout(()=>{row.querySelector('.funnel-bar').style.width=f.pct+'%';},120+i*90);
+  });
+}
+
+/* ─────────────────── ACT 2: outcomes ─────────────────── */
+function renderOutcomes(){
+  const wrap=document.getElementById('outcomes'); const note=document.getElementById('outcomes-note');
+  const available=DATA.availability?.journeys!==false;
+  const rows=Array.isArray(DATA.outcomes)?DATA.outcomes:[];
+  const total=rows.reduce((sum,o)=>sum+(Number(o.count)||0),0);
+  if(note) note.textContent=available?`${total.toLocaleString('en-ZA')} financial ${total===1?'problem':'problems'} resolved — and the value created`:'Journey data not loaded.';
+  if(!available){wrap.innerHTML='<div class="muted" style="padding:22px 8px">Journey data has not been loaded for this employer.</div>';return;}
+  if(!rows.length){wrap.innerHTML='<div class="muted" style="padding:22px 8px">No completed outcomes in the selected reporting window.</div>';return;}
+  rows.forEach(o=>{ const row=el(`<div class="outcome clickable"><div class="outcome-ico">${svgIco(o.ico)}</div><div><div class="outcome-name">${o.name}</div><div class="outcome-meta">${fmtCount(o.count)} completed · ${o.meta}</div></div><div class="outcome-stat"><div class="v">${o.stat}</div><div class="l">${o.statL}</div></div><div class="row-chevron">›</div></div>`); row.addEventListener('click',()=>outcomeDrill(o)); wrap.appendChild(row); });
+}
+
+/* ─────────────────── ACT 3: value strip ─────────────────── */
+function renderValueStrip(){
+  const wrap=document.getElementById('value-strip');
+  const strip=el('<div class="stat-strip reveal"></div>');
+  DATA.valueStrip.forEach(s=>{
+    const mk=employerMetricKey(s.l); strip.appendChild(el(`<div class="stat-cell"><div class="l">${s.l} ${employerInfoButton(mk)}</div><div class="v">${s.v}</div><div class="d">${s.d}</div></div>`));
+  });
+  wrap.appendChild(strip);
+}
+
+/* ─────────────────── ACT 3: savings area chart ─────────────────── */
+function renderEwa(){
+  const e = DATA.ewa;
+  const kpiWrap = document.getElementById('ewa-kpis');
+  if(kpiWrap){
+    kpiWrap.innerHTML='';
+    if(!e || !e.advances){
+      kpiWrap.appendChild(el('<div class="muted" style="padding:8px 2px;color:#8497a7;font-size:13.5px;grid-column:span 4;">No early wage access activity recorded yet.</div>'));
+    } else {
+      const cards=[
+        {v:e.clients.toLocaleString(), l:'Employees took up', infoKey:'ewaEmployees', sub:e.advances.toLocaleString()+' advances total', bg:'#f3efff'},
+        {v:e.total, l:'Total advanced', infoKey:'ewaTotal', sub:'all finalised advances', bg:'#e7f7ef'},
+        {v:e.avg, l:'Average advance', infoKey:'ewaAverage', sub:'per drawdown', bg:'#f3efff'},
+        {v:e.perClient.toFixed(1), l:'Advances per employee', infoKey:'ewaFrequency', sub:'average frequency', bg:'#fdf3e2'},
+      ];
+      cards.forEach((c,i)=>{
+        kpiWrap.appendChild(el(`<div class="card kpi reveal" style="animation-delay:${i*.06}s">
+          <div class="kpi-label"><span class="kpi-ico" style="background:${c.bg}"></span>${c.l}${employerInfoButton(c.infoKey)}</div>
+          <div class="kpi-value">${c.v}</div>
+          <div class="kpi-sub">${c.sub}</div>
+        </div>`));
+      });
+    }
+  }
+  // monthly trend chart (reuses the savings line style)
+  const wrap=document.getElementById('ewa-chart'); if(!wrap) return;
+  const pts=(e&&e.trend)||[], labels=(e&&e.trendLabels)||[];
+  if(pts.length<2){
+    wrap.appendChild(el(`<div style="padding:28px 8px;text-align:center;">
+      <div style="font-family:'Fraunces',serif;font-size:30px;font-weight:600;color:#32217c;">${e?e.total:'R 0'}</div>
+      <div style="font-size:12.5px;color:#8497a7;margin-top:6px;">${pts.length?'Total advanced so far.':'No advances yet.'}<br>The monthly trend appears with two or more months of data.</div></div>`));
+    return;
+  }
+  const w=860,h=210,pad=30,max=Math.max(...pts)*1.12;
+  const px=i=>pad+(i*(w-pad*2)/(pts.length-1));
+  const py=v=>h-pad-(v/max)*(h-pad*1.4);
+  const line=pts.map((p,i)=>(i?'L':'M')+px(i).toFixed(1)+' '+py(p).toFixed(1)).join(' ');
+  const area=line+` L${px(pts.length-1)} ${h-pad} L${px(0)} ${h-pad} Z`;
+  const dots=pts.map((p,i)=>`<circle cx="${px(i)}" cy="${py(p)}" r="${i===pts.length-1?4.5:2.5}" fill="#b15be8" stroke="#fff" stroke-width="2"/>`).join('');
+  const xlabels=labels.map((l,i)=>`<text x="${px(i)}" y="${h-8}" font-size="9.5" fill="#8497a7" text-anchor="middle" font-weight="600">${l}</text>`).join('');
+  wrap.appendChild(el(`<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;">
+    <defs><linearGradient id="ewag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b15be8" stop-opacity=".16"/><stop offset="1" stop-color="#b15be8" stop-opacity="0"/></linearGradient></defs>
+    ${[0,.5,1].map(f=>`<line x1="${pad}" x2="${w-pad}" y1="${h-pad-f*(h-pad*1.4)}" y2="${h-pad-f*(h-pad*1.4)}" stroke="#f7f4ff" stroke-width="1"/>`).join('')}
+    <path d="${area}" fill="url(#ewag)"/>
+    <path d="${line}" fill="none" stroke="#b15be8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    ${dots}${xlabels}
+    <text x="${px(pts.length-1)}" y="${py(pts[pts.length-1])-12}" font-size="12" font-weight="800" fill="#8e42bd" text-anchor="end">R${pts[pts.length-1]}k</text>
+  </svg>`));
+}
+
+function renderSavings(){
+  const wrap=document.getElementById('savings-chart');
+  const pts=DATA.savings||[], labels=DATA.savingsLabels||[];
+  // need at least 2 points to draw a trend line; otherwise show a friendly state
+  if(pts.length<2){
+    const val = pts.length ? pts[pts.length-1] : 0;
+    wrap.appendChild(el(`<div style="padding:28px 8px;text-align:center;">
+      <div style="font-family:'Fraunces',serif;font-size:30px;font-weight:600;color:#137a47;">R${val}k<span style="font-size:15px;">/mo</span></div>
+      <div style="font-size:12.5px;color:#8497a7;margin-top:6px;">${pts.length? 'Cumulative savings unlocked so far.' : 'No savings recorded yet.'}<br>The trend line appears once there are two or more months of data.</div>
+    </div>`));
+    return;
+  }
+  const w=420,h=200,pad=28,max=Math.max(...pts)*1.12;
+  const px=i=>pad+(i*(w-pad*2)/(pts.length-1));
+  const py=v=>h-pad-(v/max)*(h-pad*1.4);
+  let line=pts.map((p,i)=>(i?'L':'M')+px(i).toFixed(1)+' '+py(p).toFixed(1)).join(' ');
+  let area=line+` L${px(pts.length-1)} ${h-pad} L${px(0)} ${h-pad} Z`;
+  let dots=pts.map((p,i)=>`<circle cx="${px(i)}" cy="${py(p)}" r="${i===pts.length-1?4.5:0}" fill="#b15be8" stroke="#fff" stroke-width="2"/>`).join('');
+  let xlabels=labels.map((l,i)=> i%2===0||i===labels.length-1 ? `<text x="${px(i)}" y="${h-8}" font-size="9.5" fill="#8497a7" text-anchor="middle" font-weight="600">${l}</text>`:'').join('');
+  wrap.appendChild(el(`<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;">
+    <defs><linearGradient id="savg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1fa463" stop-opacity=".18"/><stop offset="1" stop-color="#1fa463" stop-opacity="0"/></linearGradient></defs>
+    ${[0,.5,1].map(f=>`<line x1="${pad}" x2="${w-pad}" y1="${h-pad-f*(h-pad*1.4)}" y2="${h-pad-f*(h-pad*1.4)}" stroke="#f7f4ff" stroke-width="1"/>`).join('')}
+    <path d="${area}" fill="url(#savg)"/>
+    <path d="${line}" fill="none" stroke="#1fa463" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    ${dots}${xlabels}
+    <text x="${px(pts.length-1)}" y="${py(pts[pts.length-1])-12}" font-size="12" font-weight="800" fill="#137a47" text-anchor="end">R${pts[pts.length-1]}k/mo</text>
+  </svg>`));
+}
+
+/* ─────────────────── ACT 3: debt pressure profile ─────────────────── */
+function renderDebtProfile(){
+  const wrap=document.getElementById('debt-profile'); if(!wrap) return;
+  // stacked bar by type
+  let seg=DATA.debtProfile.map(d=>`<div class="dp-seg" style="width:${d.pct}%;background:${d.col}" title="${d.type}"></div>`).join('');
+  let legend=DATA.debtProfile.map(d=>`<div class="dp-leg"><span class="dp-dot" style="background:${d.col}"></span><span class="dp-type">${d.type}</span><span class="dp-bal">${d.balance}</span><span class="dp-pct">${d.pct}%</span></div>`).join('');
+  wrap.appendChild(el(`<div>
+    <div class="dp-bar">${seg}</div>
+    <div class="dp-legend">${legend}</div>
+    <button class="dp-toggle" id="dp-toggle">View by creditor ▾</button>
+  </div>`));
+  const tbl=document.getElementById('creditor-table');
+  tbl.style.display='none';
+  document.getElementById('dp-toggle').addEventListener('click',function(){
+    const open=tbl.style.display!=='none';
+    tbl.style.display=open?'none':'block';
+    this.textContent=open?'View by creditor ▾':'Hide creditor detail ▴';
+  });
+}
+
+/* ─────────────────── ACT 3: creditor table ─────────────────── */
+function initials(n){ return n.split(/\s|\//)[0].slice(0,2).toUpperCase(); }
+function renderCreditors(){
+  const wrap=document.getElementById('creditor-table');
+  let rows=DATA.creditors.map((c,i)=>`<tr class="ct-row" data-i="${i}">
+    <td><div class="cred-name"><span class="cred-logo" style="background:${c.color}">${initials(c.name)}</span>${c.name}</div></td>
+    <td class="r num">${c.accounts}</td>
+    <td class="r num">${c.balance}</td>
+    <td class="r muted">${c.avg}</td>
+    <td class="r"><span class="chip-mini ${c.status==='elig'?'chip-elig':'chip-prog'}">${c.statusL}</span></td>
+  </tr>`).join('');
+  const tbl=el(`<table class="ct">
+    <thead><tr><th>Creditor</th><th class="r">Accounts</th><th class="r">Balance</th><th class="r">Avg / acct</th><th class="r">Status</th></tr></thead>
+    <tbody>${rows}
+      <tr style="border-top:2px solid #e8e1f7"><td style="font-weight:800;color:#32217c">Total in arrears journey</td>
+      <td class="r num">${DATA.creditorsTotal.accounts}</td><td class="r num">${DATA.creditorsTotal.balance}</td><td class="r"></td><td class="r"></td></tr>
+    </tbody></table>`);
+  tbl.querySelectorAll('.ct-row').forEach(r=>r.addEventListener('click',()=>creditorDrill(DATA.creditors[+r.dataset.i])));
+  wrap.appendChild(tbl);
+}
+
+/* ─────────────────── ACT 4: region bars ─────────────────── */
+function renderRegions(){
+  const wrap=document.getElementById('region-bars');
+  DATA.regions.forEach((r,i)=>{
+    const col = r.stress>=70?'#e0492f' : r.stress>=55?'#e8910c' : r.stress>=45?'#b15be8' : '#1fa463';
+    const row=el(`<div class="hbar-row"><div class="hbar-lbl">${r.name}</div><div class="hbar-track"><div class="hbar-fill" style="width:0;background:${col}"></div></div><div class="hbar-val">${r.stress}</div></div>`);
+    wrap.appendChild(row);
+    setTimeout(()=>row.querySelector('.hbar-fill').style.width=r.stress+'%', 150+i*80);
+  });
+}
+
+/* ─────────────────── ACT 4: stress map summary strip ─────────────────── */
+function renderStressMap(){
+  const wrap=document.getElementById('stress-strip'); if(!wrap) return;
+  const tone={ red:'#e0492f', green:'#1fa463', blue:'#b15be8', amber:'#e8910c' };
+  const strip=el('<div class="stress-grid reveal"></div>');
+  DATA.stressMap.forEach(s=>{
+    strip.appendChild(el(`<div class="stress-cell" style="--t:${tone[s.tone]}">
+      <div class="stress-l">${s.l} ${employerInfoButton(employerMetricKey(s.l))}</div>
+      <div class="stress-v">${s.v}</div>
+      <div class="stress-d">${s.d}</div>
+    </div>`));
+  });
+  wrap.appendChild(strip);
+}
+
+/* ─────────────────── ACT 4: income donut ─────────────────── */
+function renderIncome(){
+  const wrap=document.getElementById('income-donut');
+  const total=DATA.income.reduce((s,x)=>s+x.count,0);
+  const r=52,c=2*Math.PI*r; let off=0;
+  let segs=DATA.income.map(b=>{
+    const frac=b.count/total, len=frac*c;
+    const s=`<circle cx="70" cy="70" r="${r}" fill="none" stroke="${b.color}" stroke-width="20" stroke-dasharray="${len} ${c-len}" stroke-dashoffset="${-off}" transform="rotate(-90 70 70)" />`;
+    off+=len; return s;
+  }).join('');
+  let legend=DATA.income.map(b=>`<div class="legend-row"><span class="legend-dot" style="background:${b.color}"></span><span class="legend-name">${b.name}</span><span class="legend-val">${b.count}</span></div>`).join('');
+  wrap.appendChild(el(`<div class="donut-wrap">
+    <svg width="140" height="140" viewBox="0 0 140 140">${segs}
+      <text x="70" y="65" text-anchor="middle" font-size="22" font-weight="800" fill="#32217c" font-family="Fraunces,serif">${total}</text>
+      <text x="70" y="84" text-anchor="middle" font-size="9.5" font-weight="700" fill="#8497a7">ACTIVATED</text>
+    </svg>
+    <div class="legend">${legend}<div class="legend-sub" style="margin-top:4px">Income-band reach among activated employees in the selected view.</div></div>
+  </div>`));
+}
+
+/* ─────────────────── ACT 4: ratings ─────────────────── */
+function renderRatings(){
+  const wrap=document.getElementById('ratings'); const rt=DATA.ratings;
+  let bars=[5,4,3,2,1].map(s=>`<div class="rb-row"><div class="rb-lbl">${s} ★</div><div class="rb-track"><div class="rb-fill" style="width:${rt.dist[s]}%;${s<=2?'background:#e0492f':s===3?'background:#e8910c':''}"></div></div><div class="rb-val">${rt.dist[s]}%</div></div>`).join('');
+  wrap.appendChild(el(`<div>
+    <div class="rating-hero"><div class="rating-big">${rt.avg.toFixed(1)}</div><div><div class="rating-stars">★★★★★</div><div style="font-size:11.5px;color:#8497a7;font-weight:700;margin-top:2px">${rt.responses.toLocaleString()} ratings</div></div></div>
+    <div class="rating-bars">${bars}</div>
+    <div class="rating-share-pill"><div><div class="l">5-star ratings ${employerInfoButton('fiveStarPct')}</div></div><div class="v">${rt.fiveStarPct}%</div></div>
+  </div>`));
+}
+
+/* ─────────────────── ACT 5: debt states (three honest buckets) ─────────────────── */
+function renderDebtStates(){
+  const wrap=document.getElementById('debt-states'); if(!wrap) return;
+  const d=DATA.debtStates;
+  const fmtM=v=> v>=1e6 ? 'R '+(v/1e6).toFixed(2).replace(/\.?0+$/,'')+'m' : 'R '+Math.round(v/1e3)+'k';
+  const total=d.active.rand+d.challenged.rand+d.guided.rand;
+  const cols=[
+    { ...d.active,    c:"#b15be8", tag:"ACTIVE ARRANGEMENT" },
+    { ...d.challenged,c:"#8a4fc4", tag:"BEING CONTESTED" },
+    { ...d.guided,    c:"#e8910c", tag:"GUIDANCE ONLY" },
+  ];
+  // stacked bar
+  let seg=cols.map(x=>`<div style="width:${(x.rand/total*100).toFixed(1)}%;background:${x.c};height:100%"></div>`).join('');
+  // three cards
+  let cards=cols.map(x=>{ const mk=x.tag==='ACTIVE ARRANGEMENT'?'debtActive':x.tag==='BEING CONTESTED'?'debtChallenged':'debtGuided'; return `<div class="ds-card" style="--c:${x.c}">
+    <div class="ds-tag" style="color:${x.c}">${x.tag}</div>
+    <div class="ds-v">${fmtM(x.rand)}</div>
+    <div class="ds-name">${x.label} ${employerInfoButton(mk)}</div>
+    <div class="ds-note">${x.note}</div>
+    <div class="ds-emp">${x.employees} employees</div>
+  </div>`; }).join('');
+  wrap.appendChild(el(`<div>
+    <div class="ds-bar">${seg}</div>
+    <div class="ds-grid">${cards}</div>
+    <div class="ds-foot">Only <strong>${fmtM(d.active.rand)}</strong> is counted as <strong>debt under active intervention</strong> in the summary above. The guidance-only amount is shown separately and honestly — we educated these employees on prescription so they can manage accounts they couldn't afford to arrange; we don't claim it as active intervention.</div>
+  </div>`));
+}
+
+/* ─────────────────── ACT 5: prescription ─────────────────── */
+function renderPrescription(){
+  const wrap=document.getElementById('prescription'); const p=DATA.prescription;
+  let bars=p.statusBars.map((b,i)=>{
+    const row=el(`<div class="hbar-row" style="grid-template-columns:130px 1fr 96px"><div class="hbar-lbl">${b.l}</div><div class="hbar-track" style="height:26px"><div class="hbar-fill" style="width:0;background:${b.c}"></div></div><div class="hbar-val">${b.n} acct</div></div>`);
+    setTimeout(()=>row.querySelector('.hbar-fill').style.width=b.pct+'%',150+i*100);
+    return row;
+  });
+  const top=el(`<div style="display:flex;gap:26px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #f7f4ff">
+    <div><div style="font-size:11px;font-weight:700;color:#8497a7;text-transform:uppercase;letter-spacing:.05em">Value challenged ${employerInfoButton('prescriptionValue')}</div><div style="font-family:Fraunces,serif;font-size:30px;font-weight:600;color:#32217c;letter-spacing:-1px;margin-top:5px">${p.total}</div></div>
+    <div><div style="font-size:11px;font-weight:700;color:#8497a7;text-transform:uppercase;letter-spacing:.05em">Already written off ${employerInfoButton('prescriptionWrittenOff')}</div><div style="font-family:Fraunces,serif;font-size:30px;font-weight:600;color:#1fa463;letter-spacing:-1px;margin-top:5px">${p.writtenOff}</div></div>
+    <div><div style="font-size:11px;font-weight:700;color:#8497a7;text-transform:uppercase;letter-spacing:.05em">Accounts ${employerInfoButton('prescriptionAccounts')}</div><div style="font-family:Fraunces,serif;font-size:30px;font-weight:600;color:#32217c;letter-spacing:-1px;margin-top:5px">${p.accounts}</div></div>
+  </div>`);
+  wrap.appendChild(top);
+  const hb=el('<div class="hbar"></div>'); bars.forEach(b=>hb.appendChild(b)); wrap.appendChild(hb);
+}
+
+/* ─────────────────── ACT 5: referral ─────────────────── */
+function renderRiskSignals(){
+  const wrap=document.getElementById('risk-signals'); if(!wrap) return;
+  const sev={ high:{c:'#e0492f',l:'High'}, med:{c:'#e8910c',l:'Medium'}, low:{c:'#b15be8',l:'Low'} };
+  DATA.riskSignals.forEach(s=>{
+    const sv=sev[s.sev];
+    wrap.appendChild(el(`<div class="risk-row">
+      <div class="risk-bar" style="background:${sv.c}"></div>
+      <div class="risk-body"><div class="risk-sig">${s.sig} ${employerInfoButton('riskSignals')}</div><div class="risk-note">${s.note}</div></div>
+      <div class="risk-stat"><div class="risk-n">${s.n.toLocaleString()}</div><div class="risk-sev" style="color:${sv.c}">${sv.l}</div></div>
+    </div>`));
+  });
+}
+
+function renderOpportunities(){
+  const wrap=document.getElementById('opportunities'); if(!wrap) return;
+  const o=DATA.opportunities;
+  const cards=o.cards.map(c=>`<div class="opp-card">
+    <div class="opp-ico">${svgIco(c.icon)}</div>
+    <div class="opp-name">${c.name} ${employerInfoButton('opportunities')}</div>
+    <div class="opp-elig"><span class="opp-n">${c.eligible}</span> employees eligible</div>
+    <div class="opp-save">${c.saving!=='—'?'+ '+c.saving+'/mo potential':(c.extra||'')}</div>
+  </div>`).join('');
+  const r=DATA.referral;
+  wrap.appendChild(el(`<div class="opp-wrap reveal">
+    <div class="opp-grid">${cards}</div>
+    <div class="opp-foot">
+      <div class="opp-foot-main">
+        <div class="opp-foot-l">Estimated additional value in the next wave ${employerInfoButton('opportunityValue')}</div>
+        <div class="opp-foot-v">${o.estMonthly}<span>/month</span> &nbsp;·&nbsp; ${o.estAnnual}<span>/year</span></div>
+        <div class="opp-foot-note">Direct your broker to activate these segments — the diagnosis is already done.</div>
+      </div>
+      <div class="opp-foot-ref">
+        <div class="opp-ref-v">${r.shareRate}%</div>
+        <div class="opp-ref-l">organic referral rate ${employerInfoButton('referralRate')}<br><span>${r.shares.toLocaleString()} shares · reach ${r.impliedReach}</span></div>
+      </div>
+    </div>
+  </div>`));
+}
+
+/* ─────────────────── ACT 6: webchat engagement ─────────────────── */
+const JOURNEY_COLOR = { credit:'#32217c', funeral:'#b15be8', arrears:'#e8910c', prescribed:'#8a4fc4', emergency:'#1fa463', general:'#8497a7' };
+let CHAT_SELECTED = 'credit';
+
+function sentBadge(pct){
+  const c = pct>=72?'#1fa463' : pct>=64?'#e8910c' : '#e0492f';
+  const lbl = pct>=72?'Positive' : pct>=64?'Mixed' : 'Anxious';
+  return `<span style="font-size:10.5px;font-weight:800;color:${c};background:${c}1a;padding:3px 8px;border-radius:6px">${lbl} · ${pct}%</span>`;
+}
+
+function chatUnavailableMessage(){
+  return '<div class="muted" style="padding:34px 18px;text-align:center;color:#8497a7;font-size:13px;line-height:1.55;">Chat data is supplied by the separate chat integration and is not currently available.</div>';
+}
+
+function renderChatUnavailable(){
+  const c=DATA.chat||{};
+  const countTag=document.getElementById('chat-count-tag');
+  if(countTag) countTag.textContent='Data unavailable';
+  const kpis=document.getElementById('chat-kpis');
+  if(kpis) kpis.innerHTML=`<div class="card reveal" style="grid-column:1/-1;padding:10px 0;">${chatUnavailableMessage()}</div>`;
+  ['chat-journeys','chat-trending','chat-themes'].forEach(id=>{
+    const node=document.getElementById(id);
+    if(node) node.innerHTML=chatUnavailableMessage();
+  });
+  const title=document.getElementById('chat-theme-title');
+  if(title) title.textContent='Chat themes';
+  const note=document.getElementById('chat-theme-note');
+  if(note) note.textContent='Available when the separate chat integration is connected.';
+}
+
+function renderChatKPIs(){
+  const c=DATA.chat||{};
+  const cards=[
+    { label:'Total conversations', infoKey:'chatTotal', ico:KPI_ICONS.activated, num:Number(c.conversations||0), sub:'selected period', spark:Array.isArray(c.volume)&&c.volume.length?sparkline(c.volume,'#b15be8'):'' },
+    { label:'Resolved in chat', infoKey:'chatResolved',    ico:KPI_ICONS.takeUp, num:Number(c.resolvedInChat||0), suffix:'%', sub:Number.isFinite(Number(c.escalated))?Number(c.escalated)+'% handed to an agent':'handoff rate unavailable' },
+    { label:'Avg first reply', infoKey:'chatFirstReply',     ico:{bg:'#f3efff',path:'<circle cx="12" cy="12" r="9" stroke="#b15be8" stroke-width="1.8" fill="none"/><path d="M12 7v5l3 2" stroke="#b15be8" stroke-width="1.8" stroke-linecap="round"/>'}, raw:c.avgFirstReply||'—', sub:'median response time' },
+    { label:'Chat satisfaction', infoKey:'chatSatisfaction',   ico:KPI_ICONS.rating, num:Number(c.csat||0), suffix:'/5', decimals:1, sub:'rated after chat' },
+  ];
+  const wrap=document.getElementById('chat-kpis');
+  if(!wrap) return;
+  cards.forEach((cardData,i)=>{
+    const card=el(`<div class="card kpi reveal" style="animation-delay:${i*.06}s">
+      <div class="kpi-label"><span class="kpi-ico" style="background:${cardData.ico.bg}"><svg width="18" height="18" viewBox="0 0 24 24">${cardData.ico.path}</svg></span>${cardData.label}${employerInfoButton(cardData.infoKey)}</div>
+      <div class="kpi-value">${cardData.raw?cardData.raw:'<span class="kpi-num">0</span>'}${cardData.suffix?'<span style="font-size:18px">'+cardData.suffix+'</span>':''}</div>
+      <div class="kpi-sub">${cardData.sub||''}</div>
+      ${cardData.spark||''}
+    </div>`);
+    wrap.appendChild(card);
+    if(!cardData.raw) countUp(card.querySelector('.kpi-num'), cardData.num, {decimals:cardData.decimals||0, delay:120+i*60});
+  });
+}
+
+function renderChatJourneys(){
+  const wrap=document.getElementById('chat-journeys');
+  if(!wrap) return;
+  const rows=Array.isArray(DATA.chat?.byJourney)?DATA.chat.byJourney:[];
+  if(!rows.length){ wrap.innerHTML='<div class="muted" style="padding:28px 12px;text-align:center;color:#8497a7;font-size:13px;">No conversations in the selected period.</div>'; return; }
+  const max=Math.max(1,...rows.map(j=>Number(j.convos||0)));
+  rows.forEach((j,i)=>{
+    const col=JOURNEY_COLOR[j.key]||'#b15be8';
+    const row=el(`<div class="chat-jrow${j.key===CHAT_SELECTED?' sel':''}" data-k="${j.key}">
+      <div class="chat-jbar-lbl"><span class="chat-jdot" style="background:${col}"></span>${j.name}</div>
+      <div class="chat-jbar-track"><div class="chat-jbar" style="width:0;background:${col}"></div></div>
+      <div class="chat-jmeta">${j.convos.toLocaleString()}<small>${sentBadge(j.sentiment)}</small></div>
+    </div>`);
+    row.addEventListener('click',()=>{ CHAT_SELECTED=j.key; renderChatThemes(); document.querySelectorAll('.chat-jrow').forEach(r=>r.classList.toggle('sel', r.dataset.k===j.key)); });
+    wrap.appendChild(row);
+    setTimeout(()=>row.querySelector('.chat-jbar').style.width=(j.convos/max*100)+'%', 140+i*70);
+  });
+}
+
+function renderChatTrending(){
+  const wrap=document.getElementById('chat-trending');
+  const rows=Array.isArray(DATA.chat?.trending)?DATA.chat.trending:[];
+  if(!rows.length){ wrap.innerHTML='<div class="muted" style="padding:28px 12px;text-align:center;color:#8497a7;font-size:13px;">No trending questions in the selected period.</div>'; return; }
+  rows.forEach((t,i)=>{
+    const tc = t.trend==='flat' ? '#8497a7' : '#1fa463';
+    wrap.appendChild(el(`<div class="trend-row">
+      <div class="trend-rank">${i+1}</div>
+      <div class="trend-body"><div class="trend-q">"${t.q}"</div><div class="trend-meta">${t.journey}</div></div>
+      <div class="trend-stat"><div class="trend-n">${t.n}</div><div class="trend-up" style="color:${tc}">${t.trend==='flat'?'—':'▲ '+t.trend}</div></div>
+    </div>`));
+  });
+}
+
+function renderChatThemes(){
+  const wrap=document.getElementById('chat-themes'); if(!wrap) return; wrap.innerHTML='';
+  const journeys=Array.isArray(DATA.chat?.byJourney)?DATA.chat.byJourney:[];
+  const j=journeys.find(x=>x.key===CHAT_SELECTED)||journeys[0];
+  if(!j){
+    const title=document.getElementById('chat-theme-title'); if(title) title.textContent='Chat themes';
+    const note=document.getElementById('chat-theme-note'); if(note) note.textContent='No journey themes in the selected period.';
+    wrap.innerHTML='<div class="muted" style="padding:28px 12px;text-align:center;color:#8497a7;font-size:13px;">No themes tagged in the selected period.</div>';
+    return;
+  }
+  document.getElementById('chat-theme-title').textContent='Top themes — '+j.name;
+  document.getElementById('chat-theme-note').textContent=window.__LIVE__
+    ? 'Most frequent themes tagged for this journey in the selected period.'
+    : 'Illustrative demonstration themes for this journey.';
+  if(!j.themes || !j.themes.length){ wrap.appendChild(el('<div class="muted" style="padding:10px 0;color:#8497a7;font-size:13px;">No themes tagged for this journey yet.</div>')); return; }
+  const max=Math.max(...j.themes.map(t=>t.n));
+  const grid=el('<div class="theme-grid"></div>');
+  j.themes.forEach((t,i)=>{
+    const col=JOURNEY_COLOR[j.key];
+    const row=el(`<div class="theme-row">
+      <div class="theme-q">${t.t}</div>
+      <div class="theme-track"><div class="theme-fill" style="width:0;background:${col}"></div></div>
+      <div class="theme-n">${t.n}</div>
+    </div>`);
+    grid.appendChild(row);
+    setTimeout(()=>row.querySelector('.theme-fill').style.width=(t.n/max*100)+'%',120+i*60);
+  });
+  wrap.appendChild(grid);
+}
+
+function renderChat(){
+  const c=DATA.chat||{};
+  if(c.available===false){ renderChatUnavailable(); return; }
+  const countTag=document.getElementById('chat-count-tag');
+  if(countTag) countTag.textContent=Number(c.conversations||0).toLocaleString()+' chats';
+  renderChatKPIs(); renderChatJourneys(); renderChatTrending(); renderChatThemes();
+}
+
+
+/* ─────────────────── footnote ─────────────────── */
+document.getElementById('footnote').innerHTML =
+  '<strong>How we define the headline numbers.</strong> &nbsp;<em>Employees better off</em> = unique employees who completed at least one journey with a concrete result: a lower monthly premium or instalment, a settlement or arrangement put in place, a prescribed-debt challenge lodged, or an interest-free emergency cash advance set up. It counts people, not actions (one person who fixed two things counts once). Employees who only received guidance, without a completed fix, are not included. &nbsp;<em>Debt under active intervention</em> = arrears where a settlement or reduced-instalment arrangement has actually been sent; it excludes prescribed debt being contested (shown separately) and debt the employee could not afford to arrange, where we instead educated them on prescription to self-manage (also shown separately).<br><br>' +
+  'Simulated demonstration data for the empower-fin Dashboard Portal. Figures are illustrative and reconciled to the consumer journey model. Employee-level data is aggregated and de-identified; individual financial information is never exposed to the employer. Underwriting by Guardrisk Life Insurance Company Limited. Intermediary services: EmpowerFS (Pty) Ltd, FSP 53395.';
+
+/* ════════════════════════════════════════════════════════════════════
+   INTERACTION LAYER
+   ════════════════════════════════════════════════════════════════════ */
+
+/* keep a pristine copy so filters can re-derive from source */
+let BASE = JSON.parse(JSON.stringify(DATA));
+
+/* view state */
+const STATE = {
+  period: 'all',        // '30' | 'q' | 'all'
+  region: 'all',        // region name or 'all'
+  income: 'all',        // income band name or 'all'
+  audience: 'employer',
+};
+
+/* period scaling — figures shrink for shorter windows so the demo feels live */
+const PERIOD = {
+  '30':  { f:0.12, label:'Last 30 days',      ratings:142,  shares:118 },
+  'q':   { f:0.34, label:'This quarter',      ratings:486,  shares:402 },
+  'all': { f:1.00, label:'Programme to date', ratings:1640, shares:1284 },
+};
+
+function clearAll(){
+  ['exec-summary','wellness','kpis','funnel','outcomes','value-strip','savings-chart','debt-profile','creditor-table',
+   'stress-strip','region-bars','income-donut','ratings','debt-states','prescription','risk-signals','opportunities',
+   'chat-kpis','chat-journeys','chat-trending','chat-themes','ewa-kpis','ewa-chart']
+   .forEach(id=>{ const e=document.getElementById(id); if(e) e.innerHTML=''; });
+}
+
+/* helpers to scale numbers/strings */
+function scaleNum(n,f){ return Math.round(n*f); }
+function randMoney(v,f){ // scale a "R 2.41m"/"R 222k" style string
+  const m=String(v).match(/R?\s*([\d.,]+)\s*([mk]?)/i);
+  if(!m) return v;
+  let num=parseFloat(m[1].replace(/,/g,'')); let unit=m[2].toLowerCase();
+  let abs = unit==='m'?num*1e6 : unit==='k'?num*1e3 : num;
+  abs*=f;
+  if(abs>=1e6) return 'R '+(abs/1e6).toFixed(2).replace(/\.00$/,'')+'m';
+  if(abs>=1e3) return 'R '+Math.round(abs/1e3)+'k';
+  return 'R '+Math.round(abs);
+}
+
+/* rebuild DATA from BASE according to STATE, then re-render everything */
+function applyState(){
+  // When real data is loaded from the API, render it directly. The period /
+  // region scaling below is demo-only machinery (it multiplies figures by
+  // illustrative ratios); applying it to real snapshots would distort them.
+  if (window.__LIVE__) {
+    clearAll();
+    renderExec(); renderWellness();
+    renderKPIs(); renderFunnel(); renderOutcomes(); renderValueStrip();
+    renderSavings(); renderEwa(); renderDebtProfile(); renderCreditors(); renderRegions(); renderIncome();
+    renderRatings(); renderDebtStates(); renderPrescription(); renderRiskSignals(); renderOpportunities(); renderChat();
+    renderStressMap();
+    wireMetricTips(document.getElementById('employer-view'));
+    updateContextLine();
+    const ep0=document.getElementById('exec-period');
+    if(ep0) ep0.textContent=((DATA.filterContext&&DATA.filterContext.label)||'Latest')+' · at a glance';
+    return;
+  }
+  const p=PERIOD[STATE.period], f=p.f;
+  // region filter factor (relative share of that site) — illustrative
+  const regionShare = { 'all':1, 'Vaalwater Plant':0.34, 'Secunda Site':0.22, 'Sasolburg':0.18, 'Head Office':0.14, 'Field / Remote':0.12 };
+  const incomeShare = { 'all':1, 'Under R8k/mo':0.30, 'R8k–R15k/mo':0.42, 'R15k–R25k/mo':0.19, 'Over R25k/mo':0.09 };
+  const segF = (regionShare[STATE.region]||1) * (incomeShare[STATE.income]||1);
+  const F = f * segF;
+
+  // KPIs
+  DATA.kpis.takeUp.enrolled    = scaleNum(BASE.kpis.takeUp.enrolled, segF);
+  DATA.kpis.takeUp.pct         = STATE.region==='all'&&STATE.income==='all' ? BASE.kpis.takeUp.pct : Math.min(96, Math.round(BASE.kpis.takeUp.pct*(0.9+segF*0.3)));
+  DATA.kpis.activated.count    = scaleNum(BASE.kpis.activated.count, F);
+  DATA.kpis.activated.pct      = STATE.region==='all'&&STATE.income==='all' ? BASE.kpis.activated.pct : Math.min(90, Math.round(BASE.kpis.activated.pct*(0.85+segF*0.35)));
+  DATA.kpis.monthlySaving.rand = scaleNum(BASE.kpis.monthlySaving.rand, F);
+
+  // funnel
+  DATA.funnel = BASE.funnel.map(x=>({ ...x, n: scaleNum(x.n, segF) }));
+
+  // outcomes
+  DATA.outcomes = BASE.outcomes.map(o=>({ ...o, count: scaleNum(o.count,F), stat: o.key==='sti'? String(scaleNum(parseInt(o.stat),F)) : randMoney(o.stat,F) }));
+
+  // value strip
+  DATA.valueStrip = BASE.valueStrip.map((s,i)=>{
+    if(i===3) return s; // per-employee avg unchanged by period
+    return { ...s, v: randMoney(s.v,F), d: i===0? randMoney('R 4.62m',F)+' annualised' : s.d };
+  });
+
+  // savings series: take a tail proportional to period
+  const keep = STATE.period==='30'?2: STATE.period==='q'?4: BASE.savings.length;
+  DATA.savings = BASE.savings.slice(-keep).map(v=>Math.round(v*segF));
+  DATA.savingsLabels = BASE.savingsLabels.slice(-keep);
+
+  // creditors
+  DATA.creditors = BASE.creditors.map(c=>({ ...c, accounts: scaleNum(c.accounts,F), balance: randMoney(c.balance,F) }));
+  DATA.creditorsTotal = { accounts: scaleNum(BASE.creditorsTotal.accounts,F), balance: randMoney(BASE.creditorsTotal.balance,F) };
+
+  // income & regions stay structural (they ARE the breakdown); dim non-selected
+  DATA.income  = BASE.income.map(b=>({ ...b, count: scaleNum(b.count, f) }));
+  DATA.regions = BASE.regions.slice();
+
+  // ratings & referral
+  DATA.ratings = { ...BASE.ratings, responses: p.ratings };
+  DATA.referral = { ...BASE.referral, shares: p.shares, impliedReach: '≈ '+(scaleNum(3900,f)).toLocaleString() };
+
+  // chat: scale conversation volumes by period (themes/structure stay)
+  DATA.chat = JSON.parse(JSON.stringify(BASE.chat));
+  DATA.chat.conversations = scaleNum(BASE.chat.conversations, f);
+  DATA.chat.byJourney = BASE.chat.byJourney.map(j=>({ ...j, convos: scaleNum(j.convos, f),
+    themes: j.themes.map(t=>({ ...t, n: scaleNum(t.n, f) })) }));
+  DATA.chat.trending = BASE.chat.trending.map(t=>({ ...t, n: scaleNum(t.n, f) }));
+  const ck = STATE.period==='30'?2: STATE.period==='q'?4: BASE.chat.volume.length;
+  DATA.chat.volume = BASE.chat.volume.slice(-ck);
+
+  // debt states scale by period/segment
+  DATA.debtStates = {
+    active:    { ...BASE.debtStates.active,    rand: scaleNum(BASE.debtStates.active.rand, F),    employees: scaleNum(BASE.debtStates.active.employees, F) },
+    challenged:{ ...BASE.debtStates.challenged,rand: scaleNum(BASE.debtStates.challenged.rand, F), employees: scaleNum(BASE.debtStates.challenged.employees, F) },
+    guided:    { ...BASE.debtStates.guided,    rand: scaleNum(BASE.debtStates.guided.rand, F),    employees: scaleNum(BASE.debtStates.guided.employees, F) },
+  };
+
+  // exec summary: recompute headline figures from scaled data so the band always matches
+  DATA.exec = { items: [
+    { v: DATA.kpis.takeUp.enrolled.toLocaleString(),                 l:"employees enrolled" },
+    { v: 'R '+DATA.kpis.monthlySaving.rand.toLocaleString(),         l:"monthly cashflow restored" },
+    { v: randMoney('R 6.4m', F).replace('.00',''),                   l:"debt under active intervention" },
+    { v: scaleNum(274, F).toLocaleString(),                          l:"prescribed debts challenged" },
+    { v: scaleNum(812, F).toLocaleString(),                          l:"employees better off" },
+    { v: BASE.kpis.avgRating.val.toFixed(1)+"/5",                    l:"employee satisfaction" },
+  ]};
+
+  // wellness score stays structural (an index, not a volume); leave as BASE
+  DATA.wellness = JSON.parse(JSON.stringify(BASE.wellness));
+
+  clearAll();
+  renderExec(); renderWellness();
+  renderKPIs(); renderFunnel(); renderOutcomes(); renderValueStrip();
+  renderSavings(); renderEwa(); renderDebtProfile(); renderCreditors(); renderRegions(); renderIncome();
+  renderRatings(); renderDebtStates(); renderPrescription(); renderRiskSignals(); renderOpportunities(); renderChat();
+  renderStressMap();
+  wireMetricTips(document.getElementById('employer-view'));
+  updateContextLine();
+  const ep=document.getElementById('exec-period'); if(ep) ep.textContent=PERIOD[STATE.period].label+' · at a glance';
+}
+
+function updateContextLine(){
+  const parts=[];
+  if(window.__LIVE__ && DATA.filterContext){
+    parts.push(DATA.filterContext.label||'Programme to date');
+    if(DATA.filterContext.site) parts.push(DATA.filterContext.site);
+    if(DATA.filterContext.incomeLabel) parts.push(DATA.filterContext.incomeLabel);
+  } else {
+    parts.push(PERIOD[STATE.period].label);
+    if(STATE.region!=='all') parts.push(STATE.region);
+    if(STATE.income!=='all') parts.push(STATE.income);
+  }
+  const sub=document.getElementById('ctx-sub');
+  if(sub) sub.textContent = parts.join(' · ');
+  const tag=document.getElementById('emp-tag');
+  if(tag) tag.lastChild.textContent = ' '+DATA.kpis.takeUp.enrolled.toLocaleString()+' enrolled';
+}
+
+/* ─────── wire: period segmented control ─────── */
+function wirePeriod(){
+  document.querySelectorAll('#period-seg button').forEach(b=>{
+    b.classList.toggle('on', b.dataset.p===STATE.period);
+    b.addEventListener('click',()=>{
+      if(window.__LIVE__){
+        const map={ '30':'30d', 'q':'quarter', 'all':'all' };
+        switchFilter('range',map[b.dataset.p]||'all',{clearPeriod:true});
+        return;
+      }
+      document.querySelectorAll('#period-seg button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      STATE.period=b.dataset.p;
+      applyState();
+    });
+  });
+}
+
+/* ─────── wire: filter dropdowns ─────── */
+function buildDropdown(tagId, options, currentValue, onPick){
+  const tag=document.getElementById(tagId);
+  const menu=el('<div class="dropdown-menu"></div>');
+  options.forEach(o=>{
+    const item=el(`<button class="dropdown-item${o.value===currentValue?' on':''}" data-v="${o.value}">${o.label}</button>`);
+    item.addEventListener('click',e=>{
+      e.stopPropagation();
+      menu.querySelectorAll('.dropdown-item').forEach(x=>x.classList.remove('on'));
+      item.classList.add('on');
+      tag.querySelector('.tag-label').textContent=o.label;
+      menu.classList.remove('open');
+      onPick(o.value);
+    });
+    menu.appendChild(item);
+  });
+  tag.appendChild(menu);
+  tag.addEventListener('click',e=>{
+    e.stopPropagation();
+    document.querySelectorAll('.dropdown-menu.open').forEach(m=>{if(m!==menu)m.classList.remove('open');});
+    menu.classList.toggle('open');
+  });
+}
+function wireFilters(){
+  const siteOptions = window.__LIVE__ && DATA.filterOptions
+    ? DATA.filterOptions.sites
+    : BASE.regions.map(r=>({value:r.name,label:r.name}));
+  const incomeOptions = window.__LIVE__ && DATA.filterOptions
+    ? DATA.filterOptions.incomes
+    : BASE.income.map(b=>({value:b.value||b.name,label:b.name}));
+  buildDropdown('region-filter',
+    [{value:'all',label:'All regions'}].concat(siteOptions),
+    STATE.region,
+    v=>{ if(window.__LIVE__) switchFilter('site',v); else { STATE.region=v; applyState(); } });
+  buildDropdown('income-filter',
+    [{value:'all',label:'All income bands'}].concat(incomeOptions),
+    STATE.income,
+    v=>{ if(window.__LIVE__) switchFilter('income',v); else { STATE.income=v; applyState(); } });
+  const siteLabel=document.querySelector('#region-filter .tag-label');
+  const incomeLabel=document.querySelector('#income-filter .tag-label');
+  if(siteLabel && DATA.filterContext?.site) siteLabel.textContent=DATA.filterContext.site;
+  if(incomeLabel && DATA.filterContext?.incomeLabel) incomeLabel.textContent=DATA.filterContext.incomeLabel;
+  document.addEventListener('click',()=>document.querySelectorAll('.dropdown-menu.open').forEach(m=>m.classList.remove('open')));
+}
+
+/* ─────── wire: view switch (employer / portfolio) ─────── */
+let PF_RENDERED = false;
+function wireAudience(){
+  document.querySelectorAll('#audience-switch button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('#audience-switch button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      const portfolio = b.dataset.a==='portfolio';
+      document.getElementById('employer-view').style.display = portfolio ? 'none' : '';
+      document.getElementById('portfolio-view').style.display = portfolio ? '' : 'none';
+      // hide employer-only filters in portfolio mode
+      document.querySelector('.filters').style.display = portfolio ? 'none' : '';
+      if(portfolio && !PF_RENDERED){ renderPortfolio(); PF_RENDERED = true; }
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+}
+
+/* ─────── PORTFOLIO render ─────── */
+let PF_SORT = 'oppValue';
+let PF_SELECTED_IDS = new Set();
+let PF_SELECTION_INITIALIZED = false;
+let PF_FILTER_WIRED = false;
+
+const pfEsc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+function pfEmployerKey(e, i=0){ return String(e?.id || e?.name || `employer-${i}`); }
+function pfFinite(v){ const n=Number(v); return v!==null && v!==undefined && v!=='' && Number.isFinite(n) ? n : null; }
+function pfAllEmployerKeys(){ return PORTFOLIO.employers.map((e,i)=>pfEmployerKey(e,i)); }
+function pfEnsureSelection(){
+  const keys=pfAllEmployerKeys();
+  if(!PF_SELECTION_INITIALIZED){ PF_SELECTED_IDS=new Set(keys); PF_SELECTION_INITIALIZED=true; return; }
+  const valid=new Set(keys);
+  PF_SELECTED_IDS=new Set([...PF_SELECTED_IDS].filter(k=>valid.has(k)));
+}
+function pfVisibleEmployers(){
+  pfEnsureSelection();
+  return PORTFOLIO.employers.filter((e,i)=>PF_SELECTED_IDS.has(pfEmployerKey(e,i)));
+}
+function pfMoney(v){
+  const n=pfFinite(v); if(n===null) return '—';
+  const a=Math.abs(n);
+  if(a>=1e6) return 'R '+(n/1e6).toFixed(a>=10e6?1:2).replace(/\.00$/,'').replace(/(\.\d)0$/,'$1')+'m';
+  if(a>=1e3) return 'R '+(n/1e3).toFixed(a>=100e3?0:1).replace(/\.0$/,'')+'k';
+  return 'R '+Math.round(n).toLocaleString('en-ZA');
+}
+function pfFmt(m, v){
+  const n=pfFinite(v); if(n===null) return '—';
+  if(m.unit==='R') return pfMoney(n);
+  if(m.unit==='%') return Math.round(n)+'%';
+  if(m.unit==='/5') return n.toFixed(1);
+  if(m.unit==='n') return Math.round(n).toLocaleString('en-ZA');
+  return Number.isInteger(n)?String(n):n.toFixed(1);
+}
+function pfMetricInfo(key){
+  return PORTFOLIO_METRIC_INFO[key] || EMPLOYER_METRIC_INFO[key] || {title:'Measure',text:'This measure uses the same calculation as the employer dashboard.',formula:''};
+}
+function pfInfoButton(key){
+  const d=pfMetricInfo(key);
+  return `<button type="button" class="metric-info" data-metric="${pfEsc(key)}" tabindex="0" aria-label="What is ${pfEsc(d.title)}?">i</button>`;
+}
+function pfMetricTooltip(){
+  let tip=document.getElementById('metric-tooltip');
+  if(!tip){ tip=document.createElement('div'); tip.id='metric-tooltip'; tip.className='metric-tooltip'; tip.setAttribute('role','tooltip'); document.body.appendChild(tip); }
+  return tip;
+}
+function pfShowMetricTip(btn){
+  const d=pfMetricInfo(btn.dataset.metric);
+  const tip=pfMetricTooltip();
+  tip.innerHTML=`<b>${pfEsc(d.title)}</b>${pfEsc(d.text)}${d.formula?`<span class="metric-formula">${pfEsc(d.formula)}</span>`:''}`;
+  tip.classList.add('open');
+  const r=btn.getBoundingClientRect();
+  const tr=tip.getBoundingClientRect();
+  let left=Math.min(window.innerWidth-tr.width-14, Math.max(14, r.left + r.width/2 - tr.width/2));
+  let top=r.bottom+9;
+  if(top+tr.height>window.innerHeight-10) top=Math.max(10,r.top-tr.height-9);
+  tip.style.left=left+'px'; tip.style.top=top+'px';
+}
+function pfHideMetricTip(){ document.getElementById('metric-tooltip')?.classList.remove('open'); }
+function wireMetricTips(root=document){
+  root.querySelectorAll('.metric-info:not([data-tip-wired])').forEach(btn=>{
+    btn.dataset.tipWired='1';
+    btn.addEventListener('mouseenter',()=>pfShowMetricTip(btn));
+    btn.addEventListener('mouseleave',pfHideMetricTip);
+    btn.addEventListener('focus',()=>pfShowMetricTip(btn));
+    btn.addEventListener('blur',pfHideMetricTip);
+    btn.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); pfShowMetricTip(btn); });
+  });
+}
+
+// colour for heatmap cell: relative red->amber->green; missing/one-row columns stay neutral.
+function pfHeat(m, v, vals){
+  const n=pfFinite(v); const clean=vals.map(pfFinite).filter(x=>x!==null);
+  if(n===null || clean.length<2) return '#f3efff';
+  const min=Math.min(...clean), max=Math.max(...clean);
+  let t=max===min?0.5:(n-min)/(max-min); if(!m.goodHigh) t=1-t;
+  const stops=[[224,73,47],[232,145,12],[31,164,99]]; let c;
+  if(t<0.5){ const k=t/0.5; c=stops[0].map((x,i)=>Math.round(x+(stops[1][i]-x)*k)); }
+  else { const k=(t-0.5)/0.5; c=stops[1].map((x,i)=>Math.round(x+(stops[2][i]-x)*k)); }
+  return `rgba(${c[0]},${c[1]},${c[2]},0.16)`;
+}
+function pfTextColor(m, v, vals){
+  const n=pfFinite(v); const clean=vals.map(pfFinite).filter(x=>x!==null);
+  if(n===null || clean.length<2) return '#5d6570';
+  const min=Math.min(...clean), max=Math.max(...clean);
+  let t=max===min?0.5:(n-min)/(max-min); if(!m.goodHigh) t=1-t;
+  return t<0.4?'#b5371f':t>0.7?'#137a47':'#9a6206';
+}
+
+function pfSelectionLabel(){
+  const total=PORTFOLIO.employers.length, selected=pfVisibleEmployers().length;
+  if(selected===total && total) return `All employers (${total})`;
+  if(!selected) return 'No employers selected';
+  return `${selected} of ${total} employers`;
+}
+function updatePfSelectionSummary(){
+  const total=PORTFOLIO.employers.length, selected=pfVisibleEmployers();
+  const label=document.getElementById('pf-employer-filter-label'); if(label) label.textContent=pfSelectionLabel();
+  const note=document.getElementById('pf-scope-note');
+  if(note){
+    const heads=selected.reduce((sum,e)=>sum+(pfFinite(e.heads)||0),0);
+    note.innerHTML=selected.length?`<strong>${selected.length}</strong> employer${selected.length===1?'':'s'} selected · ${heads.toLocaleString('en-ZA')} employees covered`:'<strong>No employers selected.</strong> Choose at least one employer to populate the portfolio.';
+  }
+  const tag=document.getElementById('pf-employer-count'); if(tag) tag.textContent=`${selected.length} selected`;
+}
+function renderPfEmployerOptions(filter=''){
+  const wrap=document.getElementById('pf-employer-options'); if(!wrap) return;
+  const q=filter.trim().toLowerCase(); wrap.innerHTML='';
+  PORTFOLIO.employers.forEach((e,i)=>{
+    if(q && !String(e.name||'').toLowerCase().includes(q)) return;
+    const key=pfEmployerKey(e,i); const checked=PF_SELECTED_IDS.has(key);
+    const row=document.createElement('label'); row.className='pf-filter-option';
+    row.innerHTML=`<input type="checkbox" ${checked?'checked':''} data-employer-key="${pfEsc(key)}"><span>${pfEsc(e.name)}</span>`;
+    row.querySelector('input').addEventListener('change',ev=>{
+      if(ev.target.checked) PF_SELECTED_IDS.add(key); else PF_SELECTED_IDS.delete(key);
+      updatePfSelectionSummary(); renderPortfolioBody();
+    });
+    wrap.appendChild(row);
+  });
+  if(!wrap.children.length) wrap.innerHTML='<div class="muted" style="padding:12px">No matching employers.</div>';
+}
+function renderPfEmployerFilter(){
+  pfEnsureSelection(); updatePfSelectionSummary(); renderPfEmployerOptions(document.getElementById('pf-employer-search')?.value||'');
+  if(PF_FILTER_WIRED) return;
+  PF_FILTER_WIRED=true;
+  const btn=document.getElementById('pf-employer-filter-btn'), menu=document.getElementById('pf-employer-filter-menu');
+  btn?.addEventListener('click',e=>{ e.stopPropagation(); const open=menu.classList.toggle('open'); btn.setAttribute('aria-expanded',open?'true':'false'); });
+  menu?.addEventListener('click',e=>e.stopPropagation());
+  document.getElementById('pf-select-all')?.addEventListener('click',()=>{ PF_SELECTED_IDS=new Set(pfAllEmployerKeys()); renderPfEmployerOptions(document.getElementById('pf-employer-search')?.value||''); updatePfSelectionSummary(); renderPortfolioBody(); });
+  document.getElementById('pf-clear-all')?.addEventListener('click',()=>{ PF_SELECTED_IDS.clear(); renderPfEmployerOptions(document.getElementById('pf-employer-search')?.value||''); updatePfSelectionSummary(); renderPortfolioBody(); });
+  document.getElementById('pf-employer-search')?.addEventListener('input',e=>renderPfEmployerOptions(e.target.value));
+  document.addEventListener('click',()=>{ menu?.classList.remove('open'); btn?.setAttribute('aria-expanded','false'); });
+}
+
+function renderPortfolio(){
+  pfEnsureSelection();
+  renderPfEmployerFilter();
+  const wp=document.getElementById('pf-window-pill'); if(wp) wp.textContent='Reporting window: '+(PORTFOLIO.filterContext?.label||'Programme to date');
+  renderPortfolioBody();
+  wireMetricTips(document.getElementById('portfolio-view'));
+}
+function renderPortfolioBody(){
+  const E=pfVisibleEmployers(); const count=E.length;
+  updatePfSelectionSummary();
+  if(!count){
+    document.getElementById('pf-kpis').innerHTML='<div class="card" style="padding:28px;grid-column:1/-1"><b>No employers selected.</b><div class="muted" style="margin-top:8px">Use the Employers filter above or choose Select all.</div></div>';
+    document.getElementById('pf-heatmap').innerHTML=''; document.getElementById('pf-metric-picker').innerHTML=''; document.getElementById('pf-league').innerHTML=''; document.getElementById('pf-league-note').textContent='';
+  } else { renderPfKpis(E); renderPfHeatmap(E); renderPfPicker(); renderPfLeague(E); }
+  const periodNote=PORTFOLIO.filterContext?.label?` Reporting window: ${PORTFOLIO.filterContext.label}.`:'';
+  document.getElementById('pf-footnote').innerHTML=(PORTFOLIO.live
+    ? `Internal portfolio view calculated from the same dated source records and score rules as each employer dashboard.${periodNote}`
+    : (PORTFOLIO.explicitDemo?'Internal portfolio view — explicit demonstration mode.':'Internal portfolio view is unavailable because the live portfolio feed could not be loaded. No demonstration values are shown.'))
+    + ` Currently showing ${count} of ${PORTFOLIO.employers.length} authorised employer${PORTFOLIO.employers.length===1?'':'s'}. Heatmap colouring is relative within each metric column; with only one employer the cell is intentionally neutral. Missing measures are shown as unavailable and are not ranked as zero. For stress index and arrears, higher values indicate greater risk. Not shared with employer clients.`;
+  wireMetricTips(document.getElementById('portfolio-view'));
+}
+
+function renderPfKpis(E){
+  const sumAvailable=(key)=>{ const vals=E.map(e=>pfFinite(e[key])).filter(v=>v!==null); return {count:vals.length,total:vals.reduce((s,v)=>s+v,0)}; };
+  const heads=sumAvailable('heads'), saving=sumAvailable('saving'), opp=sumAvailable('oppValue');
+  const scores=E.map(e=>pfFinite(e.wellness)).filter(v=>v!==null);
+  const avgScore=scores.length?Math.round(scores.reduce((s,v)=>s+v,0)/scores.length):null;
+  const cards=[
+    { key:'employerClients', label:'Employer clients', ico:KPI_ICONS.takeUp, raw:E.length, sub:heads.total.toLocaleString('en-ZA')+' employees covered' },
+    { key:'saving', label:'Cashflow restored / mo', ico:KPI_ICONS.saving, raw:saving.count?pfMoney(saving.total):'—', sub:saving.count===E.length?'across selected employers':`${saving.count} of ${E.length} employers have cashflow data` },
+    { key:'oppValue', label:'Open opportunity / mo', ico:KPI_ICONS.activated, raw:opp.count?pfMoney(opp.total):'—', sub:opp.count===E.length?'identified across selected employers':`${opp.count} of ${E.length} employers have opportunity data` },
+    { key:'wellness', label:'Avg Financial Wellness Score', ico:KPI_ICONS.rating, raw:avgScore===null?'—':avgScore, sub:scores.length===E.length?'selected-employer average':`${scores.length} of ${E.length} employers have a complete score` },
+  ];
+  const wrap=document.getElementById('pf-kpis'); wrap.innerHTML='';
+  cards.forEach((c,i)=>wrap.appendChild(el(`<div class="card kpi reveal" style="animation-delay:${i*.05}s">
+    <div class="kpi-label"><span class="kpi-ico" style="background:${c.ico.bg}"><svg width="18" height="18" viewBox="0 0 24 24">${c.ico.path}</svg></span><span>${c.label}</span>${pfInfoButton(c.key)}</div>
+    <div class="kpi-value">${c.raw}</div><div class="kpi-sub">${c.sub}</div></div>`)));
+}
+function renderPfHeatmap(E){
+  const wrap=document.getElementById('pf-heatmap'); wrap.innerHTML=''; const M=PORTFOLIO.metrics;
+  const colVals={}; M.forEach(m=>colVals[m.key]=E.map(e=>e[m.key]));
+  const head='<tr><th class="pf-emp-h">Employer</th>'+M.map(m=>`<th class="pf-mh${m.key===PF_SORT?' sort':''}" data-k="${m.key}"><span>${m.label}</span>${pfInfoButton(m.key)}</th>`).join('')+'</tr>';
+  const rows=E.map(e=>{
+    const cells=M.map(m=>{ const v=pfFinite(e[m.key]); return `<td class="${v===null?'pf-no-data':''}" style="background:${pfHeat(m,v,colVals[m.key])};color:${pfTextColor(m,v,colVals[m.key])};font-weight:700" title="${v===null?'Data not loaded for this measure':''}">${pfFmt(m,v)}</td>`; }).join('');
+    return `<tr><td class="pf-emp">${pfEsc(e.name)}<small>${(pfFinite(e.heads)||0).toLocaleString('en-ZA')} staff</small></td>${cells}</tr>`;
+  }).join('');
+  const tbl=el(`<table class="pf-heat"><thead>${head}</thead><tbody>${rows}</tbody></table>`);
+  tbl.querySelectorAll('.pf-mh').forEach(th=>th.addEventListener('click',ev=>{ if(ev.target.closest('.metric-info')) return; PF_SORT=th.dataset.k; renderPfPicker(); renderPfLeague(pfVisibleEmployers()); tbl.querySelectorAll('.pf-mh').forEach(x=>x.classList.toggle('sort',x.dataset.k===PF_SORT)); document.getElementById('pf-league').scrollIntoView({behavior:'smooth',block:'center'}); }));
+  wrap.appendChild(tbl); wireMetricTips(tbl);
+}
+function renderPfPicker(){
+  const wrap=document.getElementById('pf-metric-picker'); wrap.innerHTML='';
+  PORTFOLIO.metrics.forEach(m=>{ const b=el(`<button class="pf-chip${m.key===PF_SORT?' on':''}" data-k="${m.key}"><span>${m.label}</span>${pfInfoButton(m.key)}</button>`); b.addEventListener('click',ev=>{ if(ev.target.closest('.metric-info')) return; PF_SORT=m.key; renderPfPicker(); renderPfLeague(pfVisibleEmployers()); document.querySelectorAll('.pf-mh').forEach(x=>x.classList.toggle('sort',x.dataset.k===PF_SORT)); }); wrap.appendChild(b); });
+  wireMetricTips(wrap);
+}
+function renderPfLeague(E){
+  const wrap=document.getElementById('pf-league'); wrap.innerHTML=''; const m=PORTFOLIO.metrics.find(x=>x.key===PF_SORT);
+  const available=E.filter(e=>pfFinite(e[m.key])!==null); const missing=E.length-available.length;
+  if(!available.length){ document.getElementById('pf-league-note').textContent=`No ${m.label} data is available for the selected employers.`; wrap.innerHTML='<div class="muted" style="padding:12px 0">Data not loaded for this measure.</div>'; return; }
+  // Higher-is-better measures rank best first. Risk measures rank highest-risk first so attention items rise to the top.
+  const sorted=[...available].sort((a,b)=>m.goodHigh?pfFinite(b[m.key])-pfFinite(a[m.key]):pfFinite(b[m.key])-pfFinite(a[m.key]));
+  const vals=available.map(e=>pfFinite(e[m.key])); const max=Math.max(...vals), min=Math.min(...vals);
+  document.getElementById('pf-league-note').innerHTML=`Employers ranked by ${pfEsc(m.label)} ${pfInfoButton(m.key)} · ${m.goodHigh?'highest first':'highest risk first'}${missing?` · ${missing} unavailable`:''}`;
+  sorted.forEach((e,i)=>{ const v=pfFinite(e[m.key]); const rawPct=max===min?100:((v-min)/(max-min))*100; const goodness=m.goodHigh?rawPct:100-rawPct; const col=pfTextColor(m,v,vals); const rankCol=i===0?(m.goodHigh?'#137a47':'#b5371f'):'#8497a7'; wrap.appendChild(el(`<div class="pf-lg-row"><div class="pf-lg-rank" style="color:${rankCol}">${i+1}</div><div class="pf-lg-name">${pfEsc(e.name)}<small>${(pfFinite(e.heads)||0).toLocaleString('en-ZA')} staff</small></div><div class="pf-lg-track"><div class="pf-lg-fill" style="width:${Math.max(6,goodness)}%;background:${col}"></div></div><div class="pf-lg-val" style="color:${col}">${pfFmt(m,v)}</div></div>`)); });
+  wireMetricTips(document.getElementById('pf-league-note'));
+}
+
+/* ─────── wire: header buttons ─────── */
+function wireHeaderBtns(){
+  const exp=document.getElementById('btn-export');
+  if(exp) exp.addEventListener('click',()=>{
+    exp.classList.add('loading'); exp.textContent='Preparing…';
+    setTimeout(()=>{ exp.textContent='Export PDF'; exp.classList.remove('loading'); window.print(); },700);
+  });
+  const pfExp=document.getElementById('btn-pf-export');
+  if(pfExp) pfExp.addEventListener('click',()=>{
+    pfExp.classList.add('loading'); pfExp.textContent='Preparing…';
+    setTimeout(()=>{ pfExp.textContent='Export book'; pfExp.classList.remove('loading'); window.print(); },500);
+  });
+  const sch=document.getElementById('btn-schedule');
+  if(sch) sch.addEventListener('click',openScheduleReport);
+}
+
+
+/* ─────── scheduled reports ─────── */
+const scheduleEsc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+function scheduleCurrentFilters(){
+  const p=new URLSearchParams(location.search);
+  const filters={};
+  if(p.get('period')) filters.period=p.get('period'); else filters.range=p.get('range')||'all';
+  if(p.get('site')) filters.site=p.get('site');
+  if(p.get('income')) filters.income=p.get('income');
+  return filters;
+}
+function scheduleFrequencyLabel(s){
+  const days=['','Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  if(s.frequency==='ONCE') return 'Once';
+  if(s.frequency==='DAILY') return `Daily at ${s.sendTime}`;
+  if(s.frequency==='WEEKLY') return `Weekly · ${days[s.dayOfWeek]||''} ${s.sendTime}`;
+  if(s.frequency==='MONTHLY') return `Monthly · day ${s.dayOfMonth} · ${s.sendTime}`;
+  return s.frequency||'';
+}
+function scheduleLocalWhen(v){
+  if(!v) return '—';
+  try{return new Date(v).toLocaleString('en-ZA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch(_){return v;}
+}
+async function openScheduleReport(){
+  closeScheduleReport();
+  const me=window.__ME__||{};
+  let cfg={configured:false,defaultTimezone:'Africa/Johannesburg'};
+  try{ const r=await fetch('/api/report-schedules/config'); if(r.ok) cfg=await r.json(); }catch(_){ }
+  const currentEmployer=employerIdFromUrl() || me.employers?.[0]?.id || '';
+  const currentFilters=scheduleCurrentFilters();
+  const currentPeriod=periodFromUrl();
+  const range=currentFilters.range||'all';
+  const tomorrow=new Date(Date.now()+86400000); const yyyy=tomorrow.getFullYear(), mm=String(tomorrow.getMonth()+1).padStart(2,'0'), dd=String(tomorrow.getDate()).padStart(2,'0');
+  const currentEmployerName=(me.employers||[]).find(e=>e.id===currentEmployer)?.name || DATA.employer || 'Employer';
+  const siteOptions=[`<option value="all">All regions</option>`].concat((DATA.filterOptions?.sites||[]).map(x=>`<option value="${scheduleEsc(x.value)}" ${currentFilters.site===x.value?'selected':''}>${scheduleEsc(x.label)}</option>`)).join('');
+  const incomeOptions=[`<option value="all">All income bands</option>`].concat((DATA.filterOptions?.incomes||[]).map(x=>`<option value="${scheduleEsc(x.value)}" ${currentFilters.income===x.value?'selected':''}>${scheduleEsc(x.label)}</option>`)).join('');
+  const periodOption=currentPeriod?`<option value="period:${scheduleEsc(currentPeriod)}" selected>${scheduleEsc(DATA.filterContext?.label||currentPeriod)} (fixed month)</option>`:'';
+  const admin=me.role==='ADMIN';
+  const back=document.createElement('div'); back.className='schedule-backdrop'; back.id='schedule-backdrop';
+  back.innerHTML=`<div class="schedule-modal" role="dialog" aria-modal="true" aria-label="Schedule report" onclick="event.stopPropagation()">
+    <div class="schedule-hd"><div><div class="schedule-title">Schedule report</div><div class="schedule-sub">Choose when the report should be emailed and which dashboard filters it should use.</div></div><button class="schedule-close" onclick="closeScheduleReport()">×</button></div>
+    <div class="schedule-body">
+      ${cfg.configured?'':`<div class="schedule-note err">System email is not configured yet. An administrator must complete <strong>Administration → System Email & Scheduled Reports</strong> before schedules can send.</div>`}
+      <div class="schedule-grid">
+        <label class="schedule-field full">Report name<input id="schedule-name" value="${scheduleEsc(DATA.employer||'Employer')} financial wellbeing report"></label>
+        <label class="schedule-field">Employer<div style="margin-top:6px;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:#f7f6fb;font-weight:700;color:var(--navy)">${scheduleEsc(currentEmployerName)}</div><input id="schedule-employer" type="hidden" value="${scheduleEsc(currentEmployer)}"></label>
+        <label class="schedule-field">Reporting window<select id="schedule-window">${periodOption}<option value="all" ${!currentPeriod&&range==='all'?'selected':''}>Programme to date</option><option value="30d" ${!currentPeriod&&range==='30d'?'selected':''}>Last 30 days</option><option value="quarter" ${!currentPeriod&&range==='quarter'?'selected':''}>Current quarter</option></select></label>
+        <label class="schedule-field">Region / site<select id="schedule-site">${siteOptions}</select></label>
+        <label class="schedule-field">Income band<select id="schedule-income">${incomeOptions}</select></label>
+        <label class="schedule-field">Frequency<select id="schedule-frequency" onchange="scheduleToggleFrequency()"><option value="ONCE">Once</option><option value="DAILY">Daily</option><option value="WEEKLY">Weekly</option><option value="MONTHLY" selected>Monthly</option></select></label>
+        <label class="schedule-field">Send time<input id="schedule-time" type="time" value="08:00"></label>
+        <label class="schedule-field" id="schedule-once-wrap" style="display:none">Send date<input id="schedule-once-date" type="date" value="${yyyy}-${mm}-${dd}"></label>
+        <label class="schedule-field" id="schedule-weekly-wrap" style="display:none">Day of week<select id="schedule-weekday"><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option><option value="7">Sunday</option></select></label>
+        <label class="schedule-field" id="schedule-monthly-wrap">Day of month<input id="schedule-monthday" type="number" min="1" max="31" value="1"></label>
+        <label class="schedule-field">Timezone<input id="schedule-timezone" value="${scheduleEsc(cfg.defaultTimezone||'Africa/Johannesburg')}"></label>
+        <label class="schedule-field full">Recipients<input id="schedule-recipients" type="email" ${admin?'multiple':''} value="${scheduleEsc(me.email||'')}" ${admin?'':'readonly'}><span style="display:block;margin-top:5px;font-weight:600;color:var(--grey-l);font-size:11px">${admin?'Administrators may enter multiple addresses separated by commas.':'Reports are sent to your signed-in email address.'}</span></label>
+      </div>
+      <div id="schedule-result"></div>
+      <div class="schedule-actions"><button class="btn" onclick="closeScheduleReport()">Cancel</button><button class="btn btn-primary" ${cfg.configured?'':'disabled'} onclick="createScheduledReport()">Save schedule</button></div>
+      <div class="schedule-list"><div class="schedule-list-title">Your scheduled reports</div><div id="schedule-list-body"><div class="muted">Loading schedules…</div></div></div>
+    </div></div>`;
+  back.addEventListener('click',closeScheduleReport); document.body.appendChild(back); scheduleToggleFrequency(); loadMySchedules();
+}
+function closeScheduleReport(){ document.getElementById('schedule-backdrop')?.remove(); }
+function scheduleToggleFrequency(){
+  const f=document.getElementById('schedule-frequency')?.value||'MONTHLY';
+  const set=(id,on)=>{const e=document.getElementById(id); if(e)e.style.display=on?'block':'none';};
+  set('schedule-once-wrap',f==='ONCE'); set('schedule-weekly-wrap',f==='WEEKLY'); set('schedule-monthly-wrap',f==='MONTHLY');
+}
+function scheduleFormPayload(){
+  const w=document.getElementById('schedule-window').value; const filters={};
+  if(w.startsWith('period:')) filters.period=w.slice(7); else filters.range=w;
+  const site=document.getElementById('schedule-site').value, income=document.getElementById('schedule-income').value;
+  if(site!=='all') filters.site=site; if(income!=='all') filters.income=income;
+  const recipients=document.getElementById('schedule-recipients').value.split(',').map(x=>x.trim()).filter(Boolean);
+  const frequency=document.getElementById('schedule-frequency').value;
+  return {
+    name:document.getElementById('schedule-name').value.trim(), employerId:document.getElementById('schedule-employer').value,
+    filters, frequency, timezone:document.getElementById('schedule-timezone').value.trim(), sendTime:document.getElementById('schedule-time').value,
+    onceDate:frequency==='ONCE'?document.getElementById('schedule-once-date').value:null,
+    dayOfWeek:frequency==='WEEKLY'?Number(document.getElementById('schedule-weekday').value):null,
+    dayOfMonth:frequency==='MONTHLY'?Number(document.getElementById('schedule-monthday').value):null,
+    recipients,
+  };
+}
+async function createScheduledReport(){
+  const out=document.getElementById('schedule-result'); out.innerHTML='<div class="schedule-note">Saving schedule…</div>';
+  try{
+    const r=await fetch('/api/report-schedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(scheduleFormPayload())}); const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Could not create schedule');
+    out.innerHTML=`<div class="schedule-note" style="background:var(--green-soft);color:#137a47">✓ Report scheduled. Next send: ${scheduleLocalWhen(d.nextRunAt)}</div>`; loadMySchedules();
+  }catch(e){out.innerHTML=`<div class="schedule-note err">✕ ${scheduleEsc(e.message)}</div>`;}
+}
+async function loadMySchedules(){
+  const wrap=document.getElementById('schedule-list-body'); if(!wrap)return;
+  try{
+    const r=await fetch('/api/report-schedules'); const rows=await r.json(); if(!r.ok) throw new Error(rows.error||'Could not load schedules');
+    if(!rows.length){wrap.innerHTML='<div class="muted">No scheduled reports yet.</div>';return;}
+    wrap.innerHTML=rows.map(s=>`<div class="schedule-row"><div><strong>${scheduleEsc(s.name)}</strong><small>${scheduleEsc(s.employer?.name||'')} · ${scheduleFrequencyLabel(s)} · ${s.active?'next '+scheduleLocalWhen(s.nextRunAt):'paused'}</small>${s.lastStatus==='FAILED'?`<small style="color:#b5391f">Last send failed: ${scheduleEsc(s.lastError||'')}</small>`:''}</div><div class="schedule-row-actions"><button class="schedule-mini" onclick="scheduleSendNow('${s.id}')">Send now</button><button class="schedule-mini" onclick="scheduleToggleActive('${s.id}',${!s.active})">${s.active?'Pause':'Resume'}</button><button class="schedule-mini danger" onclick="scheduleDelete('${s.id}')">Delete</button></div></div>`).join('');
+  }catch(e){wrap.innerHTML=`<div class="schedule-note err">${scheduleEsc(e.message)}</div>`;}
+}
+async function scheduleToggleActive(id,active){
+  const r=await fetch(`/api/report-schedules/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({active})}); const d=await r.json().catch(()=>({})); if(!r.ok){openToast(d.error||'Could not update schedule');return;} loadMySchedules();
+}
+async function scheduleDelete(id){
+  if(!confirm('Delete this scheduled report?'))return; const r=await fetch(`/api/report-schedules/${id}`,{method:'DELETE'}); const d=await r.json().catch(()=>({})); if(!r.ok){openToast(d.error||'Could not delete schedule');return;} loadMySchedules();
+}
+async function scheduleSendNow(id){
+  openToast('Sending report…'); const r=await fetch(`/api/report-schedules/${id}/send-now`,{method:'POST'}); const d=await r.json().catch(()=>({})); if(!r.ok){openToast(d.error||'Could not send report');return;} openToast('Report sent successfully.'); loadMySchedules();
+}
+
+
+/* ─────── drill-down drawer ─────── */
+function openDrawer(title, sub, bodyHTML){
+  closeDrawer();
+  const back=el('<div class="drawer-backdrop"></div>');
+  const drawer=el(`<div class="drawer">
+    <div class="drawer-hd">
+      <div><div class="drawer-eyebrow">Drill-down</div><div class="drawer-title">${title}</div><div class="drawer-sub">${sub}</div></div>
+      <button class="drawer-x" aria-label="Close">&times;</button>
+    </div>
+    <div class="drawer-body">${bodyHTML}</div>
+  </div>`);
+  back.addEventListener('click',closeDrawer);
+  drawer.querySelector('.drawer-x').addEventListener('click',closeDrawer);
+  document.body.appendChild(back); document.body.appendChild(drawer);
+  requestAnimationFrame(()=>{ back.classList.add('show'); drawer.classList.add('show'); });
+}
+function closeDrawer(){
+  document.querySelectorAll('.drawer,.drawer-backdrop').forEach(e=>{ e.classList.remove('show'); setTimeout(()=>e.remove(),260); });
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDrawer(); });
+
+function outcomeDrill(o){
+  const body=`
+    <div class="drawer-stats">
+      <div class="ds"><div class="dsl">Fixes completed</div><div class="dsv">${o.count.toLocaleString()}</div></div>
+      <div class="ds"><div class="dsl">${o.statL}</div><div class="dsv">${o.stat}</div></div>
+      <div class="ds"><div class="dsl">Avg per employee</div><div class="dsv">${o.key==='credit'?'R 298/mo':o.key==='funeral'?'R 147/mo':o.key==='arrears'?'R 28,900':o.key==='prescribed'?'R 10,000':o.key==='emergency'?'1-mo advance':'—'}</div></div>
+    </div>
+    <div class="drawer-section-title">Completion trend</div>
+    ${miniTrend(o.key)}
+    <div class="drawer-note">Employee-level detail is de-identified. The employer sees aggregated outcomes only — never an individual's financial information. ${o.key==='credit'?'Credit life replacement leverages NCA s106(4)(a) substitution rights.':''}</div>`;
+  openDrawer(o.name, o.meta, body);
+}
+function miniTrend(key){
+  const seed={credit:[28,41,58,72,90,112],funeral:[12,22,34,46,60,72],arrears:[6,11,18,24,28,33],prescribed:[9,17,24,28,30,33],emergency:[4,9,14,19,22,26],sti:[2,3,5,6,7,8]}[key]||[1,2,3,4,5,6];
+  const w=440,h=120,max=Math.max(...seed)*1.2,pad=10;
+  const px=i=>pad+i*(w-pad*2)/(seed.length-1), py=v=>h-pad-(v/max)*(h-pad*2);
+  let line=seed.map((v,i)=>(i?'L':'M')+px(i)+' '+py(v)).join(' ');
+  let dots=seed.map((v,i)=>`<circle cx="${px(i)}" cy="${py(v)}" r="3" fill="#b15be8"/>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:120px;margin:8px 0 4px">
+    <path d="${line}" fill="none" stroke="#b15be8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>${dots}</svg>`;
+}
+function creditorDrill(c){
+  const body=`
+    <div class="drawer-stats">
+      <div class="ds"><div class="dsl">Accounts in journey</div><div class="dsv">${c.accounts}</div></div>
+      <div class="ds"><div class="dsl">Total balance</div><div class="dsv">${c.balance}</div></div>
+      <div class="ds"><div class="dsl">Avg per account</div><div class="dsv">${c.avg}</div></div>
+    </div>
+    <div class="drawer-section-title">Settlement status</div>
+    <div class="hbar" style="margin-top:10px">
+      ${[['Offers prepared',92],['Offers sent',74],['Creditor responded',58],['Settled / arranged',c.status==='elig'?41:23]].map(([l,p])=>
+        `<div class="hbar-row" style="grid-template-columns:140px 1fr 44px"><div class="hbar-lbl">${l}</div><div class="hbar-track"><div class="hbar-fill" style="width:${p}%"></div></div><div class="hbar-val">${p}%</div></div>`).join('')}
+    </div>
+    <div class="drawer-note">Employees deal with ${c.name} directly through a guided, do-it-yourself settlement — no debt-review flag, no third party taking over their money. Figures aggregated across ${c.accounts} employees.</div>`;
+  openDrawer(c.name, 'Unsecured arrears · settlement journey', body);
+}
+
+/* ─────── toast ─────── */
+let toastT;
+function openToast(msg){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=el(`<div class="toast">${msg}</div>`);
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  clearTimeout(toastT); toastT=setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); },3400);
+}
+
+/* ─────── boot: fetch real data from the API, then render ─────── */
+// Which employer to show. Default to the first the user can see; allow ?employer=ID.
+const API_BASE = "";
+function employerIdFromUrl(){
+  const p = new URLSearchParams(location.search);
+  return p.get('employer');
+}
+function periodFromUrl(){
+  return new URLSearchParams(location.search).get('period');
+}
+function rangeFromUrl(){
+  return new URLSearchParams(location.search).get('range')||'all';
+}
+function syncStateFromUrl(){
+  const range=rangeFromUrl();
+  STATE.period = range==='30d'?'30':range==='quarter'?'q':'all';
+  STATE.region = new URLSearchParams(location.search).get('site')||'all';
+  STATE.income = new URLSearchParams(location.search).get('income')||'all';
+}
+function apiFilterQuery(){
+  const page=new URLSearchParams(location.search);
+  const api=new URLSearchParams();
+  ['period','range','site','income'].forEach(k=>{ const v=page.get(k); if(v) api.set(k,v); });
+  if(!api.has('period') && !api.has('range')) api.set('range','all');
+  const q=api.toString();
+  return q?'?'+q:'';
+}
+function switchFilter(name,value,opts={}){
+  const params=new URLSearchParams(location.search);
+  if(value && value!=='all') params.set(name,value); else if(name==='range') params.set(name,'all'); else params.delete(name);
+  if(opts.clearPeriod) params.delete('period');
+  if(name==='period') params.delete('range');
+  location.search='?'+params.toString();
+}
+
+async function loadLiveData(){
+  // require sign-in
+  let me=null;
+  try{ const r=await fetch('/api/auth/me'); if(!r.ok){ location.href='/login'; return; } me=await r.json(); }
+  catch(e){ location.href='/login'; return; }
+  window.__ME__=me;
+  addAuthBar(me);
+  applyTheme(me.theme);
+  handleWelcomeSplash(me);
+  applySectionVisibility(me);
+  populateEmployerSelect(me);
+
+  try{
+    let id = employerIdFromUrl();
+    if(!id && me.employers && me.employers.length){ id = me.employers[0].id; }
+    syncStateFromUrl();
+    const period = periodFromUrl();
+    if(id) await populateMonthSelect(id, period);
+    const qs = apiFilterQuery();
+    const url = id ? `${API_BASE}/api/employers/${id}/dashboard${qs}` : `${API_BASE}/api/dashboard/first${qs}`;
+    const live = await fetch(url).then(async r=>{ if(!r.ok) throw new Error((await r.json().catch(()=>({}))).error||'no data'); return r.json(); });
+    if(me.modules?.portfolio){
+      try{
+        const pfParams=new URLSearchParams();
+        const pageParams=new URLSearchParams(location.search);
+        ['period','range'].forEach(k=>{ const v=pageParams.get(k); if(v) pfParams.set(k,v); });
+        if(!pfParams.has('period') && !pfParams.has('range')) pfParams.set('range','all');
+        const pf=await fetch(`${API_BASE}/api/portfolio?${pfParams.toString()}`).then(async r=>{ if(!r.ok) throw new Error('portfolio unavailable'); return r.json(); });
+        if(Array.isArray(pf.employers)){
+          PORTFOLIO.employers=pf.employers;
+          PORTFOLIO.filterContext=pf.filterContext||null;
+          PORTFOLIO.live=true;
+          PF_SELECTION_INITIALIZED=false;
+          PF_SELECTED_IDS.clear();
+          PF_RENDERED=false;
+        }
+      }catch(_){
+        PORTFOLIO.live=false;
+        PORTFOLIO.error=true;
+        if(!PORTFOLIO.explicitDemo) PORTFOLIO.employers=[];
+        PF_RENDERED=false;
+      }
+    }
+    DATA = live;
+    BASE = JSON.parse(JSON.stringify(DATA));
+    window.__LIVE__ = true;
+    if(live.employer){
+      const h1=document.querySelector('.head h1'); if(h1) h1.firstChild.textContent = live.employer + ' ';
+    }
+    // real data-freshness from the last import/recompute
+    const fl=document.getElementById('data-fresh-label');
+    document.querySelector('.data-fresh')?.classList.remove('is-error');
+    if(fl){
+      if(live.sourceDataUpdatedAt||live.dataAsOf){
+        const d=new Date(live.sourceDataUpdatedAt||live.dataAsOf);
+        fl.textContent='Source updated '+d.toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'});
+      } else { fl.textContent='Live data'; }
+    }
+    renderMonthActivity(live.monthActivity, live.filterContext);
+    renderDataQuality(live.dataQuality);
+    setLiveFootnote(live.filterContext);
+    // when a specific month is picked, the relative period segment doesn't apply
+    if(period){ const seg=document.getElementById('period-seg'); if(seg){ seg.style.opacity='.4'; seg.style.pointerEvents='none'; seg.title='Showing a specific month'; } }
+    const banner = document.getElementById('demo-banner'); if(banner) banner.remove();
+  }catch(e){
+    const demoMode=new URLSearchParams(location.search).get('demo')==='1';
+    if(demoMode){
+      showDemoBanner();
+      const fl=document.getElementById('data-fresh-label'); if(fl) fl.textContent='Demo data';
+    }else{
+      showLiveError(e);
+      wireAudience(); wireHeaderBtns();
+      return;
+    }
+  }
+  applyState();
+  wirePeriod(); wireFilters(); wireAudience(); wireHeaderBtns();
+}
+
+// month picker — populated from the snapshots that actually exist
+async function populateMonthSelect(employerId, selected){
+  const sel=document.getElementById('month-select'); if(!sel) return;
+  try{
+    const periods=await fetch(`${API_BASE}/api/employers/${employerId}/periods`).then(r=>r.json());
+    if(!Array.isArray(periods) || periods.length<1){ sel.style.display='none'; return; }
+    const fmt=p=>{ const [y,m]=p.split('-'); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]+' '+y; };
+    // "Latest" option (no period param) + each month
+    let opts=`<option value="">Latest</option>`;
+    opts+=periods.map(p=>`<option value="${p.period}" ${p.period===selected?'selected':''}>${fmt(p.period)} · score ${p.optimiseScore}</option>`).join('');
+    sel.innerHTML=opts;
+    sel.style.display='inline-block';
+  }catch(e){ sel.style.display='none'; }
+}
+function switchPeriod(period){
+  const id=employerIdFromUrl();
+  const params=new URLSearchParams(location.search);
+  if(period){ params.set('period',period); params.delete('range'); }
+  else { params.delete('period'); if(!params.has('range')) params.set('range','all'); }
+  if(id) params.set('employer',id);
+  location.search='?'+params.toString();
+}
+
+// activity strip for the selected flow window
+function renderMonthActivity(a, context){
+  const host=document.querySelector('.head'); if(!host) return;
+  document.getElementById('month-activity')?.remove();
+  if(!a) return;
+  const label = (a&&a.label)||(context&&context.label)||'selected period';
+  const value=(v,fallback='—') => (v===null || v===undefined || v==='') ? fallback : v;
+  const enrolled=value(a.enrolled), completed=value(a.completed), savings=value(a.savingUnlocked);
+  const advances=value(a.advancesCount), advanceTotal=value(a.advancesTotal);
+  const strip=el(`<div id="month-activity" style="margin-top:14px;display:flex;flex-wrap:wrap;gap:22px;padding:13px 18px;background:#f7f4ff;border:1px solid #e8e1f7;border-radius:12px;font:600 13px Manrope,sans-serif;color:#32217c;">
+    <span style="color:#5b6b7a;font-weight:700;">${label}:</span>
+    <span><b>${enrolled}</b> newly enrolled</span>
+    <span><b>${completed}</b> fixes completed</span>
+    <span><b>${savings}</b>${savings==='—'?'':'/mo'} new savings</span>
+    <span><b>${advances}</b> wage advances${advanceTotal==='—'?'':' · <b>'+advanceTotal+'</b>'}</span>
+  </div>`);
+  host.appendChild(strip);
+}
+
+// employer selector in the filter row
+function populateEmployerSelect(me){
+  const sel=document.getElementById('employer-select');
+  if(!sel || !me.employers || !me.employers.length) return;
+  const cur=employerIdFromUrl()||me.employers[0].id;
+  sel.innerHTML=me.employers.map(e=>`<option value="${e.id}" ${e.id===cur?'selected':''}>${e.name}</option>`).join('');
+  // always show the field (even with one employer) so it's clearly filterable
+  sel.style.display='inline-block';
+}
+function switchEmployer(id){ const p=new URLSearchParams(location.search); p.set('employer',id); p.delete('period'); p.delete('site'); p.delete('income'); location.search='?'+p.toString(); }
+
+function renderDataQuality(q){
+  document.getElementById('data-quality-note')?.remove();
+  if(!q || !Array.isArray(q.warnings) || !q.warnings.length) return;
+  const host=document.querySelector('.head'); if(!host) return;
+  const note=el(`<div id="data-quality-note" style="margin-top:12px;padding:10px 14px;border-radius:10px;background:#fff8e8;border:1px solid #efd49b;color:#7a5512;font:600 12px Manrope,sans-serif;">Data quality: ${q.warnings.join(' ')}</div>`);
+  host.appendChild(note);
+}
+function setLiveFootnote(context){
+  const f=document.getElementById('footnote'); if(!f) return;
+  const stock=context?.semantics?.stock||'Stock measures are measured as at the selected end date.';
+  const flow=context?.semantics?.flow||'Activity measures are measured inside the selected range.';
+  f.innerHTML='<strong>How the dashboard filters.</strong> '+stock+' '+flow+' Employee-level data remains aggregated and de-identified; individual financial information is not exposed to the employer.';
+}
+
+// apply the channel partner's white-label theme (colours, logo, name)
+// hide dashboard sections the signed-in user isn't permitted to see (server
+// also redacts the underlying data for gated sections — this just matches
+// the UI to it, and skips wasted rendering work for hidden sections).
+function applySectionVisibility(me){
+  const sections = me.sections || {};
+  document.querySelectorAll('.dash-section[data-section]').forEach(el=>{
+    const key = el.getAttribute('data-section');
+    const visible = key in sections ? !!sections[key] : true; // unknown key -> fail open, don't hide
+    el.style.display = visible ? '' : 'none';
+  });
+}
+
+function applyTheme(theme){
+  if(!theme) return;
+  const root=document.documentElement.style;
+  const hex=c=>c?('#'+String(c).replace(/^#/,'')):null;
+  const baseName='empower-fin Dashboard Portal';
+  if(theme.accentColor){ root.setProperty('--blue', hex(theme.accentColor)); root.setProperty('--blue-d', shade(theme.accentColor,-18)); }
+  if(theme.navyColor){ root.setProperty('--navy', hex(theme.navyColor)); }
+  if(theme.primaryColor){ root.setProperty('--ice', tint(theme.primaryColor,92)); }
+  const brandName=document.getElementById('channel-brand-name');
+  if(theme.logoDataUrl){
+    document.querySelectorAll('.logo img, .topbar .logo img').forEach(img=>{ img.src=theme.logoDataUrl; });
+    if(brandName) brandName.textContent='';
+  }else if(brandName){
+    brandName.textContent=theme.name && theme.name!==baseName ? theme.name : '';
+  }
+  document.title=(theme.name||baseName)+' — Employer Insights';
+  if(theme.tagline){
+    const sub=document.querySelector('.head-sub');
+    if(sub) sub.textContent=theme.tagline;
+  }
+}
+// darken a hex colour by pct (negative) for the hover/darker accent
+function shade(hex,pct){
+  hex=String(hex).replace(/^#/,''); const n=parseInt(hex,16);
+  let r=(n>>16)&255,g=(n>>8)&255,b=n&255; const f=(100+pct)/100;
+  r=Math.max(0,Math.min(255,Math.round(r*f))); g=Math.max(0,Math.min(255,Math.round(g*f))); b=Math.max(0,Math.min(255,Math.round(b*f)));
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+// very light tint of a colour for surface backgrounds
+function tint(hex,pct){
+  hex=String(hex).replace(/^#/,''); const n=parseInt(hex,16);
+  let r=(n>>16)&255,g=(n>>8)&255,b=n&255; const f=pct/100;
+  r=Math.round(r+(255-r)*f); g=Math.round(g+(255-g)*f); b=Math.round(b+(255-b)*f);
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+// brief "Hi <name>" splash right after sign-in — shown once per browser tab
+// session so repeat navigation within the dashboard doesn't keep re-showing it
+function handleWelcomeSplash(me){
+  var el=document.getElementById('welcome-splash');
+  if(!el) return;
+  var already=false;
+  try{ already = sessionStorage.getItem('ef_splash_shown')==='1'; }catch(_){}
+  if(already){ el.classList.add('hide'); return; }
+  var greet=document.getElementById('welcome-splash-greeting');
+  var first=(me.name||'').trim().split(/\s+/)[0]||'there';
+  if(greet) greet.textContent='Hi '+first+' \uD83D\uDC4B';
+  var logo=document.getElementById('welcome-splash-logo');
+  if(logo && me.theme && me.theme.logoDataUrl) logo.src=me.theme.logoDataUrl;
+  try{ sessionStorage.setItem('ef_splash_shown','1'); }catch(_){}
+  setTimeout(function(){ el.classList.add('hide'); }, 700);
+}
+
+function addAuthBar(me){
+  const meta=document.querySelector('.topbar-meta');
+  if(!meta) return;
+  if(!me.modules.portfolio){ const pb=document.querySelector('.audience-switch [data-a="portfolio"]'); if(pb) pb.style.display='none'; }
+  let nav=document.getElementById('portal-nav');
+  if(!nav){
+    nav=document.createElement('div');
+    nav.id='portal-nav';
+    meta.insertBefore(nav, meta.firstChild);
+  }
+  if(window.EmpowerPortalNav){
+    window.EmpowerPortalNav.render({
+      me,
+      navSelector:'#portal-nav',
+      accountSelector:'#portal-account',
+      active:'dashboard',
+      includeDashboard:false,
+    });
+  }
+}
+
+function showLiveError(error){
+  const view=document.getElementById('employer-view');
+  if(view) view.innerHTML=`<div class="card" style="max-width:760px;margin:48px auto;padding:34px">
+    <div style="font:800 23px Manrope,sans-serif;color:#32217c">Live dashboard data is unavailable</div>
+    <p style="margin:12px 0 0;color:#5b6b7a;line-height:1.65">The portal has not substituted demonstration figures. Check the latest sync/import status in Administration, then reload this page.</p>
+    <div style="margin-top:16px;padding:10px 12px;background:#f7f9fb;border-radius:8px;color:#7b8792;font:600 12px Manrope,sans-serif">${String(error?.message||error||'Unknown data error').replace(/[<>&]/g,'')}</div>
+  </div>`;
+  const fl=document.getElementById('data-fresh-label'); if(fl) fl.textContent='Data unavailable';
+  document.querySelector('.data-fresh')?.classList.add('is-error');
+}
+
+function showDemoBanner(){
+  if(document.getElementById('demo-banner')) return;
+  const b = document.createElement('div');
+  b.id = 'demo-banner';
+  b.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#fdf3e2;color:#8a5a00;border:1px solid #f0d8a8;padding:10px 18px;border-radius:12px;font:600 13px Manrope,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:999;';
+  b.textContent = 'Explicit demonstration mode — these figures are not live source data.';
+  document.body.appendChild(b);
+}
+
+loadLiveData();
+
+</script>
+</body>
+</html>

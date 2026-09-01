@@ -1,0 +1,2 @@
+account_ref,employer_ref,payroll_ref,observed_at,closed_at,creditor_name,credit_type,balance_rand,in_arrears,state,challenge_status,journey_ref,source_updated_at,is_deleted
+ACC-55120,VIG,EMP-004821,2026-03-31,2026-04-15,African Bank,BANK_LOAN,18830.00,true,ACTIVE_INTERVENTION,LETTER_SENT,JNY-991333,2026-04-01T08:00:00Z,false

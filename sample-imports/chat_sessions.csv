@@ -1,0 +1,2 @@
+session_ref,employer_ref,payroll_ref,journey_type,resolved_in_chat,first_reply_seconds,satisfaction,sentiment,theme,primary_question,started_at,source_updated_at,is_deleted
+CHT-20025,VIG,EMP-004821,ARREARS,true,45,4,0.6,Is this legit,Will replacing my credit life affect my credit score?,2026-03-18,2026-04-01T08:00:00Z,false

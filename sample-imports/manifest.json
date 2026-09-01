@@ -1,0 +1,207 @@
+{
+  "version": "2.6",
+  "loadOrder": [
+    "employers",
+    "workforce_snapshots",
+    "employees",
+    "platform_users",
+    "journeys",
+    "debt_accounts",
+    "policies",
+    "ratings",
+    "referrals",
+    "salary_advances"
+  ],
+  "reports": [
+    {
+      "key": "employers",
+      "title": "Employers (master)",
+      "naturalKey": [
+        "employer_ref"
+      ],
+      "fields": [
+        "employer_ref",
+        "name",
+        "eligible_count",
+        "eligible_count_as_at",
+        "source_updated_at",
+        "is_deleted"
+      ]
+    },
+    {
+      "key": "workforce_snapshots",
+      "title": "Workforce Headcount Snapshots",
+      "naturalKey": [
+        "employer_ref",
+        "as_of_date"
+      ],
+      "fields": [
+        "employer_ref",
+        "as_of_date",
+        "eligible_count",
+        "source_updated_at",
+        "is_deleted"
+      ]
+    },
+    {
+      "key": "employees",
+      "title": "Workforce / Eligibility",
+      "naturalKey": [
+        "employer_ref",
+        "payroll_ref",
+        "observed_at"
+      ],
+      "fields": [
+        "employer_ref",
+        "payroll_ref",
+        "observed_at",
+        "site_name",
+        "income_band",
+        "eligible_from",
+        "eligible_to",
+        "active",
+        "source_updated_at",
+        "is_deleted"
+      ]
+    },
+    {
+      "key": "platform_users",
+      "title": "Platform Enrolment",
+      "naturalKey": [
+        "employer_ref",
+        "payroll_ref"
+      ],
+      "fields": [
+        "employer_ref",
+        "payroll_ref",
+        "enrolled_at",
+        "activated_at",
+        "has_credit_profile",
+        "source_updated_at",
+        "is_deleted"
+      ]
+    },
+    {
+      "key": "journeys",
+      "title": "Journeys & Outcomes",
+      "naturalKey": [
+        "journey_ref"
+      ],
+      "fields": [
+        "journey_ref",
+        "employer_ref",
+        "payroll_ref",
+        "type",
+        "status",
+        "started_at",
+        "completed_at",
+        "monthly_saving_rand",
+        "balance_impact_rand",
+        "source_updated_at",
+        "is_deleted"
+      ]
+    },
+    {
+      "key": "debt_accounts",
+      "title": "Debt Account Observations",
+      "naturalKey": [
+        "account_ref",
+        "observed_at"
+      ],
+      "fields": [
+        "account_ref",
+        "employer_ref",
+        "payroll_ref",
+        "observed_at",
+        "closed_at",
+        "creditor_name",
+        "credit_type",
+        "balance_rand",
+        "in_arrears",
+        "state",
+        "challenge_status",
+        "journey_ref",
+        "source_updated_at",
+        "is_deleted"
+      ]
+    },
+    {
+      "key": "policies",
+      "title": "Insurance Policy Observations",
+      "naturalKey": [
+        "policy_ref",
+        "observed_at"
+      ],
+      "fields": [
+        "policy_ref",
+        "employer_ref",
+        "payroll_ref",
+        "observed_at",
+        "effective_from",
+        "effective_to",
+        "resolved_at",
+        "type",
+        "premium_rand",
+        "is_wasteful",
+        "is_resolved",
+        "source_updated_at",
+        "is_deleted"
+      ]
+    },
+    {
+      "key": "ratings",
+      "title": "Experience Ratings",
+      "naturalKey": [
+        "rating_ref"
+      ],
+      "fields": [
+        "rating_ref",
+        "employer_ref",
+        "payroll_ref",
+        "journey_type",
+        "stars",
+        "created_at",
+        "source_updated_at",
+        "is_deleted"
+      ]
+    },
+    {
+      "key": "referrals",
+      "title": "Referrals & Sharing",
+      "naturalKey": [
+        "referral_ref"
+      ],
+      "fields": [
+        "referral_ref",
+        "employer_ref",
+        "payroll_ref",
+        "channel",
+        "shared_at",
+        "converted",
+        "converted_at",
+        "source_updated_at",
+        "is_deleted"
+      ]
+    },
+    {
+      "key": "salary_advances",
+      "title": "Early Wage Access",
+      "naturalKey": [
+        "salary_advance_id"
+      ],
+      "fields": [
+        "salary_advance_id",
+        "employer_ref",
+        "client_id",
+        "payroll_ref",
+        "amount",
+        "salary_advance_status",
+        "bank_account_verification_status",
+        "blacklisted",
+        "advanced_at",
+        "source_updated_at",
+        "is_deleted"
+      ]
+    }
+  ]
+}
