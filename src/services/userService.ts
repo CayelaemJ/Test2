@@ -7,6 +7,7 @@
 import { randomBytes } from "node:crypto";
 import { prisma, hashPassword, destroyAllSessionsForUser } from "./authService.js";
 import { sendMail, portalBaseUrl } from "./reportScheduler.js";
+import { notifyAdmins } from "./automationService.js";
 
 type Role = "ADMIN" | "EMPLOYER_VIEW" | "PORTFOLIO_VIEW";
 
@@ -83,6 +84,35 @@ function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
 }
 
+// self-service: "forgot password" — reuses the same setupToken/expiry fields
+// as the admin-issued setup link, and always responds success either way so
+// we don't leak which emails have accounts.
+export async function requestPasswordReset(email: string) {
+  const normalised = email.toLowerCase().trim();
+  const user = await prisma.user.findUnique({ where: { email: normalised } });
+  if (!user || !user.active) return { ok: true }; // don't reveal account existence/status
+  const setupToken = randomBytes(24).toString("hex");
+  const setupExpires = new Date(Date.now() + 2 * 3600e3); // 2 hours — shorter than the 3-day admin invite link
+  await prisma.user.update({ where: { id: user.id }, data: { setupToken, setupExpires } });
+  const setupPath = `/set-password?token=${setupToken}`;
+  try {
+    const base = (await portalBaseUrl()) || "";
+    const link = base ? `${base.replace(/\/$/, "")}${setupPath}` : setupPath;
+    await sendMail({
+      to: user.email,
+      subject: "Reset your empower-fin Dashboard Portal password",
+      html: `<div style="font-family:Arial,sans-serif;color:#241536;max-width:620px">
+        <h2 style="color:#32217c">Reset your password</h2>
+        <p>Hi ${escapeHtml(user.name || "")},</p>
+        <p>We got a request to reset the password on this account. Click below to choose a new one:</p>
+        <p style="margin:24px 0"><a href="${link}" style="background:#32217c;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700">Reset password</a></p>
+        <p style="color:#6b7280;font-size:13px">This link expires in 2 hours. If you didn't request this, you can safely ignore this email — your password won't change.</p>
+      </div>`,
+    });
+  } catch { /* best-effort — never reveal a send failure to the caller either */ }
+  return { ok: true };
+}
+
 export async function listUsers() {
   const users = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
@@ -144,6 +174,11 @@ export async function deactivateSelf(userId: string, reason?: string) {
     data: { active: false, revokedAt: new Date(), revokedReason: reason || "Deactivated by the user", revokedBy: "self" },
   });
   await destroyAllSessionsForUser(userId);
+  notifyAdmins({
+    subject: "A user deactivated their own account",
+    html: `<div style="font-family:Arial,sans-serif;color:#241536"><h2 style="color:#32217c">Self-deactivation</h2><p><b>${user.name}</b> (${user.email}) deactivated their own account.</p>${reason ? `<p>Reason given: "${reason}"</p>` : ""}<p style="color:#6b7280;font-size:13px">Reactivate from Past users if this wasn't intended.</p></div>`,
+    slackText: `:door: ${user.name} (${user.email}) deactivated their own account${reason ? `: "${reason}"` : "."}`,
+  }).catch(() => {}); // best-effort — never block the user's own deactivation on this
   return sanitize(user);
 }
 

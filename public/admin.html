@@ -6,6 +6,9 @@
 <link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/portal-nav-v054.css?v=0.5.4">
 <link rel="stylesheet" href="/static/ui-enhance-v1.css?v=1">
+<link rel="stylesheet" href="/static/responsive-v1.css?v=1">
+<link rel="stylesheet" href="/static/dark-mode-v1.css?v=1">
+<script src="/static/dark-mode-v1.js?v=1"></script>
 <title>empower-fin Dashboard Portal — Administration</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
@@ -107,6 +110,16 @@
   </div>
 </div>
 <script>setTimeout(function(){var e=document.getElementById('welcome-splash');if(e)e.classList.add('hide');},4500);</script>
+<script>
+(function(){
+  try{
+    if(sessionStorage.getItem('ef_splash_shown')==='1'){
+      var e=document.getElementById('welcome-splash');
+      if(e) e.style.display='none';
+    }
+  }catch(_){}
+})();
+</script>
 <div class="topbar"><div class="topbar-inner">
   <img src="/static/logo.png" alt="empower-fin Dashboard Portal" style="height:30px;width:auto;">
   <span class="pill">Administration</span>
@@ -246,7 +259,17 @@
         <div class="card-hd"><h2>System Email &amp; Scheduled Reports</h2><div class="note">SMTP delivery used by scheduled employer reports</div></div>
         <div class="card-bd">
           <div id="mail-status" class="banner ok" style="display:none;margin-bottom:14px;"></div>
-          <div class="integration-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:820px;">
+          <div style="margin-bottom:16px;display:flex;gap:8px;">
+            <button type="button" id="mail-provider-smtp" class="btn btn-ghost" onclick="setEmailProvider('smtp')">SMTP</button>
+            <button type="button" id="mail-provider-resend" class="btn btn-ghost" onclick="setEmailProvider('resend')">Resend (API key)</button>
+          </div>
+          <div id="mail-resend-fields" style="display:none;max-width:420px;margin-bottom:14px;">
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Resend API key
+              <input id="mail-resend-key" type="password" autocomplete="new-password" placeholder="re_xxxxxxxx — leave blank to keep existing" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <div class="muted" style="font-size:12px;margin-top:6px;">From email below still needs to be a domain you've verified in Resend. SMTP fields aren't used while Resend is selected.</div>
+          </div>
+          <div class="integration-two-col" id="mail-smtp-fields" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:820px;">
             <div class="integration-panel-title">SMTP connection</div>
             <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">SMTP host
               <input id="mail-host" placeholder="smtp.office365.com" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
@@ -260,6 +283,8 @@
             <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">SMTP password
               <input id="mail-password" type="password" autocomplete="new-password" placeholder="leave blank to keep existing" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
             </label>
+          </div>
+          <div class="integration-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:820px;margin-top:14px;">
             <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">From name
               <input id="mail-from-name" value="empower-fin Dashboard Portal" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
             </label>
@@ -292,6 +317,61 @@
           <div style="overflow:auto;margin-top:8px;"><table class="hist"><thead><tr><th>Report</th><th>User</th><th>Frequency</th><th>Next send</th><th>Status</th></tr></thead><tbody id="mail-schedules"><tr><td colspan="5" class="muted" style="padding:10px;">No schedules yet.</td></tr></tbody></table></div>
           <div style="margin-top:20px;font-size:12.5px;font-weight:800;color:#32217c;">Recent email deliveries</div>
           <div style="overflow:auto;margin-top:8px;"><table class="hist"><thead><tr><th>When</th><th>Report</th><th>Status</th><th>Recipients</th></tr></thead><tbody id="mail-deliveries"><tr><td colspan="4" class="muted" style="padding:10px;">No deliveries yet.</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- admin audit log -->
+      <div class="card section-gap">
+        <div class="card-hd"><h2>Admin Audit Log</h2><div class="note">Every admin change — who, what, when. Showing the most recent 20.</div></div>
+        <div class="card-bd">
+          <div style="margin-bottom:10px;"><a class="btn btn-ghost" href="/api/admin/export/audit-log" download>Download full audit log (CSV)</a></div>
+          <div style="overflow:auto;"><table class="hist"><thead><tr><th>When</th><th>Admin</th><th>Action</th><th>Details</th></tr></thead><tbody id="audit-rows"><tr><td colspan="4" class="muted" style="padding:10px;">Loading…</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- data export -->
+      <div class="card section-gap">
+        <div class="card-hd"><h2>Export Data</h2><div class="note">Download the current underlying data as CSV — leave employer blank for everything</div></div>
+        <div class="card-bd">
+          <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;display:block;max-width:340px;margin-bottom:14px;">Scope to one employer (optional)
+            <select id="export-employer" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;"><option value="">All employers</option></select>
+          </label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a class="btn btn-ghost" id="export-employees" href="#" download>Employees (CSV)</a>
+            <a class="btn btn-ghost" id="export-debt" href="#" download>Debt accounts (CSV)</a>
+            <a class="btn btn-ghost" id="export-insurance" href="#" download>Insurance policies (CSV)</a>
+            <a class="btn btn-ghost" id="export-scores" href="#" download>Score snapshots (CSV)</a>
+            <a class="btn btn-ghost" href="/api/admin/export/users" download>Users (CSV)</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- automations -->
+      <div class="card section-gap">
+        <div class="card-hd"><h2>Automations</h2><div class="note">Alerts, auto-cleanup and digests — uses the SMTP settings above</div></div>
+        <div class="card-bd">
+          <div id="auto-status" class="banner ok" style="display:none;margin-bottom:14px;"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:820px;" class="integration-two-col">
+            <label style="grid-column:span 2;font-size:12.5px;font-weight:700;color:#5b6b7a;">Admin alert emails (comma-separated)
+              <input id="auto-alert-emails" placeholder="admin1@company.com, admin2@company.com" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="grid-column:span 2;font-size:12.5px;font-weight:700;color:#5b6b7a;">Slack webhook URL (optional)
+              <input id="auto-slack-webhook" placeholder="https://hooks.slack.com/services/…" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <label style="font-size:12.5px;font-weight:700;color:#5b6b7a;">Auto-deactivate after inactive for (days, blank = off)
+              <input id="auto-stale-days" type="number" min="7" max="3650" placeholder="e.g. 180" style="display:block;width:100%;margin-top:5px;font:inherit;font-weight:500;padding:9px 12px;border:1px solid #e8e1f7;border-radius:9px;">
+            </label>
+            <div></div>
+            <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#32217c;cursor:pointer;"><input id="auto-digest-enabled" type="checkbox" style="width:17px;height:17px;"> Weekly engagement digest to admin alert emails</label>
+            <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#32217c;cursor:pointer;"><input id="auto-score-enabled" type="checkbox" checked style="width:17px;height:17px;"> Email employer users when their score changes</label>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn" onclick="saveAutomations()">Save automation settings</button>
+            <button class="btn btn-ghost" onclick="runAutomationNow('stale')">Run stale-account check now</button>
+            <button class="btn btn-ghost" onclick="runAutomationNow('digest')">Send digest now</button>
+            <button class="btn btn-ghost" onclick="runAutomationNow('test')">Send test alert</button>
+          </div>
+          <div id="auto-result" style="margin-top:12px;"></div>
         </div>
       </div>
 
@@ -532,8 +612,17 @@ async function loadIntegLogs(){
 
 
 // ── system email / SMTP and scheduled reports ──
+let CURRENT_EMAIL_PROVIDER='smtp';
+function setEmailProvider(p){
+  CURRENT_EMAIL_PROVIDER=p;
+  $('#mail-provider-smtp').classList.toggle('btn-primary', p==='smtp');
+  $('#mail-provider-resend').classList.toggle('btn-primary', p==='resend');
+  $('#mail-smtp-fields').style.display = p==='smtp' ? 'grid' : 'none';
+  $('#mail-resend-fields').style.display = p==='resend' ? 'block' : 'none';
+}
 function emailDraft(){
   const body={
+    emailProvider: CURRENT_EMAIL_PROVIDER,
     smtpHost: $('#mail-host').value.trim(),
     smtpPort: parseInt($('#mail-port').value)||587,
     smtpSecure: $('#mail-secure').checked,
@@ -547,19 +636,30 @@ function emailDraft(){
     portalBaseUrl: $('#mail-portal-url').value.trim(),
   };
   const password=$('#mail-password').value.trim(); if(password) body.smtpPassword=password;
+  const resendKey=$('#mail-resend-key').value.trim(); if(resendKey) body.resendApiKey=resendKey;
   return body;
 }
 async function loadEmailSettings(){
   try{
     const r=await fetch(`${API}/api/admin/email-settings`); const c=await r.json(); if(!r.ok) throw new Error(c.error||'Could not load email settings');
+    setEmailProvider(c.emailProvider||'smtp');
+    if(c.hasResendApiKey) $('#mail-resend-key').placeholder=c.resendApiKeyFromEnvironment?'•••••• (provided by RESEND_API_KEY)':'•••••• (saved — leave blank to keep)';
     $('#mail-host').value=c.smtpHost||''; $('#mail-port').value=c.smtpPort||587; $('#mail-user').value=c.smtpUsername||'';
     $('#mail-from-name').value=c.fromName||'empower-fin Dashboard Portal'; $('#mail-from-email').value=c.fromEmail||''; $('#mail-reply-to').value=c.replyTo||'';
     $('#mail-timezone').value=c.defaultTimezone||'Africa/Johannesburg'; $('#mail-portal-url').value=c.portalBaseUrl||'';
     $('#mail-secure').checked=!!c.smtpSecure; $('#mail-require-tls').checked=c.smtpRequireTls!==false; $('#mail-reject-unauth').checked=c.smtpRejectUnauthorized!==false;
     if(c.hasPassword) $('#mail-password').placeholder=c.passwordFromEnvironment?'•••••• (provided by SMTP_PASSWORD)':'•••••• (saved — leave blank to keep)';
     const st=$('#mail-status'); st.style.display='block'; st.className='banner '+(c.configured?'ok':'');
-    st.textContent=c.configured?'SMTP is configured for scheduled report delivery.':'SMTP setup is incomplete. Scheduled reports cannot send until the required fields are configured.';
+    st.textContent=c.configured?`Email delivery is configured (via ${c.emailProvider==='resend'?'Resend':'SMTP'}).`:'Email setup is incomplete. Scheduled reports and alerts cannot send until the required fields are configured.';
     if(c.lastTestAt) st.textContent+=` Last test: ${c.lastTestStatus||'—'} · ${fmtDate(c.lastTestAt)}${c.lastTestNote?' — '+c.lastTestNote:''}`;
+    $('#auto-alert-emails').value=c.alertEmails||''; $('#auto-slack-webhook').value=c.alertSlackWebhookUrl||'';
+    $('#auto-stale-days').value=c.staleDeactivateDays||''; $('#auto-digest-enabled').checked=!!c.digestEnabled;
+    $('#auto-score-enabled').checked=c.scoreChangeAlertsEnabled!==false;
+    const as=$('#auto-status'); as.style.display='block'; as.className='banner ok';
+    let asText='Automations use the email settings above to send.';
+    if(c.lastStaleCheckAt) asText+=` Last stale-account check: ${fmtDate(c.lastStaleCheckAt)}.`;
+    if(c.lastDigestSentAt) asText+=` Last digest sent: ${fmtDate(c.lastDigestSentAt)}.`;
+    as.textContent=asText;
     loadScheduledReportsAdmin(); loadEmailDeliveries();
   }catch(e){ $('#mail-result').innerHTML=`<div class="banner err">✕ ${e.message}</div>`; }
 }
@@ -568,18 +668,43 @@ async function saveEmailSettings(){
   try{
     const r=await fetch(`${API}/api/admin/email-settings`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(emailDraft())});
     const d=await r.json(); if(!r.ok) throw new Error(d.error||'Save failed');
-    $('#mail-password').value=''; $('#mail-result').innerHTML='<div class="banner ok">✓ Email settings saved.</div>'; loadEmailSettings();
+    $('#mail-password').value=''; $('#mail-resend-key').value=''; $('#mail-result').innerHTML='<div class="banner ok">✓ Email settings saved.</div>'; loadEmailSettings();
   }catch(e){ $('#mail-result').innerHTML=`<div class="banner err">✕ ${e.message}</div>`; }
 }
 async function testEmailSettings(){
   const recipient=$('#mail-test-recipient').value.trim();
-  $('#mail-result').innerHTML='<div class="banner ok">Testing SMTP and sending a test email…</div>';
+  $('#mail-result').innerHTML='<div class="banner ok">Testing and sending a test email…</div>';
   try{
     const body={...emailDraft(),recipient};
     const r=await fetch(`${API}/api/admin/email-settings/test`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); const d=await r.json();
     if(!r.ok) throw new Error(d.error||'Email test failed');
     $('#mail-result').innerHTML=`<div class="banner ok">✓ Test email sent to ${d.recipient}.</div>`; loadEmailSettings();
   }catch(e){ $('#mail-result').innerHTML=`<div class="banner err">✕ ${e.message}</div>`; }
+}
+
+// ── automations ──
+async function saveAutomations(){
+  $('#auto-result').innerHTML='<div class="banner ok">Saving…</div>';
+  try{
+    const body={
+      alertEmails: $('#auto-alert-emails').value.trim(),
+      alertSlackWebhookUrl: $('#auto-slack-webhook').value.trim(),
+      staleDeactivateDays: $('#auto-stale-days').value ? parseInt($('#auto-stale-days').value) : null,
+      digestEnabled: $('#auto-digest-enabled').checked,
+      scoreChangeAlertsEnabled: $('#auto-score-enabled').checked,
+    };
+    const r=await fetch(`${API}/api/admin/email-settings`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error||'Save failed');
+    $('#auto-result').innerHTML='<div class="banner ok">✓ Automation settings saved.</div>'; loadEmailSettings();
+  }catch(e){ $('#auto-result').innerHTML=`<div class="banner err">✕ ${e.message}</div>`; }
+}
+async function runAutomationNow(kind){
+  $('#auto-result').innerHTML='<div class="banner ok">Running…</div>';
+  try{
+    const r=await fetch(`${API}/api/admin/automations/run`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error||'Could not run');
+    $('#auto-result').innerHTML=`<div class="banner ok">✓ ${d.message||'Done.'}</div>`; loadEmailSettings();
+  }catch(e){ $('#auto-result').innerHTML=`<div class="banner err">✕ ${e.message}</div>`; }
 }
 function scheduleFreqLabel(s){
   if(s.frequency==='ONCE') return 'Once';
@@ -605,6 +730,37 @@ async function loadEmailDeliveries(){
   }catch(e){ tb.innerHTML=`<tr><td colspan="4" class="muted" style="padding:10px;color:#b5391f;">${e.message}</td></tr>`; }
 }
 
+// ── data export ──
+function populateExportEmployers(me){
+  const sel=$('#export-employer'); if(!sel) return;
+  const employers=Array.isArray(me.employers)?me.employers:[];
+  sel.innerHTML='<option value="">All employers</option>'+employers.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  sel.addEventListener('change', updateExportLinks);
+  updateExportLinks();
+}
+function updateExportLinks(){
+  const id=$('#export-employer')?.value||'';
+  const q=id?`?employer=${encodeURIComponent(id)}`:'';
+  [['export-employees','employees'],['export-debt','debt-accounts'],['export-insurance','insurance-policies'],['export-scores','score-snapshots']].forEach(([elId,type])=>{
+    const el=$('#'+elId); if(el) el.href=`/api/admin/export/${type}${q}`;
+  });
+}
+
+// ── admin audit log ──
+async function loadAuditLog(){
+  const rows=$('#audit-rows'); if(!rows) return;
+  try{
+    const log=await fetch(`${API}/api/admin/audit-log?limit=20`).then(r=>r.json());
+    if(!Array.isArray(log) || !log.length){ rows.innerHTML='<tr><td colspan="4" class="muted" style="padding:10px;">No admin changes recorded yet.</td></tr>'; return; }
+    rows.innerHTML=log.map(l=>`<tr>
+      <td class="muted" style="white-space:nowrap;">${fmtDate(l.createdAt)}</td>
+      <td><b>${l.actorName}</b><div class="muted">${l.actorEmail}</div></td>
+      <td><span class="tag">${l.action}</span></td>
+      <td>${l.summary}</td>
+    </tr>`).join('');
+  }catch(e){ rows.innerHTML=`<tr><td colspan="4" style="padding:10px;color:#b5391f;">Could not load the audit log.</td></tr>`; }
+}
+
 // ── client reach & engagement ──
 async function loadEngagement(){
   const days=$('#eng-days')?.value || 30;
@@ -613,12 +769,14 @@ async function loadEngagement(){
   try{
     const s=await fetch(`${API}/api/admin/analytics/summary?days=${days}`).then(r=>r.json());
     const stat=(label,value)=>`<div style="background:#f7fafd;border:1px solid #e8e1f7;border-radius:12px;padding:12px 14px;"><div style="font-size:22px;font-weight:800;color:#32217c;">${value}</div><div style="font-size:11.5px;font-weight:700;color:#8497a7;margin-top:2px;">${label}</div></div>`;
+    const fmtDuration=(s)=> s==null ? '—' : (s<60 ? s+'s' : Math.round(s/60)+'m '+(s%60)+'s');
     statsEl.innerHTML = [
       stat('Active accounts', s.activeAccountCount),
       stat('Signed in this window', s.uniqueSignedInUsers),
       stat('Total logins', s.totalLogins),
       stat('Pageviews', s.totalPageviews),
       stat('Avg. scroll depth', s.avgScrollDepth+'%'),
+      stat('Avg. time on page', fmtDuration(s.avgSessionSeconds)),
     ].join('');
     const max=Math.max(1,...s.trend.map(t=>t.logins));
     trendEl.innerHTML=s.trend.map(t=>`<div title="${t.date}: ${t.logins} login(s)" style="flex:1;min-width:2px;background:#b15be8;border-radius:3px 3px 0 0;height:${Math.max(3,Math.round((t.logins/max)*100))}%;"></div>`).join('');
@@ -854,6 +1012,7 @@ async function boot(){
   if(!me.modules.admin){ location.href='/dashboard'; return; }
   handleWelcomeSplash(me);
   addNav(me);
+  populateExportEmployers(me);
   try{
     const r = await fetch(`${API}/api/admin/reports`);
     MANIFEST = await r.json();
@@ -865,6 +1024,7 @@ async function boot(){
     loadSections();
     loadEngagement();
     renderPresets();
+    loadAuditLog();
   }catch(e){
     $('#rep-list').innerHTML = `<p class="muted">Could not reach the API. Start the server and reload.</p>`;
   }

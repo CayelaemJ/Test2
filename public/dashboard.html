@@ -6,6 +6,9 @@
 <link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/portal-nav-v054.css?v=0.5.4">
 <link rel="stylesheet" href="/static/ui-enhance-v1.css?v=1">
+<link rel="stylesheet" href="/static/responsive-v1.css?v=1">
+<link rel="stylesheet" href="/static/dark-mode-v1.css?v=1">
+<script src="/static/dark-mode-v1.js?v=1"></script>
 <title>empower-fin Dashboard Portal — Employer Insights</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
@@ -506,6 +509,21 @@
   </div>
 </div>
 <script>setTimeout(function(){var e=document.getElementById('welcome-splash');if(e)e.classList.add('hide');},4500);</script>
+<script>
+// runs synchronously, before any network call — if this tab has already
+// shown the welcome splash once, hide it instantly with no transition and no
+// flash. Without this, the overlay (with its static "Welcome" text) stays
+// fully visible for the entire /api/auth/me round-trip on every single page
+// load — including every filter change, since those reload the page.
+(function(){
+  try{
+    if(sessionStorage.getItem('ef_splash_shown')==='1'){
+      var e=document.getElementById('welcome-splash');
+      if(e) e.style.display='none';
+    }
+  }catch(_){}
+})();
+</script>
 
 <!-- ════════════════════════ TOP BAR ════════════════════════ -->
 <div class="topbar">
@@ -2454,7 +2472,7 @@ function apiFilterQuery(){
   const page=new URLSearchParams(location.search);
   const api=new URLSearchParams();
   ['period','range','site','income'].forEach(k=>{ const v=page.get(k); if(v) api.set(k,v); });
-  if(!api.has('period') && !api.has('range')) api.set('range','all');
+  if(!api.has('period') && !api.has('range')) api.set('range','latest');
   const q=api.toString();
   return q?'?'+q:'';
 }
@@ -2492,7 +2510,7 @@ async function loadLiveData(){
         const pfParams=new URLSearchParams();
         const pageParams=new URLSearchParams(location.search);
         ['period','range'].forEach(k=>{ const v=pageParams.get(k); if(v) pfParams.set(k,v); });
-        if(!pfParams.has('period') && !pfParams.has('range')) pfParams.set('range','all');
+        if(!pfParams.has('period') && !pfParams.has('range')) pfParams.set('range','latest');
         const pf=await fetch(`${API_BASE}/api/portfolio?${pfParams.toString()}`).then(async r=>{ if(!r.ok) throw new Error('portfolio unavailable'); return r.json(); });
         if(Array.isArray(pf.employers)){
           PORTFOLIO.employers=pf.employers;
@@ -2563,7 +2581,13 @@ function switchPeriod(period){
   const id=employerIdFromUrl();
   const params=new URLSearchParams(location.search);
   if(period){ params.set('period',period); params.delete('range'); }
-  else { params.delete('period'); if(!params.has('range')) params.set('range','all'); }
+  else {
+    // "Latest" — always the most recent period with data, resolved server-side
+    // and re-checked on every load (was previously falling back to
+    // range=all, an all-time aggregate that barely moves and read as "the
+    // number never updates")
+    params.delete('period'); params.set('range','latest');
+  }
   if(id) params.set('employer',id);
   location.search='?'+params.toString();
 }
@@ -2681,7 +2705,14 @@ function handleWelcomeSplash(me){
 function addAuthBar(me){
   const meta=document.querySelector('.topbar-meta');
   if(!meta) return;
-  if(!me.modules.portfolio){ const pb=document.querySelector('.audience-switch [data-a="portfolio"]'); if(pb) pb.style.display='none'; }
+  if(!me.modules.portfolio){
+    // no portfolio access → there's nothing to switch between, so the whole
+    // toggle (including "Employer view") is redundant, not just the
+    // Portfolio button. Hide it entirely rather than leaving a one-option
+    // switcher taking up space.
+    const sw=document.querySelector('.audience-switch'); if(sw) sw.style.display='none';
+    const div=sw && sw.previousElementSibling; if(div && div.classList.contains('topbar-divider')) div.style.display='none';
+  }
   let nav=document.getElementById('portal-nav');
   if(!nav){
     nav=document.createElement('div');

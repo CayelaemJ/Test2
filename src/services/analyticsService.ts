@@ -34,10 +34,11 @@ export async function recordEvent(opts: {
 export async function engagementSummary(days: number = 30) {
   const since = new Date(Date.now() - days * 864e5);
 
-  const [sessions, pageviews, scrollEvents, totalUsers, activeUsers] = await Promise.all([
+  const [sessions, pageviews, scrollEvents, sessionEnds, totalUsers, activeUsers] = await Promise.all([
     prisma.session.findMany({ where: { createdAt: { gte: since } }, select: { userId: true, createdAt: true } }),
     prisma.analyticsEvent.findMany({ where: { type: "PAGEVIEW", createdAt: { gte: since } }, select: { userId: true, path: true, createdAt: true } }),
     prisma.analyticsEvent.findMany({ where: { type: "SCROLL_DEPTH", createdAt: { gte: since } }, select: { userId: true, value: true } }),
+    prisma.analyticsEvent.findMany({ where: { type: "SESSION_END", createdAt: { gte: since } }, select: { userId: true, value: true } }),
     prisma.user.count({ where: { active: true } }),
     prisma.user.findMany({ where: { active: true }, select: { id: true, name: true, email: true } }),
   ]);
@@ -46,6 +47,12 @@ export async function engagementSummary(days: number = 30) {
   const avgScroll = scrollEvents.length
     ? Math.round(scrollEvents.reduce((sum: number, e: any) => sum + (e.value || 0), 0) / scrollEvents.length)
     : 0;
+  // average time-on-page across SESSION_END beacons (seconds); ignore
+  // implausible outliers from a tab left open overnight
+  const plausible = sessionEnds.filter((e: any) => typeof e.value === "number" && e.value > 0 && e.value < 3 * 3600);
+  const avgSessionSeconds = plausible.length
+    ? Math.round(plausible.reduce((sum: number, e: any) => sum + e.value, 0) / plausible.length)
+    : null;
 
   // logins per day, last N days (for a simple trend line)
   const dayKey = (d: Date) => d.toISOString().slice(0, 10);
@@ -91,6 +98,7 @@ export async function engagementSummary(days: number = 30) {
     totalLogins: sessions.length,
     totalPageviews: pageviews.length,
     avgScrollDepth: avgScroll,
+    avgSessionSeconds,
     trend,
     topPages,
     byUser,

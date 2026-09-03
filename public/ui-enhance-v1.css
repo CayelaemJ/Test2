@@ -65,7 +65,46 @@ table tbody tr:hover { background: var(--ice-2, #f4f9fd); }
 /* status chips/tags: slightly stronger contrast border for legibility */
 .chip, .tag, .role, .pill { box-shadow: inset 0 0 0 1px rgba(15,36,56,.04); }
 
-/* reduce motion for anyone who's asked for it */
+/* content settles in gently on load instead of popping in — the kind of
+   detail that makes an app feel considered rather than assembled */
+@keyframes ui-fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.card { animation: ui-fade-up .35s ease both; }
+.card:nth-of-type(2) { animation-delay: .04s; }
+.card:nth-of-type(3) { animation-delay: .08s; }
+.card:nth-of-type(4) { animation-delay: .12s; }
+.card:nth-of-type(5) { animation-delay: .16s; }
+
+/* active nav link gets a small animated underline instead of just a
+   background swap */
+.nav a { position: relative; }
+.nav a.on::after {
+  content: ""; position: absolute; left: 13px; right: 13px; bottom: 2px; height: 2px;
+  background: linear-gradient(90deg, var(--blue, #b15be8), var(--navy, #32217c)); border-radius: 2px;
+}
+
+/* primary CTA buttons get a subtle sheen sweep on hover */
+.btn-primary, button.btn-primary {
+  position: relative; overflow: hidden;
+}
+.btn-primary::after, button.btn-primary::after {
+  content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.35), transparent);
+  transform: skewX(-20deg); transition: left .5s ease;
+}
+.btn-primary:hover::after, button.btn-primary:hover::after { left: 130%; }
+
+/* banners (save confirmations, errors) slide in instead of just appearing —
+   used throughout Administration for save/test feedback */
+@keyframes ui-banner-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.banner { animation: ui-banner-in .25s ease both; }
+
+/* status chips/tags get a tiny pop when they first render */
+@keyframes ui-pop { 0% { transform: scale(.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.tag, .chip, .role, .pill { animation: ui-pop .2s ease both; }
+
 @media (prefers-reduced-motion: reduce) {
+  .card { animation: none; }
+  .btn-primary::after, button.btn-primary::after { display: none; }
+  .banner, .tag, .chip, .role, .pill { animation: none; }
   * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }

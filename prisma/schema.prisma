@@ -779,6 +779,25 @@ model SystemEmailConfig {
   lastTestAt              DateTime?
   lastTestStatus          String?
   lastTestNote            String?
+
+  // ── sending provider ──
+  // "smtp" (default, uses the fields above) or "resend" (uses resendApiKey
+  // via the Resend HTTP API — no SMTP credentials needed)
+  emailProvider           String   @default("smtp")
+  resendApiKey            String?
+
+  // ── automations ──
+  // comma-separated list of admin emails that receive alerts + the weekly digest
+  alertEmails             String?
+  alertSlackWebhookUrl    String?
+  digestEnabled           Boolean  @default(false)
+  lastDigestSentAt        DateTime?
+  // active accounts with no session for this many days are auto-deactivated
+  // (kept in Past users, reactivatable) — null/0 disables this
+  staleDeactivateDays     Int?
+  lastStaleCheckAt        DateTime?
+  scoreChangeAlertsEnabled Boolean @default(true)
+
   updatedAt               DateTime @default(now()) @updatedAt
 }
 
@@ -900,6 +919,26 @@ model ScoreWeight {
   employer Employer? @relation(fields: [employerId], references: [id], onDelete: Cascade)
 
   @@index([employerId, driver, effectiveFrom])
+}
+
+// ── admin audit log ──
+// Every admin-initiated change gets a row here: who, what, on what, and
+// (where useful) a compact before/after. Append-only — nothing here is ever
+// updated or deleted through the app.
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  actorEmail  String
+  actorName   String
+  action      String   // short machine-readable key, e.g. "user.update", "partner.delete"
+  targetType  String?  // e.g. "User", "Partner", "DashboardSection"
+  targetId    String?
+  summary     String   // one-line human-readable description
+  detail      Json?    // optional structured before/after or extra context
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorEmail])
+  @@index([targetType, targetId])
 }
 
 model AchievableTarget {
