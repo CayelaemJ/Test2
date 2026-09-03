@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/ui-enhance-v1.css?v=1">
+<link rel="stylesheet" href="/static/responsive-v1.css?v=1">
+<link rel="stylesheet" href="/static/dark-mode-v1.css?v=1">
+<script src="/static/dark-mode-v1.js?v=1"></script>
 <title>empower-fin Dashboard Portal — Sign in</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
@@ -43,6 +46,9 @@
     <input id="email" type="email" autocomplete="username" placeholder="you@company.com">
     <label for="password">Password</label>
     <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+    <div style="text-align:right;margin-top:8px;">
+      <a href="#" id="forgot-link" onclick="showForgot(event)" style="font-size:12.5px;font-weight:700;color:var(--blue-d);text-decoration:none;">Forgot password?</a>
+    </div>
     <label style="display:flex;align-items:center;gap:8px;margin:16px 0 0;font-weight:600;font-size:13px;color:var(--grey);cursor:pointer;">
       <input id="remember" type="checkbox" style="width:auto;margin:0;accent-color:var(--navy);cursor:pointer;">
       Remember me
@@ -50,6 +56,16 @@
     <button id="btn" onclick="signIn()">Sign in</button>
     <div class="err" id="err"></div>
     <div class="err" id="deactivated-msg" style="display:none;background:#eef2ff;color:#32217c;">Your account has been deactivated. Contact an administrator if you'd like access restored.</div>
+  </div>
+
+  <div class="card" id="forgot-card" style="display:none;">
+    <h1 style="margin-top:0;">Reset your password</h1>
+    <div class="sub">Enter your email and we'll send you a reset link, if an account exists.</div>
+    <label for="forgot-email">Email</label>
+    <input id="forgot-email" type="email" autocomplete="username" placeholder="you@company.com">
+    <button id="forgot-btn" onclick="sendForgot()">Send reset link</button>
+    <div style="text-align:center;margin-top:16px;"><a href="#" onclick="hideForgot(event)" style="font-size:12.5px;font-weight:700;color:var(--grey);text-decoration:none;">← Back to sign in</a></div>
+    <div class="err" id="forgot-msg" style="display:none;background:#e7f7ef;color:#137a47;"></div>
   </div>
   <div style="text-align:center;margin-top:18px;font-size:12px;color:#8497a7;">
     <a href="/privacy" style="color:#8497a7;">Privacy Policy</a> · <a href="/terms" style="color:#8497a7;">Terms of Service</a> · <a href="/cookies" style="color:#8497a7;">Cookie Notice</a>
@@ -103,6 +119,31 @@ async function signIn(){
   }catch(e){ err.textContent=e.message; err.style.display='block'; btn.disabled=false; btn.textContent='Sign in'; }
 }
 $('#password').addEventListener('keydown',e=>{ if(e.key==='Enter') signIn(); });
+
+function showForgot(ev){
+  if(ev) ev.preventDefault();
+  document.querySelector('.card:not(#forgot-card)').style.display='none';
+  $('#forgot-card').style.display='block';
+  $('#forgot-email').value=$('#email').value||'';
+  $('#forgot-msg').style.display='none';
+}
+function hideForgot(ev){
+  if(ev) ev.preventDefault();
+  $('#forgot-card').style.display='none';
+  document.querySelector('.card:not(#forgot-card)').style.display='block';
+}
+async function sendForgot(){
+  const btn=$('#forgot-btn'), msg=$('#forgot-msg');
+  const email=$('#forgot-email').value.trim();
+  if(!email){ msg.style.display='block'; msg.style.background='#fdecea'; msg.style.color='#b5391f'; msg.textContent='Enter your email first.'; return; }
+  btn.disabled=true; btn.textContent='Sending…';
+  try{
+    await fetch('/api/auth/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  }catch(_){ /* still show the same message either way */ }
+  msg.style.display='block'; msg.style.background='#e7f7ef'; msg.style.color='#137a47';
+  msg.textContent='If an account exists for that email, a reset link is on its way. Check your inbox (and spam folder).';
+  btn.disabled=false; btn.textContent='Send reset link';
+}
 
 // cookie notice banner — shown once until dismissed
 function dismissCookieBanner(){

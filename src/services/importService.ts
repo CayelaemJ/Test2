@@ -9,6 +9,7 @@ import { getFormat } from "./reportFormats.js";
 import { compareDateValues, dateMillis, rehydrateStagedRows } from "./stagedRows.js";
 import { parseFile, validate, detectFormat } from "./importParser.js";
 import { snapshotEmployer } from "./snapshotBuilder.js";
+import { notifyScoreChangeIfCurrentPeriod } from "./automationService.js";
 
 const prisma = new PrismaClient();
 type Json = any;
@@ -565,7 +566,10 @@ export async function commitBatch(batchId: string, options: CommitOptions = {}) 
 
   if (options.recompute !== false) {
     const period = currentPeriod();
-    for (const employerId of touchedEmployers) await snapshotEmployer(employerId, period);
+    for (const employerId of touchedEmployers) {
+      await snapshotEmployer(employerId, period);
+      notifyScoreChangeIfCurrentPeriod(employerId, period, currentPeriod()).catch(() => {}); // best-effort, don't block the import
+    }
   }
 
   return {

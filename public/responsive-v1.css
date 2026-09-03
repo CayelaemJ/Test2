@@ -1,0 +1,82 @@
+/* ════════════════════════════════════════════════════════════════════
+   RESPONSIVE LAYER — phone & tablet fixes shared by every page.
+   The viewport <meta> tag alone only stops the browser faking a desktop
+   view; it does none of the actual layout work. These are the real rules.
+   Breakpoints match what the pages already use: ≤1080px tablet-and-below
+   (dashboard.html already collapses most of its own grids there), plus a
+   ≤640px phone tier and a ≤380px small-phone tier that nothing had before.
+   ════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1080px) {
+  /* generic two-column form grids collapse to one column on anything
+     tablet-sized or smaller, across every page (dashboard's own grids
+     already do this themselves at this width) */
+  .row2 { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 1080px) and (min-width: 641px) {
+  /* tablet tier: the desktop's 28px edge padding felt tight once content
+     reflows to fewer columns at this width — ease it back a bit and give
+     stacked sections more breathing room than the tight desktop rhythm */
+  .wrap, .topbar-inner { padding-left: 22px !important; padding-right: 22px !important; }
+  .section-gap { margin-top: 26px !important; }
+  .card-bd { padding: 18px 20px !important; }
+}
+
+@media (max-width: 900px) {
+  /* tables: rather than squeezing columns illegibly, let the table itself
+     scroll horizontally inside its card. Safe because every table on
+     every page sits inside a .card-bd (or an explicit overflow wrapper
+     already added on the newer panels). */
+  .card-bd { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .card-bd > table, table.hist { min-width: 560px; }
+}
+
+@media (max-width: 640px) {
+  /* container gutters shrink so content isn't fighting the screen edge */
+  .topbar-inner, .wrap { padding-left: 16px !important; padding-right: 16px !important; }
+  .topbar-inner { height: 58px !important; gap: 10px !important; }
+  .topbar-inner img, .logo img { height: 24px !important; }
+  .card { border-radius: 14px !important; }
+  .card-bd { padding: 14px !important; }
+  .card-hd { padding: 14px 16px 10px !important; }
+  .head { padding: 22px 0 14px !important; }
+  .head h1 { font-size: 24px !important; }
+
+  /* inline flex button/toolbar rows throughout the app wrap instead of
+     overflowing off the edge of a phone screen, with enough gap that
+     wrapped rows don't look cramped */
+  [style*="display:flex"] { flex-wrap: wrap; row-gap: 10px; }
+  .topbar-inner, .portal-account-menu, .welcome-splash-inner { flex-wrap: nowrap; } /* exceptions that must stay in one line */
+
+  /* buttons/links get a real touch target */
+  .btn, button, .nav a { min-height: 40px; }
+
+  /* inputs at 16px+ stop iOS Safari auto-zooming in on focus */
+  input, select, textarea { font-size: 16px !important; }
+
+  /* table cells wrap long emails/names instead of forcing horizontal scroll
+     for content that doesn't need it */
+  td, th { word-break: break-word; }
+
+  /* stat/kpi tiles: never fewer than ~140px, but allow them to reflow to
+     as many columns as actually fit */
+  [style*="grid-template-columns:repeat(auto-fit"] { gap: 8px !important; }
+
+  h1 { font-size: 26px !important; }
+  .card-hd h2 { font-size: 13px !important; }
+}
+
+@media (max-width: 380px) {
+  .topbar-inner, .wrap { padding-left: 12px !important; padding-right: 12px !important; }
+  .pill { display: none; } /* "Administration" / build badges — logo + nav matter more on the smallest screens */
+  .welcome-splash-logo { height: 32px !important; }
+  .welcome-splash-greeting { font-size: 21px !important; }
+}
+
+/* nav row: horizontal scroll instead of wrap/overlap when there isn't
+   room for every link, on any page that uses .nav */
+@media (max-width: 640px) {
+  .nav { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap !important; padding-bottom: 2px; }
+  .nav a { white-space: nowrap; flex-shrink: 0; }
+}

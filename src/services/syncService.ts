@@ -10,6 +10,7 @@ import { LOAD_ORDER, getFormat } from "./reportFormats.js";
 import { validate } from "./importParser.js";
 import { commitBatch } from "./importService.js";
 import { snapshotEmployer } from "./snapshotBuilder.js";
+import { notifyScoreChangeIfCurrentPeriod } from "./automationService.js";
 import { createSourceAdapter, configuredSourceMode, sourceIsConfigured } from "./sourceAdapter.js";
 
 const prisma = new PrismaClient();
@@ -221,7 +222,8 @@ export async function runSync(trigger: "manual" | "scheduled" = "manual") {
 
   for (const employerId of touchedEmployers) {
     try {
-      await snapshotEmployer(employerId);
+      const r = await snapshotEmployer(employerId);
+      if (r.persisted) notifyScoreChangeIfCurrentPeriod(employerId, r.period, r.period).catch(() => {}); // best-effort
     } catch (error: any) {
       summary.snapshot = summary.snapshot ?? { errors: [] };
       summary.snapshot.errors.push({ employerId, error: error?.message ?? String(error) });

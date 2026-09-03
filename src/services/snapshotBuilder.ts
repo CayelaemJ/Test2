@@ -17,7 +17,7 @@ const rand = (cents: number) => cents / 100;
 export type DashboardRange = "30d" | "quarter" | "all" | "month";
 export interface DashboardQuery {
   period?: string;
-  range?: DashboardRange | "30" | "q";
+  range?: DashboardRange | "30" | "q" | "latest";
   site?: string;
   income?: string;
 }
@@ -138,7 +138,7 @@ function monthLabel(key: string): string {
   const [year, month] = key.split("-");
   return `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(month) - 1]} ${year.slice(2)}`;
 }
-function currentPeriod(): string {
+export function currentPeriod(): string {
   return monthKey(new Date());
 }
 function isValidPeriod(value: string): boolean {
@@ -446,7 +446,16 @@ async function latestPolicyState(platformUserIds: string[], asAt: Date) {
 }
 
 async function buildDashboardPayload(employerId: string, query: DashboardQuery = {}) {
-  const filter = resolveFilter(query);
+  // "Latest" must mean "the most recent single period with data" — it was
+  // previously falling through to range=all (a programme-to-date aggregate),
+  // which barely moves as new data lands and reads as "the number doesn't
+  // update". Resolve it to a real period up front, before anything else.
+  let effectiveQuery: DashboardQuery = query;
+  if (query.range === "latest" && !query.period) {
+    const latestSnap = await prisma.scoreSnapshot.findFirst({ where: { employerId }, orderBy: { period: "desc" }, select: { period: true } });
+    effectiveQuery = { ...query, range: undefined, period: latestSnap?.period ?? currentPeriod() };
+  }
+  const filter = resolveFilter(effectiveQuery);
   const employer = await prisma.employer.findFirstOrThrow({ where: { id: employerId, sourceDeletedAt: null } });
   const workforceState = await workforceAsAt(employerId, filter.asAt);
   const eligibleEmployees = workforceState.rows.filter((employee: any) => employeeEligibleAt(employee, filter.asAt));

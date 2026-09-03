@@ -20,8 +20,11 @@ import { uploadAndValidate, commitBatch, revertBatch, resetAllData } from "./ser
 import { getConfig as getSyncConfig, saveConfig as saveSyncConfig, publicConfig as publicSyncConfig, testConnection as testSyncConnection, runSync, recentSyncLogs } from "./services/syncService.js";
 import { listPartners, createPartner, updatePartner, deletePartner, assignUserToPartner, assignEmployerToPartner, themeForUser, themeForSlug } from "./services/partnerService.js";
 import { login, resolveSession, destroySession, canViewEmployer, canAccessModule, allowedEmployerIds, AuthUser } from "./services/authService.js";
-import { createUser, listUsers, updateUser, resetPassword, completeSetup, deactivateSelf, listRevokedUsers, deleteUserPermanently } from "./services/userService.js";
+import { createUser, listUsers, updateUser, resetPassword, completeSetup, deactivateSelf, listRevokedUsers, deleteUserPermanently, requestPasswordReset } from "./services/userService.js";
 import { recordEvent, engagementSummary } from "./services/analyticsService.js";
+import { notifyAdmins, notifyScoreChangeIfCurrentPeriod, runStaleAccountCheck, runWeeklyDigestIfDue } from "./services/automationService.js";
+import { logAdminAction, listAuditLog } from "./services/auditService.js";
+import { exportAuditLogCsv, exportEmployeesCsv, exportDebtAccountsCsv, exportInsurancePoliciesCsv, exportScoreSnapshotsCsv, exportUsersCsv } from "./services/exportService.js";
 import { ensureSectionDefaults, listSections, updateSection, grantUserSection, revokeUserSection, sectionsForUser } from "./services/sectionService.js";
 import { publicEmailConfig, saveEmailConfig, testEmailConnection, createReportSchedule, listReportSchedules, updateReportSchedule, deleteReportSchedule, sendReportNow, recentReportDeliveries, runDueReports } from "./services/reportScheduler.js";
 import type { ScheduleInput } from "./services/reportScheduler.js";
@@ -31,6 +34,21 @@ const PUBLIC_DIR = [join(__dirname, "public"), join(__dirname, "..", "public")]
   .find((p) => existsSync(join(p, "dashboard.html"))) ?? join(__dirname, "..", "public");
 
 const app = Fastify({ logger: true });
+
+// ── security headers ──
+// A conservative baseline that doesn't risk breaking the app's extensive
+// use of inline <script>/<style> (a strict CSP without 'unsafe-inline' would
+// break nearly every page here, so this isn't attempted blind). Still
+// meaningfully hardens against clickjacking, MIME-sniffing, and disables
+// browser features this app doesn't use.
+app.addHook("onSend", async (_req, reply, payload) => {
+  reply.header("X-Content-Type-Options", "nosniff");
+  reply.header("X-Frame-Options", "DENY");
+  reply.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  reply.header("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+  reply.header("Content-Security-Policy", "frame-ancestors 'none'; object-src 'none'; base-uri 'self'");
+  return payload;
+});
 app.register(cookie);
 app.register(multipart, { limits: { fileSize: 50 * 1024 * 1024 } });
 app.register(fastifyStatic, {
@@ -50,7 +68,7 @@ app.register(fastifyStatic, {
 
 const PORT = Number(process.env.PORT ?? 3000);
 const currentPeriod = () => new Date().toISOString().slice(0, 7);
-const VALID_DASHBOARD_RANGES = new Set(["30d", "quarter", "all", "month", "30", "q"]);
+const VALID_DASHBOARD_RANGES = new Set(["30d", "quarter", "all", "month", "30", "q", "latest"]);
 const VALID_INCOME_BANDS = new Set(["UNDER_5K", "BAND_5_10K", "BAND_10_20K", "BAND_20_40K", "OVER_40K"]);
 function dashboardQueryError(query: { period?: string; range?: string; income?: string }): string | null {
   const current = currentPeriod();
@@ -125,10 +143,30 @@ app.get("/version", async () => ({ product: "empower-fin Dashboard Portal", vers
 const COOKIE_SECURE = !["0", "false", "no"].includes(String(process.env.COOKIE_SECURE ?? "true").toLowerCase());
 const COOKIE = { httpOnly: true, sameSite: "lax" as const, secure: COOKIE_SECURE, path: "/" };
 
+// ── login brute-force throttle ──
+// Simple in-memory lockout per email: after too many wrong passwords in a
+// window, further attempts are rejected for a cooldown period. Not a
+// substitute for a real distributed rate limiter behind multiple instances,
+// but a meaningful improvement over no throttling at all.
+const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
+const LOGIN_MAX_ATTEMPTS = 8;
+const LOGIN_LOCKOUT_MS = 15 * 60 * 1000;
+
 app.post<{ Body: { email: string; password: string; remember?: boolean } }>("/api/auth/login", async (req, reply) => {
   const { email, password, remember } = req.body ?? ({} as any);
+  const key = String(email || "").toLowerCase().trim();
+  const now = Date.now();
+  const rec = loginAttempts.get(key);
+  if (rec?.lockedUntil && rec.lockedUntil > now) {
+    return reply.code(429).send({ error: `Too many failed attempts. Try again in ${Math.ceil((rec.lockedUntil - now) / 60000)} minute(s).` });
+  }
   const result = await login(email ?? "", password ?? "", !!remember);
-  if (!result) return reply.code(401).send({ error: "invalid email or password" });
+  if (!result) {
+    const count = (rec && rec.lockedUntil <= now ? rec.count : rec?.count || 0) + 1;
+    loginAttempts.set(key, count >= LOGIN_MAX_ATTEMPTS ? { count: 0, lockedUntil: now + LOGIN_LOCKOUT_MS } : { count, lockedUntil: 0 });
+    return reply.code(401).send({ error: "invalid email or password" });
+  }
+  loginAttempts.delete(key);
   // "Remember me": persistent cookie lasting as long as the session (30 days).
   // Otherwise: a session-only cookie (no `expires`) that the browser clears on
   // close, even though the underlying session itself stays valid for 7 days
@@ -178,6 +216,22 @@ app.post<{ Body: { token: string; password: string } }>("/api/auth/set-password"
   } catch (e: any) { return reply.code(400).send({ error: e.message }); }
 });
 
+// self-service "forgot password" — always returns { ok: true } regardless of
+// whether the email matches an account, so this can't be used to enumerate
+// who has an account. A tiny in-memory throttle (per email) stops someone
+// from hammering the mail server; it's not a substitute for a real rate
+// limiter if you add one later.
+const forgotPasswordThrottle = new Map<string, number>();
+app.post<{ Body: { email: string } }>("/api/auth/forgot-password", async (req, reply) => {
+  const email = String(req.body?.email || "").toLowerCase().trim();
+  if (!email) return { ok: true };
+  const last = forgotPasswordThrottle.get(email) || 0;
+  if (Date.now() - last < 60_000) return { ok: true }; // silently no-op if requested <60s ago
+  forgotPasswordThrottle.set(email, Date.now());
+  try { await requestPasswordReset(email); } catch { /* never leak errors here */ }
+  return { ok: true };
+});
+
 // ════════════════════ USER MANAGEMENT (admin only) ════════════════════
 app.get("/api/users", async (req, reply) => {
   if (!(await requireAdmin(req, reply))) return;
@@ -187,10 +241,12 @@ app.post<{ Body: { email: string; name: string; role: any; employerIds?: string[
   const admin = await requireAdmin(req, reply); if (!admin) return;
   try {
     const b = req.body;
-    return await createUser({
+    const created = await createUser({
       email: b.email, name: b.name, role: b.role, employerIds: b.employerIds ?? [],
       partnerId: b.partnerId, tempPassword: b.tempPassword, sendSetupLink: b.sendSetupLink, createdBy: admin.email,
     });
+    logAdminAction(admin, "user.create", `Created user ${b.name} (${b.email}), role ${b.role}`, { targetType: "User", targetId: (created as any)?.id });
+    return created;
   } catch (e: any) { return reply.code(400).send({ error: e.message }); }
 });
 app.patch<{ Params: { id: string }; Body: any }>("/api/users/:id", async (req, reply) => {
@@ -203,11 +259,16 @@ app.patch<{ Params: { id: string }; Body: any }>("/api/users/:id", async (req, r
     body.revokedBy = admin.email;
     body.revokedReason = body.reason || body.revokedReason || "Deactivated by admin";
   }
-  return updateUser(req.params.id, body);
+  const updated = await updateUser(req.params.id, body);
+  const changedKeys = Object.keys(body).join(", ") || "no fields";
+  logAdminAction(admin, "user.update", `Updated user ${req.params.id} (${changedKeys})`, { targetType: "User", targetId: req.params.id, detail: body });
+  return updated;
 });
 app.post<{ Params: { id: string }; Body: { password: string } }>("/api/users/:id/reset-password", async (req, reply) => {
-  if (!(await requireAdmin(req, reply))) return;
-  return resetPassword(req.params.id, req.body.password);
+  const admin = await requireAdmin(req, reply); if (!admin) return;
+  const result = await resetPassword(req.params.id, req.body.password);
+  logAdminAction(admin, "user.reset_password", `Reset password for user ${req.params.id}`, { targetType: "User", targetId: req.params.id });
+  return result;
 });
 
 // self-service: a signed-in user disables their own account (not a hard delete —
@@ -223,8 +284,12 @@ app.post<{ Body: { reason?: string } }>("/api/users/me/deactivate", async (req, 
 // admin-only: permanent delete. Requires the account to already be deactivated
 // (defence in depth — nobody disappears without first going through revoke).
 app.delete<{ Params: { id: string } }>("/api/users/:id", async (req, reply) => {
-  if (!(await requireAdmin(req, reply))) return;
-  try { return await deleteUserPermanently(req.params.id); }
+  const admin = await requireAdmin(req, reply); if (!admin) return;
+  try {
+    const result = await deleteUserPermanently(req.params.id);
+    logAdminAction(admin, "user.delete", `Permanently deleted user ${req.params.id}`, { targetType: "User", targetId: req.params.id });
+    return result;
+  }
   catch (e: any) { return reply.code(400).send({ error: e.message }); }
 });
 
@@ -274,25 +339,63 @@ app.get("/api/admin/sections", async (req, reply) => {
 app.patch<{ Params: { key: string }; Body: { enabled?: boolean; allowedRoles?: string[] } }>(
   "/api/admin/sections/:key",
   async (req, reply) => {
-    if (!(await requireAdmin(req, reply))) return;
-    try { return await updateSection(req.params.key, req.body || {}); }
+    const admin = await requireAdmin(req, reply); if (!admin) return;
+    try {
+      const result = await updateSection(req.params.key, req.body || {});
+      logAdminAction(admin, "section.update", `Updated section "${req.params.key}" (${Object.keys(req.body || {}).join(", ") || "no fields"})`, { targetType: "DashboardSection", targetId: req.params.key, detail: req.body });
+      return result;
+    }
     catch (e: any) { return reply.code(400).send({ error: e?.message || "could not update section" }); }
   },
 );
 app.post<{ Params: { key: string }; Body: { userId: string } }>(
   "/api/admin/sections/:key/grant",
   async (req, reply) => {
-    if (!(await requireAdmin(req, reply))) return;
+    const admin = await requireAdmin(req, reply); if (!admin) return;
     if (!req.body?.userId) return reply.code(400).send({ error: "userId required" });
-    return grantUserSection(req.body.userId, req.params.key);
+    const result = await grantUserSection(req.body.userId, req.params.key);
+    logAdminAction(admin, "section.grant", `Granted section "${req.params.key}" to user ${req.body.userId}`, { targetType: "DashboardSection", targetId: req.params.key });
+    return result;
   },
 );
 app.post<{ Params: { key: string }; Body: { userId: string } }>(
   "/api/admin/sections/:key/revoke",
   async (req, reply) => {
-    if (!(await requireAdmin(req, reply))) return;
+    const admin = await requireAdmin(req, reply); if (!admin) return;
     if (!req.body?.userId) return reply.code(400).send({ error: "userId required" });
-    return revokeUserSection(req.body.userId, req.params.key);
+    const result = await revokeUserSection(req.body.userId, req.params.key);
+    logAdminAction(admin, "section.revoke", `Revoked section "${req.params.key}" from user ${req.body.userId}`, { targetType: "DashboardSection", targetId: req.params.key });
+    return result;
+  },
+);
+
+// admin-only: audit log viewer (top N — use ?full=1 for a CSV of everything)
+app.get<{ Querystring: { limit?: string } }>("/api/admin/audit-log", async (req, reply) => {
+  if (!(await requireAdmin(req, reply))) return;
+  return listAuditLog({ limit: req.query.limit ? parseInt(req.query.limit) : undefined });
+});
+
+// admin-only: CSV data export — audit log (full) + the core imported/computed
+// datasets. Optional ?employer=<id> scopes to one employer; omitted = everything.
+const CSV_EXPORTS: Record<string, (employerId?: string) => Promise<string>> = {
+  "audit-log": () => exportAuditLogCsv(),
+  employees: (id) => exportEmployeesCsv(id),
+  "debt-accounts": (id) => exportDebtAccountsCsv(id),
+  "insurance-policies": (id) => exportInsurancePoliciesCsv(id),
+  "score-snapshots": (id) => exportScoreSnapshotsCsv(id),
+  users: () => exportUsersCsv(),
+};
+app.get<{ Params: { type: string }; Querystring: { employer?: string } }>(
+  "/api/admin/export/:type",
+  async (req, reply) => {
+    const admin = await requireAdmin(req, reply); if (!admin) return;
+    const fn = CSV_EXPORTS[req.params.type];
+    if (!fn) return reply.code(404).send({ error: "unknown export type" });
+    const csv = await fn(req.query.employer);
+    logAdminAction(admin, "data.export", `Exported ${req.params.type} CSV${req.query.employer ? ` (employer ${req.query.employer})` : " (all employers)"}`, { targetType: "Export" });
+    reply.header("Content-Type", "text/csv");
+    reply.header("Content-Disposition", `attachment; filename="${req.params.type}_${new Date().toISOString().slice(0, 10)}.csv"`);
+    return reply.send(csv);
   },
 );
 
@@ -414,12 +517,14 @@ app.get("/api/admin/batches", async (req, reply) => {
 // ── DANGER: wipe ALL imported data (clean slate for go-live). Admin only,
 //    and the body must contain confirm: "RESET" so it can't fire by accident. ──
 app.post<{ Body: { confirm?: string } }>("/api/admin/reset-all", async (req, reply) => {
-  if (!(await requireAdmin(req, reply))) return;
+  const admin = await requireAdmin(req, reply); if (!admin) return;
   if ((req.body?.confirm) !== "RESET") {
     return reply.code(400).send({ error: 'confirmation phrase missing — expected confirm: "RESET"' });
   }
   try {
-    return await resetAllData();
+    const result = await resetAllData();
+    logAdminAction(admin, "data.reset_all", `Wiped all imported data (clean slate)`, { detail: result });
+    return result;
   } catch (e: any) {
     req.log.error({ err: e }, "reset all imported data failed");
     return reply.code(500).send({ error: e?.message || "Reset failed." });
@@ -483,14 +588,39 @@ app.get("/api/admin/email-settings", async (req, reply) => {
   return publicEmailConfig();
 });
 app.post<{ Body: any }>("/api/admin/email-settings", async (req, reply) => {
-  if (!(await requireAdmin(req, reply))) return;
-  try { return await saveEmailConfig(req.body || {}); }
+  const admin = await requireAdmin(req, reply); if (!admin) return;
+  try {
+    const result = await saveEmailConfig(req.body || {});
+    const keys = Object.keys(req.body || {}).filter((k) => k !== "smtpPassword").join(", ") || "no fields";
+    logAdminAction(admin, "email_settings.update", `Updated email/automation settings (${keys})`, { targetType: "SystemEmailConfig" });
+    return result;
+  }
   catch (e: any) { return reply.code(400).send({ error: e?.message || "Could not save email settings" }); }
 });
 app.post<{ Body: any }>("/api/admin/email-settings/test", async (req, reply) => {
   if (!(await requireAdmin(req, reply))) return;
   try { return await testEmailConnection(req.body || {}); }
   catch (e: any) { return reply.code(400).send({ error: e?.message || "Email test failed" }); }
+});
+// manual "run now" for automations — lets an admin verify config without waiting for the hourly tick
+app.post<{ Body: { kind: "stale" | "digest" | "test" } }>("/api/admin/automations/run", async (req, reply) => {
+  const admin = await requireAdmin(req, reply); if (!admin) return;
+  try {
+    const kind = req.body?.kind;
+    if (kind === "stale") {
+      const r = await runStaleAccountCheck();
+      return { ok: true, message: r.ran ? `Checked — ${r.deactivated ?? 0} account(s) auto-deactivated.` : "Not run: no inactivity threshold is set." };
+    }
+    if (kind === "digest") {
+      const r = await runWeeklyDigestIfDue();
+      return { ok: true, message: r.ran ? "Digest sent." : "Not sent: digest is disabled, or one was already sent in the last 7 days." };
+    }
+    if (kind === "test") {
+      const r = await notifyAdmins({ subject: "Test alert from empower-fin Dashboard Portal", html: `<p>This is a test alert triggered by ${admin.name} (${admin.email}).</p>`, slackText: `:wave: Test alert triggered by ${admin.name}.` });
+      return { ok: true, message: `Sent to ${r.emailed} email address(es)${r.slack ? " and Slack" : ""}. Set admin alert emails and/or a Slack webhook first if nothing arrived.` };
+    }
+    return reply.code(400).send({ error: "Unknown automation kind" });
+  } catch (e: any) { return reply.code(400).send({ error: e?.message || "Could not run automation" }); }
 });
 app.get("/api/admin/report-deliveries", async (req, reply) => {
   if (!(await requireAdmin(req, reply))) return;
@@ -538,17 +668,24 @@ app.get("/api/admin/partners", async (req, reply) => {
   return listPartners();
 });
 app.post<{ Body: { name: string; displayName?: string } }>("/api/admin/partners", async (req, reply) => {
-  if (!(await requireAdmin(req, reply))) return;
+  const admin = await requireAdmin(req, reply); if (!admin) return;
   if (!req.body?.name?.trim()) return reply.code(400).send({ error: "partner name required" });
-  return createPartner(req.body);
+  const created = await createPartner(req.body);
+  logAdminAction(admin, "partner.create", `Created channel partner "${req.body.name}"`, { targetType: "Partner", targetId: (created as any)?.id });
+  return created;
 });
 app.put<{ Params: { id: string }; Body: any }>("/api/admin/partners/:id", async (req, reply) => {
-  if (!(await requireAdmin(req, reply))) return;
-  return updatePartner(req.params.id, req.body || {});
+  const admin = await requireAdmin(req, reply); if (!admin) return;
+  const updated = await updatePartner(req.params.id, req.body || {});
+  const keys = Object.keys(req.body || {}).join(", ") || "no fields";
+  logAdminAction(admin, "partner.update", `Updated channel partner ${req.params.id} (${keys})`, { targetType: "Partner", targetId: req.params.id });
+  return updated;
 });
 app.delete<{ Params: { id: string } }>("/api/admin/partners/:id", async (req, reply) => {
-  if (!(await requireAdmin(req, reply))) return;
-  return deletePartner(req.params.id);
+  const admin = await requireAdmin(req, reply); if (!admin) return;
+  const result = await deletePartner(req.params.id);
+  logAdminAction(admin, "partner.delete", `Deleted channel partner ${req.params.id}`, { targetType: "Partner", targetId: req.params.id });
+  return result;
 });
 app.post<{ Params: { id: string }; Body: { userId?: string; employerId?: string } }>(
   "/api/admin/partners/:id/assign",
@@ -567,7 +704,7 @@ app.get<{ Params: { slug: string } }>("/api/partner-theme/:slug", async (req) =>
 // ── dashboard: real stock/as-at + flow/in-window filtering ──
 app.get<{
   Params: { employerId: string };
-  Querystring: { period?: string; range?: "30d" | "quarter" | "all" | "month" | "30" | "q"; site?: string; income?: string };
+  Querystring: { period?: string; range?: "30d" | "quarter" | "all" | "month" | "30" | "q" | "latest"; site?: string; income?: string };
 }>(
   "/api/employers/:employerId/dashboard",
   async (req, reply) => {
@@ -621,7 +758,12 @@ app.get<{ Params: { employerId: string } }>(
 // ── trigger a (re)snapshot — admin only ──
 app.post<{ Params: { employerId: string }; Body: { period: string } }>(
   "/api/employers/:employerId/snapshot",
-  async (req, reply) => { if (!(await requireAdmin(req, reply))) return; return snapshotEmployer(req.params.employerId, req.body.period); },
+  async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    const result = await snapshotEmployer(req.params.employerId, req.body.period);
+    if (result.persisted) notifyScoreChangeIfCurrentPeriod(req.params.employerId, result.period, currentPeriod()).catch(() => {});
+    return result;
+  },
 );
 
 // ── first-run: create an admin from env vars if no users exist ──
@@ -652,6 +794,13 @@ function startSyncScheduler(app: any) {
         app.log.info("Running scheduled external source sync…");
         const r = await runSync("scheduled");
         app.log.info(`Scheduled sync: ${r.status ?? "done"}`);
+        if (r.status === "FAILED") {
+          notifyAdmins({
+            subject: "Scheduled data sync failed",
+            html: `<div style="font-family:Arial,sans-serif;color:#241536"><h2 style="color:#b5391f">Sync failed</h2><p>The scheduled external data sync failed.</p><pre style="background:#f7fafd;padding:12px;border-radius:8px;font-size:12px;overflow:auto">${JSON.stringify(r.summary ?? r, null, 2).slice(0, 2000)}</pre></div>`,
+            slackText: `:rotating_light: Scheduled data sync failed — check Administration → Live Data Integration.`,
+          }).catch(() => {});
+        }
       }
     } catch (e) { app.log.error(e); }
   };
@@ -659,6 +808,17 @@ function startSyncScheduler(app: any) {
   setTimeout(tick, 30000); // also check shortly after boot
 }
 
+
+// ── automations checker: stale-account cleanup + weekly digest ──
+function startAutomationScheduler(app: any) {
+  const CHECK_MS = 60 * 60 * 1000; // hourly is plenty — both checks are self-gated by date thresholds
+  const tick = async () => {
+    try { await runStaleAccountCheck(); } catch (e) { app.log.error(e); }
+    try { await runWeeklyDigestIfDue(); } catch (e) { app.log.error(e); }
+  };
+  setInterval(tick, CHECK_MS);
+  setTimeout(tick, 45000);
+}
 
 // ── scheduled-report checker: claims due jobs in the database and sends them via SMTP ──
 function startReportScheduler(app: any) {
@@ -672,7 +832,7 @@ function startReportScheduler(app: any) {
 }
 
 // ── portfolio view: same dated calculation model as each employer dashboard ──
-app.get<{ Querystring: { period?: string; range?: "30d" | "quarter" | "all" | "month" | "30" | "q" } }>(
+app.get<{ Querystring: { period?: string; range?: "30d" | "quarter" | "all" | "month" | "30" | "q" | "latest" } }>(
   "/api/portfolio",
   async (req, reply) => {
     const user = await requireUser(req, reply); if (!user) return;
@@ -697,7 +857,7 @@ app.get<{ Querystring: { period?: string; range?: "30d" | "quarter" | "all" | "m
 );
 
 // ── convenience: live dashboard of the first employer THIS USER can see ──
-app.get<{ Querystring: { period?: string; range?: "30d" | "quarter" | "all" | "month" | "30" | "q"; site?: string; income?: string } }>(
+app.get<{ Querystring: { period?: string; range?: "30d" | "quarter" | "all" | "month" | "30" | "q" | "latest"; site?: string; income?: string } }>(
   "/api/dashboard/first",
   async (req, reply) => {
     const user = await requireUser(req, reply);
@@ -721,6 +881,6 @@ app.get<{ Querystring: { period?: string; range?: "30d" | "quarter" | "all" | "m
 // Register all routes before opening the listener.
 app.log.info({ portalVersion: "0.5.3", publicDir: PUBLIC_DIR }, "starting empower-fin Dashboard Portal");
 app.listen({ port: PORT, host: "0.0.0.0" })
-  .then(async () => { await bootstrapAdmin(); await ensureSectionDefaults(); startSyncScheduler(app); startReportScheduler(app); app.log.info(`empower-fin Dashboard Portal on :${PORT}`); })
+  .then(async () => { await bootstrapAdmin(); await ensureSectionDefaults(); startSyncScheduler(app); startReportScheduler(app); startAutomationScheduler(app); app.log.info(`empower-fin Dashboard Portal on :${PORT}`); })
   .catch((err) => { app.log.error(err); process.exit(1); });
 
